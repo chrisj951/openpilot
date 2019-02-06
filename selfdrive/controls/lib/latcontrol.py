@@ -83,8 +83,7 @@ class LatControl(object):
     self.dash_file = open(DIR + '/dashboard_file_%d.csv' % self.filenumber, mode='w')
     self.dash_writer = csv.writer(self.dash_file, delimiter=',', quotechar='', quoting=csv.QUOTE_NONE)
     self.dash_writer.writerow(['angle_steers_des','angle_steers_des_mpc','angle_steers','angle_rate','v_ego','steer_override',
-                    'p','i','f','sync0','sync1','sync2','sync3','cur_time','time'])
-                    #'p','i','f','sync0','sync1','sync2','sync3','sync4','sync5','sync6','sync7','cur_time','time'])
+                    'p','i','f','cur_time','time'])
 
   def setup_mpc(self, steer_rate_cost):
     self.libmpc = libmpc_py.libmpc
@@ -104,7 +103,7 @@ class LatControl(object):
   def reset(self):
     self.pid.reset()
 
-  def update(self, active, v_ego, angle_steers, angle_rate, sync_offset, steer_override, d_poly, angle_offset, CP, VM, PL):
+  def update(self, active, v_ego, angle_steers, angle_rate, steer_override, d_poly, angle_offset, CP, VM, PL):
     self.mpc_updated = False
 
     if angle_rate == 0.0 and self.calculate_rate:
@@ -232,8 +231,6 @@ class LatControl(object):
                               str(round(self.pid.p, 4)),
                               str(round(self.pid.i, 4)),
                               str(round(self.pid.f, 4)),
-                              str(sync_offset[0]),str(sync_offset[1]),
-                              str(sync_offset[2]),str(sync_offset[3]),
                               cur_time,
                               str(receiveTime)])
 

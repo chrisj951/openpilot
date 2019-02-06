@@ -284,7 +284,7 @@ class CANParser {
         }
 
         DEBUG("  proc %X: %llx\n", cmsg.getAddress(), p);
-
+        if (cmsg.getAddress() == 330) steerFound = true;
         state_it->second.parse(sec, cmsg.getBusTime(), p);
 
       }
@@ -327,8 +327,9 @@ class CANParser {
 
     // multiple recv is fine
     int CANReceived = 0;
-    while (wait) {
-      if (wait == true && CANReceived < 1) {
+    steerFound = false;
+    while (wait && steerFound == false) {
+      if (wait == true) {
         err = zmq_msg_recv(&msg, subscriber, 0);
       } else {
         err = zmq_msg_recv(&msg, subscriber, ZMQ_DONTWAIT);
@@ -338,7 +339,7 @@ class CANParser {
 
       // format for board, make copy due to alignment issues, will be freed on out of scope
       auto amsg = kj::heapArray<capnp::word>((zmq_msg_size(&msg) / sizeof(capnp::word)) + 1);
-      memcpy(amsg.begin(), zmq_msg_data(&msg), zmq_msg_size(&msg)); 
+      memcpy(amsg.begin(), zmq_msg_data(&msg), zmq_msg_size(&msg));
 
       // extract the messages
       capnp::FlatArrayMessageReader cmsg(amsg);
@@ -348,9 +349,13 @@ class CANParser {
 
       UpdateCans(sec, cans);
     }
-
-    if (CANReceived == 3) printf("      %d CANs received!\n", CANReceived);
-    if (CANReceived == 1 || CANReceived > 3) printf("             %d CANs received!\n", CANReceived);
+    if (CANReceived == 1 && wait == true) printf("            %d CANs received!\n", CANReceived);
+    else if (CANReceived > 3 && wait == true) printf("   %d CANs received!\n", CANReceived);
+    /*else if (CANReceived == 2 && wait == true) printf("     %d CANs received!\n", CANReceived);
+    else if (CANReceived == 4 && wait == true) printf("            %d CANs received!\n", CANReceived);
+    else if (CANReceived >= 5 && wait == true) printf("                %d CANs received!\n", CANReceived);
+    else if (CANReceived > 0 && wait == false) printf("                                  %d CANs received!\n", CANReceived);
+    */
     if (can_forward_period_ns > 0) ForwardCANData(sec);
 
     UpdateValid(sec);
@@ -386,7 +391,7 @@ class CANParser {
   // zmq vars
   void *context = NULL;
   void *subscriber = NULL;
-
+  bool steerFound;
   void *forwarder = NULL;
   uint64_t can_forward_period_ns = 100000000;
   uint64_t next_can_forward_ns = 0;
