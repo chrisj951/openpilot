@@ -328,7 +328,7 @@ class CANParser {
     // multiple recv is fine
     int CANReceived = 0;
     steerFound = false;
-    while (wait && steerFound == false) {
+    while (wait == true && steerFound == false) {
       if (wait == true) {
         err = zmq_msg_recv(&msg, subscriber, 0);
       } else {
@@ -349,9 +349,9 @@ class CANParser {
 
       UpdateCans(sec, cans);
     }
-    if (CANReceived == 1 && wait == true) printf("            %d CANs received!\n", CANReceived);
-    else if (CANReceived > 3 && wait == true) printf("   %d CANs received!\n", CANReceived);
-    /*else if (CANReceived == 2 && wait == true) printf("     %d CANs received!\n", CANReceived);
+    if (CANReceived != 1 && wait == true) printf("            %d CANs received!\n", CANReceived);
+    /*else if (CANReceived > 3 && wait == true) printf("   %d CANs received!\n", CANReceived);
+    else if (CANReceived == 2 && wait == true) printf("     %d CANs received!\n", CANReceived);
     else if (CANReceived == 4 && wait == true) printf("            %d CANs received!\n", CANReceived);
     else if (CANReceived >= 5 && wait == true) printf("                %d CANs received!\n", CANReceived);
     else if (CANReceived > 0 && wait == false) printf("                                  %d CANs received!\n", CANReceived);

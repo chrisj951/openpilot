@@ -64,6 +64,9 @@ pthread_t safety_setter_thread_handle = -1;
 pthread_t pigeon_thread_handle = -1;
 bool pigeon_needs_init;
 
+int bigRecv;
+uint32_t bigData[RECV_SIZE*2];
+
 void pigeon_init();
 void *pigeon_thread(void *crap);
 
@@ -215,6 +218,7 @@ void handle_usb_issue(int err, const char func[]) {
 bool can_recv(void *s) {
   int err;
   uint32_t data[RECV_SIZE/4];
+
   int recv;
   uint32_t f1, f2;
   bool steerFound;
@@ -238,39 +242,62 @@ bool can_recv(void *s) {
   if (recv <= 0) {
     return false;
   }
-
-  // create message
-  capnp::MallocMessageBuilder msg;
-  cereal::Event::Builder event = msg.initRoot<cereal::Event>();
-  event.setLogMonoTime(nanos_since_boot());
-
-  auto canData = event.initCan(recv/0x10);
-
-  // populate message
+  uint32_t address;
+  int bigIndex = bigRecv/0x10;
   for (int i = 0; i<(recv/0x10); i++) {
+    bigData[(bigIndex + i)*4] = data[i*4];
+    bigData[(bigIndex + i)*4+1] = data[i*4+1];
+    bigData[(bigIndex + i)*4+2] = data[i*4+2];
+    bigData[(bigIndex + i)*4+3] = data[i*4+3];
+    bigRecv += 0x10;
     if (data[i*4] & 4) {
       // extended
-      canData[i].setAddress(data[i*4] >> 3);
-      //printf("got extended: %x\n", data[i*4] >> 3);
+      address = data[i*4] >> 3;
+      //printf("got extended: %x\n", bigData[i*4] >> 3);
     } else {
       // normal
-      canData[i].setAddress(data[i*4] >> 21);
+      address = data[i*4] >> 21;
     }
-    canData[i].setBusTime(data[i*4+1] >> 16);
-    int len = data[i*4+1]&0xF;
-    canData[i].setDat(kj::arrayPtr((uint8_t*)&data[i*4+2], len));
-    canData[i].setSrc((data[i*4+1] >> 4) & 0xff);
+    if (address != 330) {
+      //do nothing
+    }
+    else {
 
-    if (canData[i].getAddress() == 330) {
+      //printf("got steer!");
       steerFound = true;
+      //send_packet(s);
+
+      capnp::MallocMessageBuilder msg;
+      cereal::Event::Builder event = msg.initRoot<cereal::Event>();
+      event.setLogMonoTime(nanos_since_boot());
+
+      auto canData = event.initCan(bigRecv/0x10);
+
+      // populate message
+      for (int i = 0; i<(bigRecv/0x10); i++) {
+        if (bigData[i*4] & 4) {
+          // extended
+          canData[i].setAddress(bigData[i*4] >> 3);
+          //printf("got extended: %x\n", bigData[i*4] >> 3);
+        } else {
+          // normal
+          canData[i].setAddress(bigData[i*4] >> 21);
+        }
+        canData[i].setBusTime(bigData[i*4+1] >> 16);
+        int len = bigData[i*4+1]&0xF;
+        canData[i].setDat(kj::arrayPtr((uint8_t*)&bigData[i*4+2], len));
+        canData[i].setSrc((bigData[i*4+1] >> 4) & 0xff);
+      }
+
+      // send to can
+      auto words = capnp::messageToFlatArray(msg);
+      auto bytes = words.asBytes();
+      zmq_send(s, bytes.begin(), bytes.size(), 0);
+
+      bigRecv = 0;
+      bigIndex = -(i + 1);
     }
   }
-
-  // send to can
-  auto words = capnp::messageToFlatArray(msg);
-  auto bytes = words.asBytes();
-  zmq_send(s, bytes.begin(), bytes.size(), 0);
-
   return steerFound;
 }
 
@@ -462,29 +489,26 @@ void *can_recv_thread(void *crap) {
   bool steerFound;
   bool skipOnce;
   uint64_t steerTime, wakeTime;
+  //int bigRecv;
+  //uint32_t bigData[RECV_SIZE*2];
   steerTime = 1e-3 * nanos_since_boot();
   wakeTime = steerTime;
   // run at ~200hz
   while (!do_exit) {
 
-    steerFound = can_recv(publisher);
-
-    if (steerFound == true || skipOnce == true) { //&& skipOnce == false) {
-      steerTime = wakeTime + 3500;
+    steerFound = can_recv(publisher); //, bigRecv, bigData);
+    if (steerFound == true || skipOnce == true) {
       skipOnce = steerFound;
-      usleep(steerTime - wakeTime);
+      usleep(4500 + (1e-3 * nanos_since_boot()) - wakeTime);
     }
-    /*else if (skipOnce == true) {
-      steerTime = wakeTime + 4000;
-      skipOnce = false;
-      usleep(steerTime - wakeTime);
-    }*/
+    else if (wakeTime < steerTime) {
+      usleep(500 + (1e-3 * nanos_since_boot()) - wakeTime);
+    }
     else {
-      steerTime = wakeTime + 4000;
-      //skipOnce = false;
-      usleep(steerTime - wakeTime);
+      usleep(500);
     }
     wakeTime = 1e-3 * nanos_since_boot();
+
   }
   return NULL;
 }

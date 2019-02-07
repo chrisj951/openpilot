@@ -523,7 +523,7 @@ def controlsd_thread(gctx=None, rate=100, default_bias=0.):
       v_cruise_kph_last, AM, rk, driver_status, PL, LaC, LoC, VM, angle_offset, passive, is_metric, cal_perc)
     prof.checkpoint("State Control")
 
-    rk.keep_time()  # Run at 100Hz
+    #rk.keep_time()  # Run at 100Hz
 
     # Publish data
     CC = data_send(PL.perception_state, plan, plan_ts, CS, CI, CP, VM, state, events, actuators, v_cruise_kph, rk, carstate, carcontrol,

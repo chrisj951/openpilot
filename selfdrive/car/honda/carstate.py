@@ -160,6 +160,7 @@ class CarState(object):
     self.right_blinker_on = 0
 
     self.stopped = 0
+    self.steer_sensor_frame_prev = 0
 
     # vEgo kalman filter
     dt = 0.01
@@ -241,6 +242,10 @@ class CarState(object):
     self.gear = 0 if self.CP.carFingerprint == CAR.CIVIC else cp.vl["GEARBOX"]['GEAR']
     self.angle_steers = cp.vl["STEERING_SENSORS"]['STEER_ANGLE']
     self.angle_steers_rate = cp.vl["STEERING_SENSORS"]['STEER_ANGLE_RATE']
+    steer_sensor_frame = cp.vl["STEERING_SENSORS"]['COUNTER']
+    if (steer_sensor_frame != (self.steer_sensor_frame_prev + 1) % 4):
+      print("     new_steer_frame %d   prev_steer_frame %d  " % (steer_sensor_frame, self.steer_sensor_frame_prev))
+    self.steer_sensor_frame_prev = steer_sensor_frame
 
     self.cruise_setting = cp.vl["SCM_BUTTONS"]['CRUISE_SETTING']
     self.cruise_buttons = cp.vl["SCM_BUTTONS"]['CRUISE_BUTTONS']
@@ -303,7 +308,7 @@ class CarState(object):
     self.user_brake = cp.vl["VSA_STATUS"]['USER_BRAKE']
     self.pcm_acc_status = cp.vl["POWERTRAIN_DATA"]['ACC_STATUS']
     self.hud_lead = cp.vl["ACC_HUD"]['HUD_LEAD']
-    
+
     # gets rid of Pedal Grinding noise when brake is pressed at slow speeds for some models
     if self.CP.carFingerprint in (CAR.PILOT, CAR.PILOT_2019, CAR.RIDGELINE):
       if self.user_brake > 0.05:
