@@ -474,7 +474,7 @@ def main():
   if params.get("HasAcceptedTerms") is None:
     params.put("HasAcceptedTerms", "0")
   if params.get("IsUploadVideoOverCellularEnabled") is None:
-    params.put("IsUploadVideoOverCellularEnabled", "1")
+    params.put("IsUploadVideoOverCellularEnabled", "0")
   if params.get("IsDriverMonitoringEnabled") is None:
     params.put("IsDriverMonitoringEnabled", "1")
   if params.get("IsGeofenceEnabled") is None:
