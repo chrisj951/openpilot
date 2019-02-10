@@ -14,9 +14,9 @@ class PathPlanner(object):
     self.lead_dist, self.lead_prob, self.lead_var = 0, 0, 1
     self._path_pinv = compute_path_pinv()
 
-    self.lane_width_estimate = 2.85
+    self.lane_width_estimate = 3.7
     self.lane_width_certainty = 1.0
-    self.lane_width = 2.85
+    self.lane_width = 3.7
 
     self.l_prob = 0
     self.l_poly = [0., 0., 0., 0.]
@@ -56,7 +56,7 @@ class PathPlanner(object):
       self.lane_width_certainty += 0.05 * (lr_prob - self.lane_width_certainty)
       current_lane_width = abs(l_poly[3] - r_poly[3])
       self.lane_width_estimate += 0.005 * (current_lane_width - self.lane_width_estimate)
-      speed_lane_width = interp(v_ego, [0., 14., 20.], [2.5, 3., 3.5]) # German Standards
+      speed_lane_width = interp(v_ego, [0., 31.], [3., 3.8])
       self.lane_width = self.lane_width_certainty * self.lane_width_estimate + \
                         (1 - self.lane_width_certainty) * speed_lane_width
 
