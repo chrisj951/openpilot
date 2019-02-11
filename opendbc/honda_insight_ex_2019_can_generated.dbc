@@ -243,7 +243,8 @@ BO_ 829 LKAS_HUD: 5 ADAS
  SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" BDY
 
 BO_ 862 CAMERA_MESSAGES: 8 CAM
- SG_ ZEROS_BOH : 7|50@0+ (1,0) [0|127] "" BDY
+ SG_ ZEROS_BOH : 7|18@0+ (1,0) [0|127] "" BDY
+ SG_ SPEED_LIMIT : 21|6@0- (5,0) [0|31] "" XXX
  SG_ AUTO_HIGHBEAMS_ACTIVE : 53|1@0+ (1,0) [0|1] "" XXX
  SG_ HIGHBEAMS_ON : 52|1@0+ (1,0) [0|1] "" XXX
  SG_ ZEROS_BOH_2 : 51|4@0+ (1,0) [0|15] "" XXX
@@ -270,6 +271,11 @@ BO_ 891 STALK_STATUS_2: 8 XXX
 VAL_ 399 STEER_STATUS 6 "tmp_fault" 5 "fault_1" 4 "no_torque_alert_2" 3 "low_speed_lockout" 2 "no_torque_alert_1" 0 "normal" ;
 CM_ "honda_insight_ex_2019_can.dbc starts here"
 
+BO_ 148 KINEMATICS: 8 XXX
+ SG_ LAT_ACCEL : 7|10@0+ (0.02,-512) [-20|20] "m/s2" EON
+ SG_ LONG_ACCEL : 24|9@0- (-0.02,0) [-20|20] "m/s2" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
 
 BO_ 419 GEARBOX: 8 PCM
  SG_ GEAR : 7|8@0+ (1,0) [0|255] "" EON
@@ -280,6 +286,11 @@ BO_ 419 GEARBOX: 8 PCM
 BO_ 432 STANDSTILL: 7 VSA
  SG_ COUNTER : 53|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 51|4@0+ (1,0) [0|15] "" EON
+ 
+BO_ 576 LANE_POSITION: 8 XXX
+ SG_ LANE_1 : 6|11@0- (1,0) [-1023|1023] "" XXX
+ SG_ LANE_3 : 39|16@0+ (1,0) [0|32767] "" XXX
+ SG_ LANE_2 : 22|11@0+ (1,0) [0|2047] "" XXX
 
 BO_ 927 RADAR_HUD: 8 RADAR
  SG_ ZEROS_BOH : 7|10@0+ (1,0) [0|127] "" BDY
