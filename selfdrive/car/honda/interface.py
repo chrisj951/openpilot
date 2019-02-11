@@ -191,6 +191,10 @@ class CarInterface(object):
     ret.steerKiBP, ret.steerKpBP = [[0.], [0.]]
 
     ret.steerKf = 0.00006 # conservative feed-forward
+    ret.steerReactance = 1.0
+    ret.steerInductance = 1.0
+    ret.steerResistance = 1.0
+    ret.eonToFront = 0.5
 
     if candidate in [CAR.CIVIC, CAR.CIVIC_BOSCH]:
       stop_and_go = True
@@ -219,6 +223,10 @@ class CarInterface(object):
       ret.centerToFront = ret.wheelbase * 0.39
       ret.steerRatio = 15.96  # 11.82 is spec end-to-end
       tire_stiffness_factor = 0.8467
+      ret.steerReactance = 1.75
+      ret.steerInductance = 2.25
+      ret.steerResistance = 0.5
+      ret.eonToFront = 1.0
       ret.steerKpV, ret.steerKiV = [[0.6], [0.18]]
       ret.longitudinalKpBP = [0., 5., 35.]
       ret.longitudinalKpV = [1.2, 0.8, 0.5]
@@ -280,6 +288,8 @@ class CarInterface(object):
 
     elif candidate == CAR.INSIGHT:
       stop_and_go = True
+      if not candidate == CAR.INSIGHT:
+        ret.safetyParam = 1
       ret.mass = 2987. * CV.LB_TO_KG + std_cargo
       ret.wheelbase = 2.7
       ret.centerToFront = ret.wheelbase * 0.39
@@ -383,8 +393,7 @@ class CarInterface(object):
   def update(self, c):
     # ******************* do can recv *******************
     canMonoTimes = []
-
-    self.cp.update(int(sec_since_boot() * 1e9), False)
+    self.cp.update(int(sec_since_boot() * 1e9), True)
     self.cp_cam.update(int(sec_since_boot() * 1e9), False)
 
     self.CS.update(self.cp, self.cp_cam)
@@ -451,7 +460,7 @@ class CarInterface(object):
     ret.brake = self.CS.user_brake
     ret.brakePressed = self.CS.brake_pressed != 0
     # FIXME: read sendcan for brakelights
-    if self.CS.CP.carFingerprint in (CAR.ACCORDH):
+    if self.CS.CP.carFingerprint in (CAR.ACCORDH, CAR.INSIGHT):
       ret.brakeLights = bool(self.CS.brake_switch or self.CS.braking1!=0)
     else:
       brakelights_threshold = 0.02 if self.CS.CP.carFingerprint == CAR.CIVIC else 0.1

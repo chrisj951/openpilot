@@ -73,7 +73,7 @@ def get_can_signals(CP):
     if CP.carFingerprint not in (CAR.ACCORDH, CAR.CIVIC_BOSCH, CAR.INSIGHT):
       signals += [("BRAKE_PRESSED", "BRAKE_MODULE", 0)]
       checks += [("BRAKE_MODULE", 50)]
-    elif CP.carFingerprint in (CAR.ACCORDH):
+    elif CP.carFingerprint in (CAR.ACCORDH, CAR.INSIGHT):
       signals += [("BRAKING_1", "ACC_CONTROL", 0), ("CONTEXT", "XXX_16", 0)]
     signals += [("CAR_GAS", "GAS_PEDAL_2", 0),
                 ("MAIN_ON", "SCM_FEEDBACK", 0),
@@ -162,6 +162,7 @@ class CarState(object):
     self.right_blinker_on = 0
 
     self.stopped = 0
+    self.steer_sensor_frame_prev = 0
 
     # vEgo kalman filter
     dt = 0.01
@@ -243,6 +244,10 @@ class CarState(object):
     self.gear = 0 if self.CP.carFingerprint == CAR.CIVIC else cp.vl["GEARBOX"]['GEAR']
     self.angle_steers = cp.vl["STEERING_SENSORS"]['STEER_ANGLE']
     self.angle_steers_rate = cp.vl["STEERING_SENSORS"]['STEER_ANGLE_RATE']
+    steer_sensor_frame = cp.vl["STEERING_SENSORS"]['COUNTER']
+    if (steer_sensor_frame != (self.steer_sensor_frame_prev + 1) % 4):
+      print("     new_steer_frame %d   prev_steer_frame %d  " % (steer_sensor_frame, self.steer_sensor_frame_prev))
+    self.steer_sensor_frame_prev = steer_sensor_frame
 
     self.cruise_setting = cp.vl["SCM_BUTTONS"]['CRUISE_SETTING']
     self.cruise_buttons = cp.vl["SCM_BUTTONS"]['CRUISE_BUTTONS']
@@ -285,7 +290,7 @@ class CarState(object):
                           cp.ts["POWERTRAIN_DATA"]['BRAKE_SWITCH'] != self.brake_switch_ts)
         self.brake_switch_prev = self.brake_switch
         self.brake_switch_ts = cp.ts["POWERTRAIN_DATA"]['BRAKE_SWITCH']
-        if self.CP.carFingerprint in (CAR.ACCORDH):
+        if self.CP.carFingerprint in (CAR.ACCORDH, CAR.INSIGHT):
           self.braking1 = cp.vl["ACC_CONTROL"]["BRAKING_1"]
       else:
         self.brake_pressed = cp.vl["BRAKE_MODULE"]['BRAKE_PRESSED']
@@ -308,6 +313,10 @@ class CarState(object):
     self.pcm_acc_status = cp.vl["POWERTRAIN_DATA"]['ACC_STATUS']
     self.hud_lead = cp.vl["ACC_HUD"]['HUD_LEAD']
 
+    # gets rid of Pedal Grinding noise when brake is pressed at slow speeds for some models
+    if self.CP.carFingerprint in (CAR.PILOT, CAR.PILOT_2019, CAR.RIDGELINE):
+      if self.user_brake > 0.05:
+        self.brake_pressed = 1
 
 # carstate standalone tester
 if __name__ == '__main__':

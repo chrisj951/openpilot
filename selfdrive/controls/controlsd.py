@@ -284,7 +284,7 @@ def state_control(plan, CS, CP, state, events, v_cruise_kph, v_cruise_kph_last, 
 
   # *** steering PID loop ***
   if not NoSteering and not CS.leftBlinker and not CS.rightBlinker:
-    actuators.steer, actuators.steerAngle = LaC.update(active, CS.vEgo, CS.steeringAngle,
+    actuators.steer, actuators.steerAngle = LaC.update(active, CS.vEgo, CS.steeringAngle, CS.steeringRate,
                                                     CS.steeringPressed, plan.dPoly, angle_offset, CP, VM, PL)
 
   # send a "steering required alert" if saturation count has reached the limit
@@ -455,6 +455,12 @@ def controlsd_thread(gctx=None, rate=100, default_bias=0.):
   gps_location = messaging.sub_sock(context, service_list['gpsLocationExternal'].port, conflate=True, poller=poller)
   logcan = messaging.sub_sock(context, service_list['can'].port)
 
+  synchronizer = context.socket(zmq.SUB)
+  synchronizer.connect ("tcp://localhost:8591")
+  synchronizer.setsockopt(zmq.SUBSCRIBE, b"")
+  poller2 = zmq.Poller()
+  poller2.register(synchronizer, zmq.POLLIN)
+
   CC = car.CarControl.new_message()
   CI, CP = get_car(logcan, sendcan, 1.0 if passive else None)
 
@@ -535,12 +541,13 @@ def controlsd_thread(gctx=None, rate=100, default_bias=0.):
       v_cruise_kph_last, AM, rk, driver_status, PL, LaC, LoC, VM, angle_offset, passive, is_metric, cal_perc)
     prof.checkpoint("State Control")
 
+    #rk.keep_time()  # Run at 100Hz
+
     # Publish data
     CC = data_send(PL.perception_state, plan, plan_ts, CS, CI, CP, VM, state, events, actuators, v_cruise_kph, rk, carstate, carcontrol,
                    live100, livempc, AM, driver_status, LaC, LoC, angle_offset, passive)
     prof.checkpoint("Sent")
 
-    rk.keep_time()  # Run at 100Hz
     prof.display()
 
 
