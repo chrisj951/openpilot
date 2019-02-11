@@ -1,7 +1,5 @@
 {
-<<<<<<< HEAD
     "python.pythonPath": "/usr/local/bin/python"
-=======
     "files.associations": {
         "array": "cpp",
         "atomic": "cpp",
@@ -39,5 +37,4 @@
         "typeinfo": "cpp",
         "utility": "cpp"
     }
->>>>>>> fc42a95c6285af862fd25b14b6e954e94a3bc5da
 }
