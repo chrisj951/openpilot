@@ -33,7 +33,7 @@ There are a bunch of changes for debugging/compiling on Mac, etc. The relevant c
 | selfdrive/loggerd/uploader.py                    | Upload toggle works on WIFI                                   |
 | selfdrive/ui/ui.c                                | Buttons, brake lights, blinkers, engineering display          |
 | selfdrive/ui/devicestate.c                       | Support functions for various UI changes                      |
-=======
+
 [![](https://i.imgur.com/UetIFyH.jpg)](#)
 
 Welcome to openpilot
