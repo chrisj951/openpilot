@@ -492,6 +492,7 @@ struct ControlsState @0x97ff69c53601abf1 {
     saturated @8 :Bool;
     angleFFRatio @9 :Float32;
     angleFFGain @10 :Float32;
+    oversampling @11 :Float32;
    }
 
 }
@@ -656,6 +657,7 @@ struct PathPlan {
   lProb @5 :Float32;
   rPoly @6 :List(Float32);
   rProb @7 :Float32;
+  pPoly @19 :List(Float32);
 
   angleSteers @8 :Float32; # deg
   rateSteers @13 :Float32; # deg/s

@@ -87,7 +87,8 @@ class PathPlanner(object):
     if not mpc_nans:
       self.mpc_angles[0] = angle_steers
       self.mpc_times[0] = sm.logMonoTime['model'] * 1e-9
-      oversample_limit = 19 if v_ego == 0 else 4 + min(15, int(400.0 / v_ego))
+      oversample_limit = 19 if v_ego == 0 else min(19, abs(int(sm['controlsState'].lateralControlState.pidState.oversampling / v_ego)))
+      print(oversample_limit, sm['controlsState'].lateralControlState.pidState.oversampling)
       for i in range(1,20):
         if i < 6:
           self.mpc_times[i] = self.mpc_times[i-1] + 0.05
@@ -132,6 +133,7 @@ class PathPlanner(object):
     plan_send.pathPlan.cPoly = [float(x) for x in self.MP.c_poly]
     plan_send.pathPlan.cProb = float(self.MP.c_prob)
     plan_send.pathPlan.lPoly = [float(x) for x in self.l_poly]
+    plan_send.pathPlan.pPoly = [float(x) for x in self.p_poly]
     plan_send.pathPlan.lProb = float(self.MP.l_prob)
     plan_send.pathPlan.rPoly = [float(x) for x in self.r_poly]
     plan_send.pathPlan.rProb = float(self.MP.r_prob)

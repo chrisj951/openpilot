@@ -33,6 +33,7 @@ class LatControlPID(object):
     self.starting_angle = 0.0
     self.half_lane_width = 0.0
     self.steer_counter_prev = 1
+    self.oversampling = 0.
     self.params = Params()
 
     try:
@@ -54,6 +55,8 @@ class LatControlPID(object):
       self.pid.k_f = (float(kegman.conf['Kf']))
       self.damp_time = (float(kegman.conf['dampTime']))
       self.react_mpc = (float(kegman.conf['reactMPC']))
+      self.oversampling = (float(kegman.conf['oversampling']))
+
 
   def reset(self):
     self.pid.reset()
@@ -67,7 +70,7 @@ class LatControlPID(object):
 
   def update_lane_state(self, angle_steers, driver_opposing_lane, blinkers_on, path_plan):
     if self.lane_changing > 0.0:
-      if self.lane_changing > 2.75 or (not blinkers_on and self.lane_changing < 1.0 and abs(path_plan.cPoly[3]) < 0.3 and abs(self.starting_angle - angle_steers) < 1.0):
+      if self.lane_changing > 2.75 or (not blinkers_on and self.lane_changing < 1.0 and abs(path_plan.cPoly[3]) < 0.5 and min(abs(self.starting_angle - angle_steers), abs(self.angle_steers_des - angle_steers)) < 1.5):
         self.lane_changing = 0.0
         print("                                       done!")
       elif 2.25 <= self.lane_changing < 2.5 and abs(path_plan.lPoly[3] + path_plan.rPoly[3]) < abs(path_plan.cPoly[3]):
@@ -83,7 +86,7 @@ class LatControlPID(object):
       else:
         self.lane_change_adjustment = interp(self.lane_changing, [0.0, 1.0, 2.0, 2.25, 2.5, 2.75], [1.0, 0.0, 0.0, 0.1, .2, 1.0])
       print("%0.2f lane_changing  %0.2f adjustment  %0.2f c_poly   %0.2f avg_poly" % (self.lane_changing, self.lane_change_adjustment, path_plan.cPoly[3], path_plan.lPoly[3] + path_plan.rPoly[3]))
-    elif driver_opposing_lane and (blinkers_on or abs(path_plan.cPoly[3]) > 0.3 or abs(self.starting_angle - angle_steers) > 1.0):
+    elif driver_opposing_lane and (blinkers_on or abs(path_plan.cPoly[3]) > 0.5 or min(abs(self.starting_angle - angle_steers), abs(self.angle_steers_des - angle_steers)) > 1.5):
       self.lane_changing = 0.01
     else:
       self.half_lane_width = (path_plan.lPoly[3] - path_plan.rPoly[3]) / 2.
@@ -108,6 +111,7 @@ class LatControlPID(object):
     pid_log = log.ControlsState.LateralPIDState.new_message()
     pid_log.steerAngle = float(angle_steers)
     pid_log.steerRate = float(angle_steers_rate)
+    pid_log.oversampling = self.oversampling
 
     self.live_tune(CP)
 

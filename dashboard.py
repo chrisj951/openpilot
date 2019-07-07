@@ -6,8 +6,17 @@ import json
 import selfdrive.messaging as messaging
 from selfdrive.services import service_list
 from common.params import Params
+from cereal import car
 
 def dashboard_thread(rate=100):
+  '''
+  ret = car.CarParams.new_message()
+  ret.communityParams.init("entries", 3)
+  ret.communityParams.entries[0] = {"key": "reactMPC", "value": "-0.05"}
+  ret.communityParams.entries[1] = {"key": "dampTime", "value": "0.1"}
+  ret.communityParams.entries[2] = {"key": "rateFFGain", "value": "0.4"}
+  print(ret.communityParams.entries['reactMPC'].value)
+  '''
 
   kegman_valid = True
 
@@ -28,7 +37,7 @@ def dashboard_thread(rate=100):
   osmData = None #messaging.sub_sock(context, 8601, addr=ipaddress, conflate=False, poller=poller)
   canData = None #messaging.sub_sock(context, 8602, addr=ipaddress, conflate=False, poller=poller)
   #pathPlan = messaging.sub_sock(context, service_list['pathPlan'].port, addr=ipaddress, conflate=False, poller=poller)
-  pathPlan = None #messaging.sub_sock(context, service_list['plan'].port, addr=ipaddress, conflate=False, poller=poller)
+  pathPlan = messaging.sub_sock(service_list['pathPlan'].port)
 
   #gpsNMEA = messaging.sub_sock(context, service_list['gpsNMEA'].port, addr=ipaddress, conflate=True)
 
@@ -50,6 +59,7 @@ def dashboard_thread(rate=100):
   tuneSub.connect(server_address + ":8596")
   poller.register(tuneSub, zmq.POLLIN)
   poller.register(controlsState, zmq.POLLIN)
+  poller.register(pathPlan, zmq.POLLIN)
 
   try:
     if os.path.isfile('/data/openpilot/kegman.json'):
@@ -74,8 +84,8 @@ def dashboard_thread(rate=100):
   mapFormatString = "location,user=" + user_id + " latitude=%s,longitude=%s,altitude=%s,speed=%s,bearing=%s,accuracy=%s,speedLimitValid=%s,speedLimit=%s,curvatureValid=%s,curvature=%s,wayId=%s,distToTurn=%s,mapValid=%s,speedAdvisoryValid=%s,speedAdvisory=%s,speedAdvisoryValid=%s,speedAdvisory=%s,speedLimitAheadValid=%s,speedLimitAhead=%s,speedLimitAheadDistance=%s %s\n"
   canFormatString="CANData,user=" + user_id + ",src=%s,pid=%s d1=%si,d2=%si "
   liveStreamFormatString = "curvature,user=" + user_id + " l_curv=%s,p_curv=%s,r_curv=%s,map_curv=%s,map_rcurv=%s,map_rcurvx=%s,v_curv=%s,l_diverge=%s,r_diverge=%s %s\n"
-  pathFormatString = "pathPlan,user=" + user_id + " d0=%s,d1=%s,d2=%s,d3=%s %s\n"
-  pathDataFormatString = "%d|"
+  pathFormatString = "pathPlan,user=" + user_id + " l0=%s,l1=%s,l2=%s,l3=%sr0=%s,r1=%s,r2=%s,r3=%sc0=%s,c1=%s,c2=%s,c3=%sd0=%s,d1=%s,d2=%s,d3=%sp0=%s,p1=%s,p2=%s,p3=%s,l_prob=%s,r_prob=%s,c_prob=%s %s\n"
+  pathDataFormatString = "%0.2f,%0.2f,%0.2f,%d|"
   polyDataString = "%.10f,%0.8f,%0.6f,%0.4f,"
   pathDataString = ""
   influxDataString = ""
@@ -134,15 +144,15 @@ def dashboard_thread(rate=100):
       if socket is pathPlan:
         _pathPlan = messaging.drain_sock(socket)
         for _pp in _pathPlan:
-          pp = _pp.plan
+          pp = _pp.pathPlan
           if vEgo > 0 and active and (carState == None or boolStockRcvd):
             boolStockRcvd = False
-            #pathDataString += polyDataString % tuple(map(float, pp.lPoly))
-            #pathDataString += polyDataString % tuple(map(float, pp.rPoly))
-            #pathDataString += polyDataString % tuple(map(float, pp.cPoly))
+            pathDataString += polyDataString % tuple(map(float, pp.lPoly))
+            pathDataString += polyDataString % tuple(map(float, pp.rPoly))
+            pathDataString += polyDataString % tuple(map(float, pp.cPoly))
             pathDataString += polyDataString % tuple(map(float, pp.dPoly))
-            #pathDataString += polyDataString % tuple(map(float, pp.pPoly))
-            pathDataString +=  (pathDataFormatString % (int((monoTimeOffset + _pp.logMonoTime) * .0000002) * 5))
+            pathDataString += polyDataString % tuple(map(float, pp.pPoly))
+            pathDataString +=  (pathDataFormatString % (pp.lProb, pp.rProb, pp.cProb, int((monoTimeOffset + _pp.logMonoTime) * .0000002) * 5))
 
       if socket is controlsState:
         _controlsState = messaging.drain_sock(socket)
@@ -236,8 +246,9 @@ def dashboard_thread(rate=100):
                 reactMPC = config['reactMPC']
                 rateFF = config['rateFFGain']
                 dampTime = config['dampTime']
-                kegmanDataString += ("%s,%s,%s,%s,%s,%s,%s|" % \
-                      (steerKpV, steerKiV, steerKf, reactMPC, rateFF, dampTime, receiveTime))
+                oversampling = config['oversampling']
+                kegmanDataString += ("%s,%s,%s,%s,%s,%s,%s,%s|" % \
+                      (steerKpV, steerKiV, steerKf, reactMPC, rateFF, dampTime, oversampling, receiveTime))
               else:
                 timeConst = config['timeConst']
                 actEffect = config['actEffect']

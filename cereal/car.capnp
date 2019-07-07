@@ -337,6 +337,7 @@ struct CarParams {
   steerActuatorDelay @36 :Float32; # Steering wheel actuator delay in seconds
   openpilotLongitudinalControl @37 :Bool; # is openpilot doing the longitudinal control?
   carVin @38 :Text; # VIN number queried during fingerprinting
+  #communityParams @39 :Community(Text, Text);   # Generic list of key / value pairs for community use
 
   struct LateralPIDTuning {
     kpBP @0 :List(Float32);
@@ -358,7 +359,6 @@ struct CarParams {
     deadzoneV @5 :List(Float32);
   }
 
-
   struct LateralINDITuning {
     outerLoopGain @0 :Float32;
     innerLoopGain @1 :Float32;
@@ -367,6 +367,13 @@ struct CarParams {
     reactMPC @4 :Float32;
   }
 
+  #struct Community(Key, Value) {
+    #entries @0 :List(Entry);
+    #struct Entry {
+    #  key @0 :Key;
+    #  value @1 :Value;
+    #}
+  #}
 
   enum SafetyModel {
     # does NOT match board setting

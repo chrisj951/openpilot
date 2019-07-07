@@ -34,6 +34,7 @@ selfdrive/ui/ui
 selfdrive/test/tests/plant/out
 selfdrive/visiond/visiond
 selfdrive/sensord/gpsd
+selfdrive/loggerd/loggerd
 selfdrive/sensord/sensord
 /src/
 
