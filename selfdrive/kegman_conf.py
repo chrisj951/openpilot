@@ -15,6 +15,7 @@ class kegman_conf():
 
 
   def init_config(self, CP):
+    print("                initialized")
     write_conf = False
     if CP.lateralTuning.which() == 'pid':
       self.type = "pid"
@@ -40,7 +41,8 @@ class kegman_conf():
         self.conf['rateFFGain'] = str(round(CP.lateralTuning.pid.rateFFGain,3))
         write_conf = True
       if self.conf['oversampling'] == "-1":
-        self.conf['oversampling'] = str(round(1.,3))
+        print("                  defaulting")
+        self.conf['oversampling'] = str(round(200.0,3))
         write_conf = True
     else:
       self.type = "indi"
@@ -59,16 +61,18 @@ class kegman_conf():
         write_conf = True
 
     if write_conf:
+      print(write_conf)
       self.write_config(self.config)
 
   def read_config(self, CP=None, Reset=False):
     self.element_updated = False
 
-    if not Reset and os.path.isfile('../kegman.json'):
-      with open('../kegman.json', 'r') as f:
+    if not Reset and os.path.isfile('kegman.json'):
+      with open('kegman.json', 'r') as f:
         self.config = json.load(f)
-        self.write_config(self.config)
+        #self.write_config(self.config)
 
+      #print(self.config)
       if ("type" not in self.config or self.config['type'] == "-1") and CP != None:
           self.config.update({"type":CP.lateralTuning.which()})
           print(CP.lateralTuning.which())
@@ -112,6 +116,7 @@ class kegman_conf():
 
 
     else:
+      #print("                           reset!")
       if self.type == "pid" or CP.lateralTuning.which() == "pid":
         self.config = {"type":"pid","Kp":"-1", "Ki":"-1", "Kf":"-1", "dampTime":"-1", "reactMPC":"-1", "rateFFGain":"-1", "oversampling":"-1"}
       else:
@@ -121,6 +126,7 @@ class kegman_conf():
     return self.config
 
   def write_config(self, config):
-    with open('../kegman.json', 'w') as f:
+    #print("written")
+    with open('kegman.json', 'w') as f:
       json.dump(self.config, f, indent=2, sort_keys=True)
-      os.chmod("../kegman.json", 0o764)
+      os.chmod("kegman.json", 0o764)

@@ -56,6 +56,7 @@ class LatControlPID(object):
       self.damp_time = (float(kegman.conf['dampTime']))
       self.react_mpc = (float(kegman.conf['reactMPC']))
       self.oversampling = (float(kegman.conf['oversampling']))
+      #print(self.oversampling)
 
 
   def reset(self):

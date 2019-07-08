@@ -8,7 +8,7 @@ from selfdrive.car.honda.values import CAR, DBC, STEER_THRESHOLD, SPEED_FACTOR, 
 def parse_gear_shifter(gear, vals):
 
   val_to_capnp = {'P': 'park', 'R': 'reverse', 'N': 'neutral',
-                  'D': 'drive', 'S': 'sport', 'L': 'low'}
+                  'D': 'drive', 'D': 'drive', 'D': 'drive'}  # 'S': 'sport', 'L': 'low'}
   try:
     return val_to_capnp[vals[gear]]
   except KeyError:

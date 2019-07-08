@@ -48,7 +48,7 @@ def dashboard_thread(rate=100):
   #server_address = "tcp://kevo.live"
   server_address = "tcp://gernstation.synology.me"
   #server_address = "tcp://192.168.137.1"
-  #server_address = "tcp://192.168.1.3"
+  server_address = "tcp://192.168.1.3"
 
   context = zmq.Context()
   steerPush = context.socket(zmq.PUSH)
@@ -162,15 +162,15 @@ def dashboard_thread(rate=100):
             if l100.controlsState.lateralControlState.which == "pidState":
               lateral_type = "pid"
               influxFormatString = user_id + ",sources=capnp ff_angle=%s,damp_angle_steers_des=%s,angle_steers_des=%s,angle_steers=%s,steer_override=%s,v_ego=%s,p=%s,i=%s,f=%s,output=%s %s\n"
-              kegmanFormatString = user_id + ",sources=kegman KpV=%s,KiV=%s,Kf=%s,reactMPC=%s,rate_ff_gain=%s,dampTime=%s %s\n"
+              kegmanFormatString = user_id + ",sources=kegman KpV=%s,KiV=%s,Kf=%s,reactMPC=%s,rate_ff_gain=%s,dampTime=%s,oversampling=%s %s\n"
             else:
               lateral_type = "indi"
               influxFormatString = user_id + ",sources=capnp angle_steers_des=%s,damp_angle_steers_des=%s,angle_steers=%s,steer_override=%s,v_ego=%s,output=%s,indi_angle=%s,indi_rate=%s,indi_rate_des=%s,indi_accel=%s,indi_accel_des=%s,accel_error=%s,delayed_output=%s,indi_delta=%s %s\n"
               kegmanFormatString = user_id + ",sources=kegman time_const=%s,act_effect=%s,inner_gain=%s,outer_gain=%s,reactMPC=%s %s\n"
           vEgo = l100.controlsState.vEgo
           active = l100.controlsState.active
-          #active = True
-          #vEgo = 1.
+          active = True
+          vEgo = 1.
           #print(active)
           receiveTime = int((monoTimeOffset + l100.logMonoTime) * .0000002) * 5
           if (abs(receiveTime - int(time.time() * 1000)) > 10000):
