@@ -1,9 +1,9 @@
 {
-  "Kf": "6e-05", 
-  "Ki": "0.18", 
-  "Kp": "0.6", 
-  "dampTime": "0.1", 
-  "rateFFGain": "0.4", 
-  "reactMPC": "0.0", 
-  "type": "pid"
+  "Kf": "-1", 
+  "Ki": "-1", 
+  "Kp": "-1", 
+  "dampTime": "-1", 
+  "rateFFGain": "-1", 
+  "reactMPC": "-1", 
+  "type": "-1"
 }
