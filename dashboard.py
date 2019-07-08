@@ -169,14 +169,14 @@ def dashboard_thread(rate=100):
               kegmanFormatString = user_id + ",sources=kegman time_const=%s,act_effect=%s,inner_gain=%s,outer_gain=%s,reactMPC=%s %s\n"
           vEgo = l100.controlsState.vEgo
           active = l100.controlsState.active
-          active = True
-          vEgo = 1.
+          #active = True
+          #vEgo = 1.
           #print(active)
           receiveTime = int((monoTimeOffset + l100.logMonoTime) * .0000002) * 5
           if (abs(receiveTime - int(time.time() * 1000)) > 10000):
             monoTimeOffset = (time.time() * 1000000000) - l100.logMonoTime
             receiveTime = int((monoTimeOffset + l100.logMonoTime) * 0.0000002) * 5
-          if vEgo > 0 and active:
+          if (vEgo > 0 and active) or frame_count == 0:
             dat = l100.controlsState
             #print(dat)
 
@@ -191,7 +191,7 @@ def dashboard_thread(rate=100):
                   s.output, s.steerAngle, s.steerRate, s.rateSetPoint, s.steerAccel, s.accelSetPoint, s.accelError, s.delayedOutput, s.delta, receiveTime))
 
             #print(dat.upFine, dat.uiFine)
-            frame_count += 1
+          frame_count += 1
 
     #if lastGPStime + 2.0 <= time.time():
     #  lastGPStime = time.time()
