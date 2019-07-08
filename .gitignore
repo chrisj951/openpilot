@@ -5,6 +5,7 @@ venv/
 .idea
 .sconsign.dblite
 model2.png
+kegman.json
 a.out
 
 *.DSYM
@@ -23,7 +24,6 @@ a.out
 *.vcd
 config.json
 clcache
-kegman.json
 
 board/obj/
 selfdrive/boardd/boardd
