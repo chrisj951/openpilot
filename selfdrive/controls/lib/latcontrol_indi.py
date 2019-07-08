@@ -9,7 +9,6 @@ from common.numpy_fast import clip
 from cereal import log
 from common.realtime import sec_since_boot
 from selfdrive.kegman_conf import kegman_conf
-from common.numpy_fast import interp
 
 class LatControlINDI(object):
   def __init__(self, CP):
