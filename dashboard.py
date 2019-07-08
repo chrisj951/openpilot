@@ -48,7 +48,7 @@ def dashboard_thread(rate=100):
   #server_address = "tcp://kevo.live"
   server_address = "tcp://gernstation.synology.me"
   #server_address = "tcp://192.168.137.1"
-  server_address = "tcp://192.168.1.3"
+  #server_address = "tcp://192.168.1.3"
 
   context = zmq.Context()
   steerPush = context.socket(zmq.PUSH)
