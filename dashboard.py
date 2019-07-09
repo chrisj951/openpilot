@@ -37,6 +37,7 @@ def dashboard_thread(rate=100):
   osmData = None #messaging.sub_sock(context, 8601, addr=ipaddress, conflate=False, poller=poller)
   canData = None #messaging.sub_sock(context, 8602, addr=ipaddress, conflate=False, poller=poller)
   #pathPlan = messaging.sub_sock(context, service_list['pathPlan'].port, addr=ipaddress, conflate=False, poller=poller)
+  liveParameters = messaging.sub_sock(service_list['liveParameters'].port)
   pathPlan = messaging.sub_sock(service_list['pathPlan'].port)
 
   #gpsNMEA = messaging.sub_sock(context, service_list['gpsNMEA'].port, addr=ipaddress, conflate=True)
@@ -59,7 +60,8 @@ def dashboard_thread(rate=100):
   tuneSub.connect(server_address + ":8596")
   poller.register(tuneSub, zmq.POLLIN)
   poller.register(controlsState, zmq.POLLIN)
-  poller.register(pathPlan, zmq.POLLIN)
+  if pathPlan != None: poller.register(pathPlan, zmq.POLLIN)
+  if liveParameters != None: poller.register(liveParameters, zmq.POLLIN)
 
   try:
     if os.path.isfile('/data/openpilot/kegman.json'):
@@ -85,9 +87,12 @@ def dashboard_thread(rate=100):
   canFormatString="CANData,user=" + user_id + ",src=%s,pid=%s d1=%si,d2=%si "
   liveStreamFormatString = "curvature,user=" + user_id + " l_curv=%s,p_curv=%s,r_curv=%s,map_curv=%s,map_rcurv=%s,map_rcurvx=%s,v_curv=%s,l_diverge=%s,r_diverge=%s %s\n"
   pathFormatString = "pathPlan,user=" + user_id + " l0=%s,l1=%s,l2=%s,l3=%sr0=%s,r1=%s,r2=%s,r3=%sc0=%s,c1=%s,c2=%s,c3=%sd0=%s,d1=%s,d2=%s,d3=%sp0=%s,p1=%s,p2=%s,p3=%s,l_prob=%s,r_prob=%s,c_prob=%s %s\n"
+  liveParamsFormatString = "liveParameters,user=" + user_id + " yaw_rate=%s,gyro_bias=%s,angle_offset=%s,angle_offset_avg=%s,tire_stiffness=%s,steer_ratio=%s %s\n"
   pathDataFormatString = "%0.2f,%0.2f,%0.2f,%d|"
   polyDataString = "%.10f,%0.8f,%0.6f,%0.4f,"
+  liveParamsString = "%0.2f,%0.2f,%0.2f,%0.2f,%0.2f,%0.2f,%d|"
   pathDataString = ""
+  liveParamsDataString = ""
   influxDataString = ""
   kegmanDataString = ""
   liveStreamDataString = ""
@@ -120,6 +125,14 @@ def dashboard_thread(rate=100):
         livestream = liveStreamData.recv_string() + str(receiveTime) + "|"
         if vEgo > 0 and active: liveStreamDataString += livestream
 
+      if socket is liveParameters:
+        _liveParams = messaging.drain_sock(socket)
+        for _lp in _liveParams:
+          #print("                Live params!")
+          lp = _lp.liveParameters
+          if vEgo > 0 and active:
+            liveParamsDataString += (liveParamsString % (lp.yawRate, lp.gyroBias, lp.angleOffset, lp.angleOffsetAverage, lp.stiffnessFactor, lp.steerRatio, receiveTime))
+            #print(liveParamsDataString)
       if socket is canData:
         canString = canData.recv_string()
         #print(canString)
@@ -144,6 +157,7 @@ def dashboard_thread(rate=100):
       if socket is pathPlan:
         _pathPlan = messaging.drain_sock(socket)
         for _pp in _pathPlan:
+          #print("                path plan!")
           pp = _pp.pathPlan
           if vEgo > 0 and active and (carState == None or boolStockRcvd):
             boolStockRcvd = False
@@ -158,6 +172,7 @@ def dashboard_thread(rate=100):
         _controlsState = messaging.drain_sock(socket)
         #print("controlsState")
         for l100 in _controlsState:
+          #print("               controls state")
           if lateral_type == "":
             if l100.controlsState.lateralControlState.which == "pidState":
               lateral_type = "pid"
@@ -271,6 +286,7 @@ def dashboard_thread(rate=100):
       insertString += influxFormatString + "~" + influxDataString + "!"
       insertString += pathFormatString + "~" + pathDataString + "!"
       insertString += mapFormatString + "~" + mapDataString + "!"
+      insertString += liveParamsFormatString + "~" + liveParamsDataString + "!"
       #insertString += canInsertString
       #print(canInsertString)
       steerPush.send_string(insertString)
@@ -278,6 +294,7 @@ def dashboard_thread(rate=100):
       frame_count = 0
       influxDataString = ""
       kegmanDataString = ""
+      liveParamsDataString = ""
       mapDataString = ""
       pathDataString = ""
       insertString = ""
