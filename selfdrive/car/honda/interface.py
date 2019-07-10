@@ -211,7 +211,7 @@ class CarInterface(object):
       ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5]
       ret.longitudinalTuning.kiBP = [0., 35.]
       ret.longitudinalTuning.kiV = [0.18, 0.12]
-      ret.lateralTuning.pid.dampTime = 0.1
+      ret.lateralTuning.pid.dampTime = 0.02
       ret.lateralTuning.pid.reactMPC = 0.0
       ret.lateralTuning.pid.rateFFGain = 0.4
       ret.steerLimitAlert = False

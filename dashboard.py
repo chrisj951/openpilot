@@ -184,7 +184,7 @@ def dashboard_thread(rate=100):
               kegmanFormatString = user_id + ",sources=kegman time_const=%s,act_effect=%s,inner_gain=%s,outer_gain=%s,reactMPC=%s %s\n"
           vEgo = l100.controlsState.vEgo
           active = l100.controlsState.active
-          #active = True
+          active = True
           #vEgo = 1.
           #print(active)
           receiveTime = int((monoTimeOffset + l100.logMonoTime) * .0000002) * 5

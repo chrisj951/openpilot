@@ -110,7 +110,7 @@ class PathPlanner(object):
         self.mpc_angles[i] = (self.mpc_times[i] - self.mpc_times[i-1]) * self.mpc_rates[i-1] + self.mpc_angles[i-1]
 
       rate_desired = math.degrees(self.mpc_solution[0].rate[0] * VM.sR)
-      self.angle_steers_des_mpc = self.mpc_angles[1]
+      self.angle_steers_des_mpc = math.degrees(self.mpc_solution[0].delta[1] * VM.sR) + angle_offset_average
 
     else:
       self.libmpc.init(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, CP.steerRateCost)
@@ -124,6 +124,7 @@ class PathPlanner(object):
     else:
       self.solution_invalid_cnt = 0
     plan_solution_valid = self.solution_invalid_cnt < 2
+    print("%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f " % tuple(self.mpc_rates))
 
     plan_send = messaging.new_message()
     plan_send.init('pathPlan')

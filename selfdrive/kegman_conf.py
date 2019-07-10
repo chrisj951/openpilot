@@ -42,7 +42,7 @@ class kegman_conf():
         write_conf = True
       if self.conf['oversampling'] == "-1":
         print("                  defaulting")
-        self.conf['oversampling'] = str(round(200.0,3))
+        self.conf['oversampling'] = str(round(400.0,3))
         write_conf = True
     else:
       self.type = "indi"

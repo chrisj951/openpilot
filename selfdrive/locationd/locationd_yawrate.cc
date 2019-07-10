@@ -199,7 +199,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  ParamsLearner learner(car_params, ao, x, sR, 0.05);
+  ParamsLearner learner(car_params, ao, x, sR, 0.1);
 
   // Main loop
   int save_counter = 0;
