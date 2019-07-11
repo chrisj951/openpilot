@@ -197,20 +197,37 @@ class CarInterface(object):
       ret.lateralTuning.pid.reactMPC = -0.05
       ret.lateralTuning.pid.rateFFGain = 0.4
 
-    elif candidate in (CAR.ACCORD, CAR.ACCORD_15, CAR.ACCORDH):
+#    elif candidate in (CAR.ACCORD, CAR.ACCORD_15, CAR.ACCORDH):
+#      stop_and_go = True
+#      if not candidate == CAR.ACCORDH: # Hybrid uses same brake msg as hatch
+#        ret.safetyParam = 1 # Accord and CRV 5G use an alternate user brake msg
+#      ret.mass = 3279. * CV.LB_TO_KG + STD_CARGO_KG
+#      ret.wheelbase = 2.83
+#      ret.centerToFront = ret.wheelbase * 0.39
+#      ret.steerRatio = 15.96  # 11.82 is spec end-to-end
+#      tire_stiffness_factor = 0.8467
+#      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.18]]
+#      ret.longitudinalTuning.kpBP = [0., 5., 35.]
+#      ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5]
+#      ret.longitudinalTuning.kiBP = [0., 35.]
+#      ret.longitudinalTuning.kiV = [0.18, 0.12]
+#      ret.lateralTuning.pid.dampTime = 0.02
+#      ret.lateralTuning.pid.reactMPC = 0.0
+#      ret.lateralTuning.pid.rateFFGain = 0.4
+#      ret.steerLimitAlert = False
+
+    elif candidate == CAR.INSIGHT:
       stop_and_go = True
-      if not candidate == CAR.ACCORDH: # Hybrid uses same brake msg as hatch
-        ret.safetyParam = 1 # Accord and CRV 5G use an alternate user brake msg
-      ret.mass = 3279. * CV.LB_TO_KG + STD_CARGO_KG
-      ret.wheelbase = 2.83
+      ret.mass = 2987. * CV.LB_TO_KG + STD_CARGO_KG
+      ret.wheelbase = 2.7
       ret.centerToFront = ret.wheelbase * 0.39
-      ret.steerRatio = 15.96  # 11.82 is spec end-to-end
-      tire_stiffness_factor = 0.8467
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.18]]
+      ret.steerRatio = 15  # 12.58 is spec end-to-end
+      tire_stiffness_factor = 0.82
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.5], [0.20]]
       ret.longitudinalTuning.kpBP = [0., 5., 35.]
       ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5]
       ret.longitudinalTuning.kiBP = [0., 35.]
-      ret.longitudinalTuning.kiV = [0.18, 0.12]
+      ret.longitudinalTuning.kiV = [0.18, 0.12]  
       ret.lateralTuning.pid.dampTime = 0.02
       ret.lateralTuning.pid.reactMPC = 0.0
       ret.lateralTuning.pid.rateFFGain = 0.4
