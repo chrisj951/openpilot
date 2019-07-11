@@ -954,17 +954,20 @@ const UIScene *scene = &s->scene;
     if(((int)(scene->angleSteers) < -6) || ((int)(scene->angleSteers) > 6)) {
       // Draw orange vision track
       track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-        nvgRGBA(225, 100, 0, 255), nvgRGBA(255, 115, 3, 255/2));
+        nvgRGBA(225, 115, 0, 225), nvgRGBA(225, 135, 3, 255/2));
+    } else if(((int)(scene->angleSteers) < -12) || ((int)(scene->angleSteers) > 12)) {
+       track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
+         nvgRGBA(255, 50, 0, 255), nvgRGBA(255, 100, 3, 255/2));
     } else {
       // Draw green vision track
       track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-        nvgRGBA(23, 170, 66, 255), nvgRGBA(19, 143, 55, 255/2));
+        nvgRGBA(23, 170, 66, 200), nvgRGBA(19, 143, 55, 255/2));
     }
     //nvgRGBA(clr[0], clr[1], clr[2], 255), nvgRGBA(clr[0], clr[1], clr[2], 255/2));
   } else {
     // Draw white vision track
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-      nvgRGBA(255, 255, 255, 255), nvgRGBA(255, 255, 255, 0));
+      nvgRGBA(255, 255, 255, 200), nvgRGBA(255, 255, 255, 0));
   }
 
   nvgFillPaint(s->vg, track_bg);
