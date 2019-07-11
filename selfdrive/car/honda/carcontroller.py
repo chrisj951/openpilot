@@ -70,7 +70,7 @@ def process_hud_alert(hud_alert):
 
 HUDData = namedtuple("HUDData",
                      ["pcm_accel", "v_cruise", "mini_car", "car", "X4",
-                      "lanes", "beep", "chime", "fcw", "acc_alert", "steer_required"])
+                      "lanes", "beep", "chime", "fcw", "acc_alert", "steer_required", "dashed_lanes"])
 
 
 class CarController(object):
@@ -116,28 +116,37 @@ class CarController(object):
     self.brake_last = rate_limit(brake, self.brake_last, -2., 1./100)
 
     # vehicle hud display, wait for one update from 10Hz 0x304 msg
+    if hud_show_lanes and CS.lkMode:
+      hud_lanes = 1
+    else:
+      hud_lanes = 0
+
+    # vehicle hud display, wait for one update from 10Hz 0x304 msg
     if hud_show_lanes:
       hud_lanes = 1
     else:
       hud_lanes = 0
 
-    if enabled:
-      if hud_show_car:
-        hud_car = 2
-      else:
-        hud_car = 1
+    # Always detect lead car on HUD even without ACC engaged
+    if hud_show_car:
+      hud_car = 2
     else:
-      hud_car = 0
+      hud_car = 1
 
     # For lateral control-only, send chimes as a beep since we don't send 0x1fa
     if CS.CP.radarOffCan:
       snd_beep = snd_beep if snd_beep != 0 else snd_chime
 
+    # Do not send audible alert when steering is disabled
+    if not CS.lkMode:
+      snd_beep = 0
+      snd_chime = 0
+
     #print("{0} {1} {2}".format(chime, alert_id, hud_alert))
     fcw_display, steer_required, acc_alert = process_hud_alert(hud_alert)
 
     hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), 1, hud_car,
-                  0xc1, hud_lanes, int(snd_beep), snd_chime, fcw_display, acc_alert, steer_required)
+                  0xc1, hud_lanes, int(snd_beep), snd_chime, fcw_display, acc_alert, steer_required, CS.lkMode)
 
     # **** process the car messages ****
 
@@ -157,7 +166,7 @@ class CarController(object):
     apply_brake = int(clip(self.brake_last * BRAKE_MAX, 0, BRAKE_MAX - 1))
     apply_steer = int(clip(-actuators.steer * STEER_MAX, -STEER_MAX, STEER_MAX))
 
-    lkas_active = enabled and not CS.steer_not_allowed
+    lkas_active = enabled and not CS.steer_not_allowed and CS.lkMode
 
     # Send CAN commands.
     can_sends = []
