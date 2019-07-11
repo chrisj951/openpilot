@@ -2048,7 +2048,7 @@ static void ui_draw_blank(UIState *s) {
 }
 
 static void ui_draw(UIState *s) {
-  if (s->vision_connected) {
+  if (s->vision_connected && s->plus_state == 0) {
     ui_draw_vision(s);
   } else {
     ui_draw_blank(s);
