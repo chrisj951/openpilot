@@ -144,7 +144,7 @@ static int honda_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   //    tx = 0;
   //  }
   //}
-  if (bosch_hardware && ((to_send->RIR>>21) == 0x296)) {
+  if (honda_bosch_hardware && ((to_send->RIR>>21) == 0x296)) {
     int buttons = (to_send->RDLR & 0xE0) >> 5;
     if (buttons == 4 || buttons == 3) {
       controls_allowed = 1;
