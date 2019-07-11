@@ -2565,7 +2565,7 @@ static void ui_update(UIState *s) {
       struct cereal_GpsLocationData datad;
       cereal_read_GpsLocationData(&datad, eventd.gpsLocation);
 
-      if (datad.accuracy == NULL) {
+      if (!datad.accuracy) {
         s->scene.gpsAccuracy = 99.99;
       } else {
         s->scene.gpsAccuracy = datad.accuracy;
