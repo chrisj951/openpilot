@@ -322,7 +322,6 @@ typedef struct UIState {
   track_vertices_data track_vertices[2];
 
   bool ignoreLayout;
-  unsigned long lastdriveEnd;
   int touchTimeout;
 
 } UIState;
@@ -529,6 +528,7 @@ static void ui_init(UIState *s) {
   s->livempc_sock_raw = sub_sock(s->ctx, "tcp://127.0.0.1:8035");
   s->plus_sock_raw = sub_sock(s->ctx, "tcp://127.0.0.1:8037");
   s->gps_sock_raw = sub_sock(s->ctx, "tcp://127.0.0.1:8032");
+  s->carstate_sock_raw = sub_sock(s->ctx, "tcp://127.0.0.1:8021");
 
 #ifdef SHOW_SPEEDLIMIT
   s->map_data_sock_raw = sub_sock(s->ctx, "tcp://127.0.0.1:8065");
@@ -2356,9 +2356,6 @@ static void ui_update(UIState *s) {
   int err;
 
   if (s->vision_connect_firstrun) {
-    s->carstate_sock_raw = sub_sock(s->ctx, "tcp://127.0.0.1:8021");
-    assert(s->carstate_sock_raw);
-    s->lastdriveEnd = 0;
     // cant run this in connector thread because opengl.
     // do this here for now in lieu of a run_on_main_thread event
 
@@ -2540,7 +2537,7 @@ static void ui_update(UIState *s) {
 
     if (polls[0].revents || polls[1].revents || polls[2].revents ||
         polls[3].revents || polls[4].revents || polls[6].revents ||
-        polls[7].revents || polls[plus_sock_num].revents) {
+        polls[8].revents || polls[9].revents || polls[plus_sock_num].revents) {
       // awake on any (old) activity
       set_awake(s, true);
     }
