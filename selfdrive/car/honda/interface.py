@@ -161,7 +161,7 @@ class CarInterface(object):
     rotationalInertia_civic = 2500
     tireStiffnessFront_civic = 192150
     tireStiffnessRear_civic = 202500
-    ret.steerLimitAlert = True
+    ret.steerLimitAlert = False
 
     # Optimized car params: tire_stiffness_factor and steerRatio are a result of a vehicle
     # model optimization process. Certain Hondas have an extra steering sensor at the bottom
