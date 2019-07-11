@@ -85,7 +85,7 @@ class PathPlanner(object):
     mpc_nans = np.any(np.isnan(list(self.mpc_solution[0].delta)))
 
     if not mpc_nans:
-      self.mpc_angles[0] = angle_steers
+      self.mpc_angles[0] = math.degrees(self.mpc_solution[0].delta[0] * VM.sR) + angle_offset_average
       self.mpc_times[0] = sm.logMonoTime['model'] * 1e-9
       oversample_limit = 19 if v_ego == 0 else min(19, abs(int(sm['controlsState'].lateralControlState.pidState.oversampling / v_ego)))
       print(oversample_limit, sm['controlsState'].lateralControlState.pidState.oversampling)
