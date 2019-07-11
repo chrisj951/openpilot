@@ -121,12 +121,6 @@ class CarController(object):
     else:
       hud_lanes = 0
 
-    # vehicle hud display, wait for one update from 10Hz 0x304 msg
-    if hud_show_lanes:
-      hud_lanes = 1
-    else:
-      hud_lanes = 0
-
     # Always detect lead car on HUD even without ACC engaged
     if hud_show_car:
       hud_car = 2
