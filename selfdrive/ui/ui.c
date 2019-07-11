@@ -2566,7 +2566,7 @@ static void ui_update(UIState *s) {
       cereal_read_GpsLocationData(&datad, eventd.gpsLocation);
 
       if (datad.accuracy == NULL) {
-        s->scene.gpsAccuracy = 99.99
+        s->scene.gpsAccuracy = 99.99;
       } else {
         s->scene.gpsAccuracy = datad.accuracy;
       }
