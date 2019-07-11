@@ -484,6 +484,8 @@ class CarInterface(object):
     ret.cruiseState.speedOffset = self.CS.cruise_speed_offset
     ret.cruiseState.standstill = False
 
+    ret.lkMode = self.CS.lkMode
+
     # TODO: button presses
     buttonEvents = []
     ret.leftBlinker = bool(self.CS.left_blinker_on)
