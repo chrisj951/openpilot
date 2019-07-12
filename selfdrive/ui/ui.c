@@ -2565,7 +2565,7 @@ static void ui_update(UIState *s) {
       struct cereal_GpsLocationData datad;
       cereal_read_GpsLocationData(&datad, eventd.gpsLocation);
 
-      if (!datad.accuracy) {
+      if (err >= 0) {
         s->scene.gpsAccuracy = 99.99;
       } else {
         s->scene.gpsAccuracy = datad.accuracy;
@@ -2578,7 +2578,6 @@ static void ui_update(UIState *s) {
       {
         s->scene.gpsAccuracy = 99.8;
       }
-      capn_free(&ctx);
       zmq_msg_close(&msg);
     }
 
@@ -2793,15 +2792,6 @@ int main(int argc, char* argv[]) {
   UIState *s = &uistate;
   ui_init(s);
   ds_init();
-  s->scene = (UIScene){
-      .frontview = getenv("FRONTVIEW") != NULL,
-      .fullview = getenv("FULLVIEW") != NULL,
-      .world_objects_visible = true, // Invisible until we receive a calibration message.
-      .gps_planner_active = true,
-      .ui_viz_rx = (box_x - sbr_w + bdr_is * 2),
-      .ui_viz_rw = (box_w + sbr_w - (bdr_is * 2)),
-      .ui_viz_ro = 0,
-  };
 
   pthread_t connect_thread_handle;
   err = pthread_create(&connect_thread_handle, NULL,
