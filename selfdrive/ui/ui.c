@@ -957,8 +957,9 @@ const UIScene *scene = &s->scene;
       track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
         nvgRGBA(225, 115, 0, 225), nvgRGBA(225, 135, 3, 255/2));
     } else if(((int)(scene->angleSteers) < -12) || ((int)(scene->angleSteers) > 12)) {
+      // Draw red vision track
        track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-         nvgRGBA(255, 50, 0, 255), nvgRGBA(255, 100, 3, 255/2));
+         nvgRGBA(255, 0, 0, 235), nvgRGBA(225, 10, 3, 255/2));
     } else {
       // Draw green vision track
       track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
