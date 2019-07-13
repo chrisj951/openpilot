@@ -182,6 +182,7 @@ typedef struct UIScene {
   float freeSpace;
   float angleSteers;
   float angleSteersDes;
+  float output_scale;
   //BB END CPU TEMP
   bool steerOverride;
   // Used to display calibration progress
@@ -952,20 +953,15 @@ const UIScene *scene = &s->scene;
     // Draw colored MPC track
     // Why isn't is_mpc not working?
     //const uint8_t *clr = bg_colors[s->status];
-    if(((int)(scene->angleSteers) < -6) || ((int)(scene->angleSteers) > 6)) {
-      // Draw orange vision track
+    float scale = fabs((float)s->scene.output_scale);
+    track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4, 
+      nvgRGBA(23+((int)(scale * 202)), 170-((int)(scale * 55)), 66-((int)(scale * 66)), 200+ ((int)(scale * 25))),
+      nvgRGBA(19+((int)(scale * 206)), 143-((int)(scale * 8)), 55-((int)(scale * 52)), (int)(255/2)));
+    if(scene->steerOverride) {
+      // Draw red vision track when user is overriding
       track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-        nvgRGBA(225, 115, 0, 225), nvgRGBA(225, 135, 3, 255/2));
-    } else if(((int)(scene->angleSteers) < -12) || ((int)(scene->angleSteers) > 12)) {
-      // Draw red vision track
-       track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-         nvgRGBA(255, 0, 0, 235), nvgRGBA(225, 10, 3, 255/2));
-    } else {
-      // Draw green vision track
-      track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-        nvgRGBA(23, 170, 66, 200), nvgRGBA(19, 143, 55, 255/2));
+        nvgRGBA(255, 0, 0, 235), nvgRGBA(225, 10, 3, 255/2));
     }
-    //nvgRGBA(clr[0], clr[1], clr[2], 255), nvgRGBA(clr[0], clr[1], clr[2], 255/2));
   } else {
     // Draw white vision track
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
@@ -2140,6 +2136,10 @@ void handle_message(UIState *s, void *which) {
     struct cereal_ControlsState datad;
     cereal_read_ControlsState(&datad, eventd.controlsState);
 
+    struct cereal_ControlsState_LateralPIDState pdata;
+    cereal_read_ControlsState_LateralPIDState(&pdata, eventd.lateralState);
+
+
     if (datad.vCruise != s->scene.v_cruise) {
       s->scene.v_cruise_update_ts = eventd.logMonoTime;
     }
@@ -2153,6 +2153,7 @@ void handle_message(UIState *s, void *which) {
     s->scene.engageable = datad.engageable;
     s->scene.gps_planner_active = datad.gpsPlannerActive;
     s->scene.monitoring_active = datad.driverMonitoringOn;
+    s->scene.output_scale = pdata.output;
 
     s->scene.frontview = datad.rearViewCam;
 
