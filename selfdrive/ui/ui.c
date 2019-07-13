@@ -952,10 +952,9 @@ const UIScene *scene = &s->scene;
   if (scene->engaged) {
     // Draw colored MPC track
     // Why isn't is_mpc not working?
-    //const uint8_t *clr = bg_colors[s->status];
-    float scale = fabs((float)s->scene.output_scale);
+    float scale = fabs(s->scene.output_scale);
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4, 
-      nvgRGBA(23+((int)(scale * 202)), 170-((int)(scale * 55)), 66-((int)(scale * 66)), 200+ ((int)(scale * 25))),
+      nvgRGBA(23+((int)(scale * 202)), 170-((int)(scale * 55)), 66-((int)(scale * 66)), 200+((int)(scale * 25))),
       nvgRGBA(19+((int)(scale * 206)), 143-((int)(scale * 8)), 55-((int)(scale * 52)), (int)(255/2)));
     if(scene->steerOverride) {
       // Draw red vision track when user is overriding
@@ -967,7 +966,6 @@ const UIScene *scene = &s->scene;
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
       nvgRGBA(255, 255, 255, 200), nvgRGBA(255, 255, 255, 0));
   }
-
   nvgFillPaint(s->vg, track_bg);
   nvgFill(s->vg);
   nvgRestore(s->vg);
@@ -2792,6 +2790,16 @@ int main(int argc, char* argv[]) {
   UIState *s = &uistate;
   ui_init(s);
   ds_init();
+
+  s->scene = (UIScene){
+      .frontview = getenv("FRONTVIEW") != NULL,
+      .fullview = getenv("FULLVIEW") != NULL,
+      .world_objects_visible = true, // Invisible until we receive a calibration message.
+      .gps_planner_active = s->scene.gps_planner_active,
+      .ui_viz_rx = (box_x - sbr_w + bdr_s * 2),
+      .ui_viz_rw = (box_w + sbr_w - (bdr_s * 2)),
+      .ui_viz_ro = 0,
+  };
 
   pthread_t connect_thread_handle;
   err = pthread_create(&connect_thread_handle, NULL,
