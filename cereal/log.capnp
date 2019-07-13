@@ -1777,6 +1777,5 @@ struct Event {
     thumbnail @66: Thumbnail;
     carEvents @68: List(Car.CarEvent);
     carParams @69: Car.CarParams;
-    lateralState @70 :ControlsState.LateralPIDState;
   }
 }

@@ -2135,7 +2135,7 @@ void handle_message(UIState *s, void *which) {
     cereal_read_ControlsState(&datad, eventd.controlsState);
 
     struct cereal_ControlsState_LateralPIDState pdata;
-    cereal_read_ControlsState_LateralPIDState(&pdata, eventd.lateralState);
+    cereal_read_ControlsState_LateralPIDState(&pdata, datad.lateralControlState.pidState);
 
 
     if (datad.vCruise != s->scene.v_cruise) {
