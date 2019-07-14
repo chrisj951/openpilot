@@ -197,7 +197,7 @@ static int honda_bosch_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
   }
   if (bus_num == bus_rdr_cam)  {
     int addr = GET_ADDR(to_fwd);
-    int is_lkas_msg = (addr == 0xE4) || (addr == 0x33D);
+    int is_lkas_msg = (addr == 0xE4) || (addr == 0xE5) || (addr == 0x33D);
     if (!is_lkas_msg) {
       bus_fwd = bus_rdr_car;
     }

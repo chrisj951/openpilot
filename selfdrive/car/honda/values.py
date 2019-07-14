@@ -27,6 +27,7 @@ class AH:
   GEAR_NOT_D     = [4, 6]
   SEATBELT       = [5, 5]
   SPEED_TOO_HIGH = [6, 8]
+  LDW            = [7, 1]
 
 VISUAL_HUD = {
   VisualAlert.none: AH.NONE,
@@ -35,7 +36,8 @@ VISUAL_HUD = {
   VisualAlert.brakePressed: AH.BRAKE_PRESSED,
   VisualAlert.wrongGear: AH.GEAR_NOT_D,
   VisualAlert.seatbeltUnbuckled: AH.SEATBELT,
-  VisualAlert.speedTooHigh: AH.SPEED_TOO_HIGH}
+  VisualAlert.speedTooHigh: AH.SPEED_TOO_HIGH,
+  VisualAlert.ldw: AH.LDW}
 
 class CAR:
   ACCORD = "HONDA ACCORD 2018 SPORT 2T"

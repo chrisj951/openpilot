@@ -320,6 +320,9 @@ def data_send(sm, CS, CI, CP, VM, state, events, actuators, v_cruise_kph, rk, ca
   if len(list(sm['pathPlan'].lPoly)) == 4:
     CC.hudControl.leftLaneDepart = bool(ldw_allowed and sm['pathPlan'].lPoly[3] < (1.08 - CAMERA_OFFSET) and left_lane_visible)
 
+  if CC.hudControl.leftLaneDepart or CC.hudControl.rightLaneDepart:
+    AM.add(sm.frame, "ldw", CC.enabled)
+
   CC.hudControl.visualAlert = AM.visual_alert
 
   if not read_only:

@@ -54,13 +54,24 @@ def create_brake_command(packer, apply_brake, pump_on, pcm_override, pcm_cancel_
 
 
 def create_steering_control(packer, apply_steer, lkas_active, car_fingerprint, idx, is_panda_black):
+  commands = []
+
   values = {
     "STEER_TORQUE": apply_steer if lkas_active else 0,
     "STEER_TORQUE_REQUEST": lkas_active,
   }
   bus = get_lkas_cmd_bus(car_fingerprint, is_panda_black)
-  return packer.make_can_msg("STEERING_CONTROL", bus, values, idx)
+  commands.append(packer.make_can_msg("STEERING_CONTROL", bus, values, idx))
 
+  if car_fingerprint in HONDA_BOSCH:
+    steer2_values = {
+      "SET_TO_X04": 0x04,
+      "SET_TO_X80": 0x80,
+      "SET_TO_X10": 0x10
+      }
+
+    commands.append(packer.make_can_msg("STEER_CONTROL_2", bus, steer2_values, idx))
+  return commands
 
 def create_ui_commands(packer, pcm_speed, hud, car_fingerprint, is_metric, idx, is_panda_black):
   commands = []
@@ -82,12 +93,18 @@ def create_ui_commands(packer, pcm_speed, hud, car_fingerprint, is_metric, idx, 
     commands.append(packer.make_can_msg("ACC_HUD", bus_pt, acc_hud_values, idx))
 
   lkas_hud_values = {
-    'SET_ME_X41': 0x41,
-    'SET_ME_X48': 0x48,
+    'SET_ME_X41': hud.ldw,
+    #'SET_ME_X48': 0x48,
     'STEERING_REQUIRED': hud.steer_required,
     'SOLID_LANES': hud.lanes,
     'DASHED_LANES': hud.dashed_lanes,
     'BEEP': 0,
+    'LDW_ON_1': 1,
+    'LDW_ON_2': 1,
+    'LDW_ON_3': 1,
+    'BOH': 2 if hud.ldw else 0,
+    'LDW_RIGHT': hud.ldw,
+
   }
   commands.append(packer.make_can_msg('LKAS_HUD', bus_lkas, lkas_hud_values, idx))
 

@@ -81,6 +81,13 @@ ALERTS = [
       Priority.HIGHEST, VisualAlert.fcw, AudibleAlert.chimeWarningRepeat, 1., 2., 2.),
 
   Alert(
+      "ldw",
+      "TAKE CONTROL",
+      "Lane Departure Warning",
+      AlertStatus.userPrompt, AlertSize.mid,
+      Priority.HIGH, VisualAlert.ldw, AudibleAlert.chimeWarningRepeat, 1., 2., 2.),
+
+  Alert(
       "steerSaturated",
       "TAKE CONTROL",
       "Turn Exceeds Steering Limit",

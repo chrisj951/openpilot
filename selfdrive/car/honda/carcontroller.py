@@ -59,21 +59,24 @@ def process_hud_alert(hud_alert):
   fcw_display = 0
   steer_required = 0
   acc_alert = 0
+  ldw_display = 0
   if hud_alert == AH.NONE:          # no alert
     pass
   elif hud_alert == AH.FCW:         # FCW
     fcw_display = hud_alert[1]
   elif hud_alert == AH.STEER:       # STEER
     steer_required = hud_alert[1]
+  elif hud_alert == AH.LDW:         # LDW
+    ldw_display = hud_alert[1]
   else:                             # any other ACC alert
     acc_alert = hud_alert[1]
 
-  return fcw_display, steer_required, acc_alert
+  return fcw_display, steer_required, acc_alert, ldw_display
 
 
 HUDData = namedtuple("HUDData",
                      ["pcm_accel", "v_cruise", "mini_car", "car", "X4",
-                      "lanes", "fcw", "acc_alert", "steer_required", "dashed_lanes"])
+                      "lanes", "fcw", "acc_alert", "steer_required", "dashed_lanes", "ldw"])
 
 
 class CarController(object):
@@ -175,11 +178,10 @@ class CarController(object):
       hud_car = 1
 
     #print("{0} {1} {2}".format(chime, alert_id, hud_alert))
-    fcw_display, steer_required, acc_alert = process_hud_alert(hud_alert)
+    fcw_display, steer_required, acc_alert, ldw_display = process_hud_alert(hud_alert)
 
     hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), 1, hud_car,
-                  0xc1, hud_lanes, fcw_display, acc_alert, steer_required, CS.lkMode)
-
+                  0xc1, hud_lanes, fcw_display, acc_alert, steer_required, CS.lkMode, ldw_display)
 
     # **** process the car messages ****
 
@@ -206,7 +208,7 @@ class CarController(object):
 
     # Send steering command.
     idx = frame % 4
-    can_sends.append(hondacan.create_steering_control(self.packer, apply_steer,
+    can_sends.extend(hondacan.create_steering_control(self.packer, apply_steer,
       lkas_active, CS.CP.carFingerprint, idx, CS.CP.isPandaBlack))
 
     # Send dashboard UI commands.
