@@ -6,17 +6,8 @@ import json
 import selfdrive.messaging as messaging
 from selfdrive.services import service_list
 from common.params import Params
-from cereal import car
 
 def dashboard_thread(rate=100):
-  '''
-  ret = car.CarParams.new_message()
-  ret.communityParams.init("entries", 3)
-  ret.communityParams.entries[0] = {"key": "reactMPC", "value": "-0.05"}
-  ret.communityParams.entries[1] = {"key": "dampTime", "value": "0.1"}
-  ret.communityParams.entries[2] = {"key": "rateFFGain", "value": "0.4"}
-  print(ret.communityParams.entries['reactMPC'].value)
-  '''
 
   kegman_valid = True
 
@@ -37,8 +28,8 @@ def dashboard_thread(rate=100):
   osmData = None #messaging.sub_sock(context, 8601, addr=ipaddress, conflate=False, poller=poller)
   canData = None #messaging.sub_sock(context, 8602, addr=ipaddress, conflate=False, poller=poller)
   #pathPlan = messaging.sub_sock(context, service_list['pathPlan'].port, addr=ipaddress, conflate=False, poller=poller)
+  pathPlan = None #messaging.sub_sock(context, service_list['plan'].port, addr=ipaddress, conflate=False, poller=poller)
   liveParameters = messaging.sub_sock(service_list['liveParameters'].port)
-  pathPlan = messaging.sub_sock(service_list['pathPlan'].port)
 
   #gpsNMEA = messaging.sub_sock(context, service_list['gpsNMEA'].port, addr=ipaddress, conflate=True)
 
@@ -60,12 +51,11 @@ def dashboard_thread(rate=100):
   tuneSub.connect(server_address + ":8596")
   poller.register(tuneSub, zmq.POLLIN)
   poller.register(controlsState, zmq.POLLIN)
-  if pathPlan != None: poller.register(pathPlan, zmq.POLLIN)
   if liveParameters != None: poller.register(liveParameters, zmq.POLLIN)
 
   try:
-    if os.path.isfile('/data/openpilot/selfdrive/kegman.json'):
-      with open('/data/openpilot/selfdrive/kegman.json', 'r') as f:
+    if os.path.isfile('/data/kegman.json'):
+      with open('/data/kegman.json', 'r') as f:
         config = json.load(f)
         user_id = config['userID']
         tunePush.send_json(config)
@@ -86,12 +76,12 @@ def dashboard_thread(rate=100):
   mapFormatString = "location,user=" + user_id + " latitude=%s,longitude=%s,altitude=%s,speed=%s,bearing=%s,accuracy=%s,speedLimitValid=%s,speedLimit=%s,curvatureValid=%s,curvature=%s,wayId=%s,distToTurn=%s,mapValid=%s,speedAdvisoryValid=%s,speedAdvisory=%s,speedAdvisoryValid=%s,speedAdvisory=%s,speedLimitAheadValid=%s,speedLimitAhead=%s,speedLimitAheadDistance=%s %s\n"
   canFormatString="CANData,user=" + user_id + ",src=%s,pid=%s d1=%si,d2=%si "
   liveStreamFormatString = "curvature,user=" + user_id + " l_curv=%s,p_curv=%s,r_curv=%s,map_curv=%s,map_rcurv=%s,map_rcurvx=%s,v_curv=%s,l_diverge=%s,r_diverge=%s %s\n"
-  pathFormatString = "pathPlan,user=" + user_id + " l0=%s,l1=%s,l2=%s,l3=%sr0=%s,r1=%s,r2=%s,r3=%sc0=%s,c1=%s,c2=%s,c3=%sd0=%s,d1=%s,d2=%s,d3=%sp0=%s,p1=%s,p2=%s,p3=%s,l_prob=%s,r_prob=%s,c_prob=%s %s\n"
-  liveParamsFormatString = "liveParameters,user=" + user_id + " yaw_rate=%s,gyro_bias=%s,angle_offset=%s,angle_offset_avg=%s,tire_stiffness=%s,steer_ratio=%s %s\n"
-  pathDataFormatString = "%0.2f,%0.2f,%0.2f,%d|"
+  pathFormatString = "pathPlan,user=" + user_id + " d0=%s,d1=%s,d2=%s,d3=%s %s\n"
+  pathDataFormatString = "%d|"
   polyDataString = "%.10f,%0.8f,%0.6f,%0.4f,"
-  liveParamsString = "%0.2f,%0.2f,%0.2f,%0.2f,%0.2f,%0.2f,%d|"
   pathDataString = ""
+  liveParamsFormatString = "liveParameters,user=" + user_id + " yaw_rate=%s,gyro_bias=%s,angle_offset=%s,angle_offset_avg=%s,tire_stiffness=%s,steer_ratio=%s %s\n"
+  liveParamsString = "%0.2f,%0.2f,%0.2f,%0.2f,%0.2f,%0.2f,%d|"
   liveParamsDataString = ""
   influxDataString = ""
   kegmanDataString = ""
@@ -117,9 +107,9 @@ def dashboard_thread(rate=100):
       if socket is tuneSub:
         config = json.loads(tuneSub.recv_multipart()[1])
         #print(config)
-        with open('/data/openpilot/selfdrive/kegman.json', 'w') as f:
+        with open('/data/kegman.json', 'w') as f:
           json.dump(config, f, indent=2, sort_keys=True)
-          os.chmod("/data/openpilot/selfdrive/kegman.json", 0o764)
+          os.chmod("/data/kegman.json", 0o764)
 
       if socket is liveStreamData:
         livestream = liveStreamData.recv_string() + str(receiveTime) + "|"
@@ -133,6 +123,7 @@ def dashboard_thread(rate=100):
           if vEgo > 0 and active:
             liveParamsDataString += (liveParamsString % (lp.yawRate, lp.gyroBias, lp.angleOffset, lp.angleOffsetAverage, lp.stiffnessFactor, lp.steerRatio, receiveTime))
             #print(liveParamsDataString)
+
       if socket is canData:
         canString = canData.recv_string()
         #print(canString)
@@ -157,48 +148,46 @@ def dashboard_thread(rate=100):
       if socket is pathPlan:
         _pathPlan = messaging.drain_sock(socket)
         for _pp in _pathPlan:
-          #print("                path plan!")
-          pp = _pp.pathPlan
+          pp = _pp.plan
           if vEgo > 0 and active and (carState == None or boolStockRcvd):
             boolStockRcvd = False
-            pathDataString += polyDataString % tuple(map(float, pp.lPoly))
-            pathDataString += polyDataString % tuple(map(float, pp.rPoly))
-            pathDataString += polyDataString % tuple(map(float, pp.cPoly))
+            #pathDataString += polyDataString % tuple(map(float, pp.lPoly))
+            #pathDataString += polyDataString % tuple(map(float, pp.rPoly))
+            #pathDataString += polyDataString % tuple(map(float, pp.cPoly))
             pathDataString += polyDataString % tuple(map(float, pp.dPoly))
-            pathDataString += polyDataString % tuple(map(float, pp.pPoly))
-            pathDataString +=  (pathDataFormatString % (pp.lProb, pp.rProb, pp.cProb, int((monoTimeOffset + _pp.logMonoTime) * .0000002) * 5))
+            #pathDataString += polyDataString % tuple(map(float, pp.pPoly))
+            pathDataString +=  (pathDataFormatString % (int((monoTimeOffset + _pp.logMonoTime) * .0000002) * 5))
 
       if socket is controlsState:
         _controlsState = messaging.drain_sock(socket)
         #print("controlsState")
         for l100 in _controlsState:
-          #print("               controls state")
           if lateral_type == "":
             if l100.controlsState.lateralControlState.which == "pidState":
               lateral_type = "pid"
-              influxFormatString = user_id + ",sources=capnp ff_angle=%s,damp_angle_steers_des=%s,angle_steers_des=%s,angle_steers=%s,steer_override=%s,v_ego=%s,p=%s,i=%s,f=%s,output=%s %s\n"
-              kegmanFormatString = user_id + ",sources=kegman KpV=%s,KiV=%s,Kf=%s,reactMPC=%s,rate_ff_gain=%s,dampTime=%s,oversampling=%s %s\n"
+              influxFormatString = user_id + ",sources=capnp ff_angle=%s,damp_angle_steers_des=%s,angle_steers_des=%s,angle_steers=%s,steer_override=%s,v_ego=%s,p=%s,p2=%s,i=%s,f=%s,output=%s %s\n"
+              kegmanFormatString = user_id + ",sources=kegman KpV=%s,KiV=%s,Kf=%s,reactMPC=%s,rate_ff_gain=%s,dampTime=%s,polyFactor=%s,reactPoly=%s,dampPoly=%s %s\n"
             else:
               lateral_type = "indi"
               influxFormatString = user_id + ",sources=capnp angle_steers_des=%s,damp_angle_steers_des=%s,angle_steers=%s,steer_override=%s,v_ego=%s,output=%s,indi_angle=%s,indi_rate=%s,indi_rate_des=%s,indi_accel=%s,indi_accel_des=%s,accel_error=%s,delayed_output=%s,indi_delta=%s %s\n"
               kegmanFormatString = user_id + ",sources=kegman time_const=%s,act_effect=%s,inner_gain=%s,outer_gain=%s,reactMPC=%s %s\n"
           vEgo = l100.controlsState.vEgo
           active = l100.controlsState.active
-          active = True
+          #active = True
           #vEgo = 1.
           #print(active)
           receiveTime = int((monoTimeOffset + l100.logMonoTime) * .0000002) * 5
           if (abs(receiveTime - int(time.time() * 1000)) > 10000):
             monoTimeOffset = (time.time() * 1000000000) - l100.logMonoTime
             receiveTime = int((monoTimeOffset + l100.logMonoTime) * 0.0000002) * 5
-          if (vEgo > 0 and active) or frame_count == 0:
+          if vEgo > 0 and active:
             dat = l100.controlsState
             #print(dat)
 
             if lateral_type == "pid":
-              influxDataString += ("%0.3f,%0.3f,%0.3f,%0.2f,%d,%0.1f,%0.4f,%0.4f,%0.4f,%0.4f,%d|" %
+              influxDataString += ("%0.3f,%0.3f,%0.3f,%0.2f,%d,%0.1f,%0.4f,%0.4f,%0.4f,%0.4f,%0.4f,%d|" %
                   (dat.lateralControlState.pidState.angleFFRatio, dat.dampAngleSteersDes, dat.angleSteersDes, dat.angleSteers,  dat.steerOverride, vEgo,
-                  dat.lateralControlState.pidState.p, dat.lateralControlState.pidState.i, dat.lateralControlState.pidState.f,dat.lateralControlState.pidState.output, receiveTime))
+                  dat.lateralControlState.pidState.p, dat.lateralControlState.pidState.p2, dat.lateralControlState.pidState.i, dat.lateralControlState.pidState.f,dat.lateralControlState.pidState.output, receiveTime))
             else:
               s = dat.lateralControlState.indiState
               influxDataString += ("%0.3f,%0.2f,%0.2f,%d,%0.1f,%0.4f,%0.4f,%0.4f,%0.4f,%0.4f,%0.4f,%0.4f,%0.4f,%0.4f,%d|" %
@@ -206,7 +195,7 @@ def dashboard_thread(rate=100):
                   s.output, s.steerAngle, s.steerRate, s.rateSetPoint, s.steerAccel, s.accelSetPoint, s.accelError, s.delayedOutput, s.delta, receiveTime))
 
             #print(dat.upFine, dat.uiFine)
-          frame_count += 1
+            frame_count += 1
 
     #if lastGPStime + 2.0 <= time.time():
     #  lastGPStime = time.time()
@@ -251,8 +240,8 @@ def dashboard_thread(rate=100):
     if frame_count >= 100:
       if kegman_valid:
         try:
-          if os.path.isfile('/data/openpilot/selfdrive/kegman.json'):
-            with open('/data/openpilot/selfdrive/kegman.json', 'r') as f:
+          if os.path.isfile('/data/kegman.json'):
+            with open('/data/kegman.json', 'r') as f:
               config = json.load(f)
               if lateral_type == "pid":
                 steerKpV = config['Kp']
@@ -261,9 +250,11 @@ def dashboard_thread(rate=100):
                 reactMPC = config['reactMPC']
                 rateFF = config['rateFFGain']
                 dampTime = config['dampTime']
-                oversampling = config['oversampling']
-                kegmanDataString += ("%s,%s,%s,%s,%s,%s,%s,%s|" % \
-                      (steerKpV, steerKiV, steerKf, reactMPC, rateFF, dampTime, oversampling, receiveTime))
+                polyFactor = config['polyFactor']
+                polyReact = config['polyReact']
+                polyDamp = config['polyDamp']
+                kegmanDataString += ("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s|" % \
+                      (steerKpV, steerKiV, steerKf, reactMPC, rateFF, dampTime, polyFactor, polyReact, polyDamp, receiveTime))
               else:
                 timeConst = config['timeConst']
                 actEffect = config['actEffect']
@@ -294,8 +285,8 @@ def dashboard_thread(rate=100):
       frame_count = 0
       influxDataString = ""
       kegmanDataString = ""
-      liveParamsDataString = ""
       mapDataString = ""
+      liveParamsDataString = ""
       pathDataString = ""
       insertString = ""
       canInsertString = ""

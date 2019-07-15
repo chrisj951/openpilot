@@ -492,7 +492,7 @@ struct ControlsState @0x97ff69c53601abf1 {
     saturated @8 :Bool;
     angleFFRatio @9 :Float32;
     angleFFGain @10 :Float32;
-    oversampling @11 :Float32;
+    p2 @11 :Float32;
    }
 
 }
