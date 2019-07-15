@@ -2137,9 +2137,9 @@ void handle_message(UIState *s, void *which) {
     struct cereal_ControlsState_LateralPIDState pdata;
     cereal_read_ControlsState_LateralPIDState(&pdata, datad.lateralControlState.pidState);
 
-    struct cereal_GpsLocationData datad;
-    cereal_read_GpsLocationData(&datad, eventd.gpsLocation);
-    s->scene.gpsAccuracy = datad.accuracy;
+    struct cereal_GpsLocationData datag;
+    cereal_read_GpsLocationData(&datag, eventd.gpsLocation);
+    s->scene.gpsAccuracy = datag.accuracy;
     if (s->scene.gpsAccuracy > 100) {
       s->scene.gpsAccuracy = 99.99;
     } else if (s->scene.gpsAccuracy < 0) {
