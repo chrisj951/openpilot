@@ -2569,7 +2569,7 @@ static void ui_update(UIState *s) {
       {
         s->scene.gpsAccuracy = 99.99;
       }
-      else if (s->scene.gpsAccuracy < 0.01)
+      else if (s->scene.gpsAccuracy == 0)
       {
         s->scene.gpsAccuracy = 99.8;
       }
