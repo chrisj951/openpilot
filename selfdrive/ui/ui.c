@@ -961,10 +961,14 @@ const UIScene *scene = &s->scene;
       green_lvl = 255;
       red_lvl = scale * 510;
     }
-    if(scene->steerOverride) blue_lvl = 255;
+    if(scene->steerOverride) {
+      track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
+        nvgRGBA(0, 191, 255, 235), nvgRGBA(0, 191, 225, 255/2));
+    } else {
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
       nvgRGBA(          red_lvl,            green_lvl,            blue_lvl, 235),
       nvgRGBA((int)(0.5*red_lvl), (int)(0.5*green_lvl), (int)(0.5*blue_lvl), 150));
+    }
   } else {
     // Draw white vision track
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
