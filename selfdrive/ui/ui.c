@@ -178,7 +178,7 @@ typedef struct UIScene {
   //BB CPU TEMP
   uint16_t maxCpuTemp;
   uint32_t maxBatTemp;
-  float gpsAccuracy;
+  //float gpsAccuracy;
   float freeSpace;
   float angleSteers;
   float angleSteersDes;
@@ -190,7 +190,7 @@ typedef struct UIScene {
   int cal_perc;
 
   // Used to show gps planner status
-  bool gps_planner_active;
+  //bool gps_planner_active;
 
   bool brakeLights;
   bool leftBlinker;
@@ -246,7 +246,7 @@ typedef struct UIState {
   void *livempc_sock_raw;
   void *plus_sock_raw;
   void *map_data_sock_raw;
-  void *gps_sock_raw;
+  //void *gps_sock_raw;
   void *carstate_sock_raw;
 
   void *uilayout_sock_raw;
@@ -529,7 +529,7 @@ static void ui_init(UIState *s) {
   s->radarstate_sock_raw = sub_sock(s->ctx, "tcp://127.0.0.1:8012");
   s->livempc_sock_raw = sub_sock(s->ctx, "tcp://127.0.0.1:8035");
   s->plus_sock_raw = sub_sock(s->ctx, "tcp://127.0.0.1:8037");
-  s->gps_sock_raw = sub_sock(s->ctx, "tcp://127.0.0.1:8032");
+  //s->gps_sock_raw = sub_sock(s->ctx, "tcp://127.0.0.1:8032");
   s->carstate_sock_raw = sub_sock(s->ctx, "tcp://127.0.0.1:8021");
 
 #ifdef SHOW_SPEEDLIMIT
@@ -675,7 +675,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
       .front_box_width = ui_info.front_box_width,
       .front_box_height = ui_info.front_box_height,
       .world_objects_visible = false,  // Invisible until we receive a calibration message.
-      .gps_planner_active = false,
+      //.gps_planner_active = false,
   };
 
   s->rgb_width = back_bufs.width;
@@ -867,7 +867,7 @@ static void update_track_data(UIState *s, bool is_mpc, track_vertices_data *pvd)
       py = mpc_y_coords[i] - off;
     } else {
       px = lerp(i+1.0, i, i/100.0);
-      py = path.points[i] - off;
+      py = path.points[i] - (off);
     }
 
     vec4 p_car_space = (vec4){{px, py, 0., 1.}};
@@ -949,23 +949,28 @@ const UIScene *scene = &s->scene;
   nvgClosePath(s->vg);
 
   NVGpaint track_bg;
-  if (scene->engaged) {
+  if (is_mpc) {
     // Draw colored MPC track
-    // Why isn't is_mpc not working?
-    float scale = fabs(s->scene.output_scale);
-    track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4, 
-      nvgRGBA(23+((int)(scale * 202)), 170-((int)(scale * 55)), 66-((int)(scale * 66)), 200+((int)(scale * 25))),
-      nvgRGBA(19+((int)(scale * 206)), 143-((int)(scale * 8)), 55-((int)(scale * 52)), (int)(255/2)));
-    if(scene->steerOverride) {
-      // Draw red vision track when user is overriding
-      track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-        nvgRGBA(255, 0, 0, 235), nvgRGBA(225, 10, 3, 255/2));
+    float scale = fabs((float)s->scene.output_scale);
+    int blue_lvl = 0;
+    int red_lvl = 255;
+    int green_lvl = 0;
+    if (scale > 0.5 && scale < 1.0) {
+      green_lvl = 510 - (scale * 510);
+    } else if (scale <= 0.5) {
+      green_lvl = 255;
+      red_lvl = scale * 510;
     }
+    if(scene->steerOverride) blue_lvl = 255;
+    track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
+      nvgRGBA(          red_lvl,            green_lvl,            blue_lvl, 235),
+      nvgRGBA((int)(0.5*red_lvl), (int)(0.5*green_lvl), (int)(0.5*blue_lvl), 150));
   } else {
     // Draw white vision track
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-      nvgRGBA(255, 255, 255, 200), nvgRGBA(255, 255, 255, 0));
+      nvgRGBA(255, 255, 255, 235), nvgRGBA(255, 255, 255, 50));
   }
+
   nvgFillPaint(s->vg, track_bg);
   nvgFill(s->vg);
   nvgRestore(s->vg);
@@ -1209,7 +1214,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
   }
 
   //add grey panda GPS accuracy
-  if (true) {
+  /*if (true) {
     char val_str[16];
     char uom_str[3];
     NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
@@ -1229,7 +1234,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
         val_color, lab_color, uom_color,
         value_fontSize, label_fontSize, uom_fontSize );
     bb_ry = bb_y + bb_h;
-  }
+  }*/
 
   //add free space - from bthaler1
   if (true) {
@@ -1704,7 +1709,7 @@ static void ui_draw_vision_speed(UIState *s) {
     nvgLineTo(s->vg, viz_speed_x - viz_speed_w/2, box_y + header_h/4 + header_h/4);
     nvgLineTo(s->vg, viz_speed_x, box_y + header_h/2 + header_h/4);
     nvgClosePath(s->vg);
-    nvgFillColor(s->vg, nvgRGBA(23,134,68,s->scene.blinker_blinkingrate>=50?210:60)); 
+    nvgFillColor(s->vg, nvgRGBA(23,134,68,s->scene.blinker_blinkingrate>=50?210:60));
     nvgFill(s->vg);
   }
 
@@ -1714,7 +1719,7 @@ static void ui_draw_vision_speed(UIState *s) {
     nvgLineTo(s->vg, viz_speed_x+viz_speed_w + viz_speed_w/2, box_y + header_h/4 + header_h/4);
     nvgLineTo(s->vg, viz_speed_x+viz_speed_w, box_y + header_h/2 + header_h/4);
     nvgClosePath(s->vg);
-    nvgFillColor(s->vg, nvgRGBA(23,134,68,s->scene.blinker_blinkingrate>=50?210:60)); 
+    nvgFillColor(s->vg, nvgRGBA(23,134,68,s->scene.blinker_blinkingrate>=50?210:60));
     nvgFill(s->vg);
   }
 
@@ -2137,6 +2142,7 @@ void handle_message(UIState *s, void *which) {
     struct cereal_ControlsState_LateralPIDState pdata;
     cereal_read_ControlsState_LateralPIDState(&pdata, datad.lateralControlState.pidState);
 
+
     if (datad.vCruise != s->scene.v_cruise) {
       s->scene.v_cruise_update_ts = eventd.logMonoTime;
     }
@@ -2148,7 +2154,7 @@ void handle_message(UIState *s, void *which) {
     s->scene.curvature = datad.curvature;
     s->scene.engaged = datad.enabled;
     s->scene.engageable = datad.engageable;
-    s->scene.gps_planner_active = datad.gpsPlannerActive;
+    //s->scene.gps_planner_active = datad.gpsPlannerActive;
     s->scene.monitoring_active = datad.driverMonitoringOn;
     s->scene.output_scale = pdata.output;
 
@@ -2429,7 +2435,7 @@ static void ui_update(UIState *s) {
     s->alert_blinked = false;
   }
 
-  zmq_pollitem_t polls[12] = {{0}};
+  zmq_pollitem_t polls[13] = {{0}};
   // Wait for next rgb image from visiond
   while(true) {
     assert(s->ipc_fd >= 0);
@@ -2520,10 +2526,10 @@ static void ui_update(UIState *s) {
       plus_sock_num++;
       polls[8].socket = s->carstate_sock_raw;
       polls[8].events = ZMQ_POLLIN;
-      num_polls++;
+      /*num_polls++;
       plus_sock_num++;
       polls[9].socket = s->gps_sock_raw;
-      polls[9].events = ZMQ_POLLIN;
+      polls[9].events = ZMQ_POLLIN;*/
     }
 
     polls[plus_sock_num].socket = s->plus_sock_raw; // plus_sock should be last
@@ -2540,45 +2546,43 @@ static void ui_update(UIState *s) {
 
     if (polls[0].revents || polls[1].revents || polls[2].revents ||
         polls[3].revents || polls[4].revents || polls[6].revents ||
-        polls[8].revents || polls[9].revents || polls[plus_sock_num].revents) {
+        polls[8].revents || polls[plus_sock_num].revents) {  //} || polls[9].revents) {
       // awake on any (old) activity
       set_awake(s, true);
     }
 
-    if (polls[9].revents) {
-      //gps socket
+    /*if (polls[9].revents) {
+      // gps socket
+
       zmq_msg_t msg;
       err = zmq_msg_init(&msg);
       assert(err == 0);
       err = zmq_msg_recv(&msg, s->gps_sock_raw, 0);
       assert(err >= 0);
-      if (err <= 0) {
+
+      struct capn ctx;
+      capn_init_mem(&ctx, zmq_msg_data(&msg), zmq_msg_size(&msg), 0);
+
+      cereal_Event_ptr eventp;
+      eventp.p = capn_getp(capn_root(&ctx), 0, 1);
+      struct cereal_Event eventd;
+      cereal_read_Event(&eventd, eventp);
+
+      struct cereal_GpsLocationData datad;
+      cereal_read_GpsLocationData(&datad, eventd.gpsLocation);
+
+      s->scene.gpsAccuracy = datad.accuracy;
+
+      if (s->scene.gpsAccuracy > 100)
+      {
         s->scene.gpsAccuracy = 99.99;
-      } else {
-        struct capn ctx;
-        capn_init_mem(&ctx, zmq_msg_data(&msg), zmq_msg_size(&msg), 0);
- 
-        cereal_Event_ptr eventp;
-        eventp.p = capn_getp(capn_root(&ctx), 0, 1);
-        struct cereal_Event eventd;
-        cereal_read_Event(&eventd, eventp);
-
-        struct cereal_GpsLocationData datad;
-        cereal_read_GpsLocationData(&datad, eventd.gpsLocationExternal);
-
-        s->scene.gpsAccuracy = datad.accuracy;
-        if (s->scene.gpsAccuracy > 100)
-        {
-          s->scene.gpsAccuracy = 99.99;
-        }
-        else if (s->scene.gpsAccuracy == 0)
-        {
-          s->scene.gpsAccuracy = 99.8;
-        }
-        capn_free(&ctx);
+      }
+      else if (s->scene.gpsAccuracy == 0)
+      {
+        s->scene.gpsAccuracy = 99.8;
       }
       zmq_msg_close(&msg);
-    }
+    }*/
 
     if (polls[plus_sock_num].revents) {
       // plus socket
@@ -2792,16 +2796,6 @@ int main(int argc, char* argv[]) {
   ui_init(s);
   ds_init();
 
-  s->scene = (UIScene){
-      .frontview = getenv("FRONTVIEW") != NULL,
-      .fullview = getenv("FULLVIEW") != NULL,
-      .world_objects_visible = true, // Invisible until we receive a calibration message.
-      .gps_planner_active = s->scene.gps_planner_active,
-      .ui_viz_rx = (box_x - sbr_w + bdr_s * 2),
-      .ui_viz_rw = (box_w + sbr_w - (bdr_s * 2)),
-      .ui_viz_ro = 0,
-  };
-
   pthread_t connect_thread_handle;
   err = pthread_create(&connect_thread_handle, NULL,
                        vision_connect_thread, s);
@@ -2882,7 +2876,7 @@ int main(int argc, char* argv[]) {
     if (s->awake) {
       ds_update(s->awake, s->awake);
     }
-    
+
    // wake up on button press while not driving
     if(ds.statePwr && (!s->vision_connected || s->plus_state != 0))
       set_awake(s, !s->awake);
@@ -2911,7 +2905,7 @@ int main(int argc, char* argv[]) {
       glFinish();
       should_swap = true;
     }
-    
+
     // manage wakefulness
     if (s->awake_timeout > 0) {
       s->awake_timeout--;
