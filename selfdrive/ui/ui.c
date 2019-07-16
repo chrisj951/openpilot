@@ -2552,28 +2552,31 @@ static void ui_update(UIState *s) {
       assert(err == 0);
       err = zmq_msg_recv(&msg, s->gps_sock_raw, 0);
       assert(err >= 0);
-
-      struct capn ctx;
-      capn_init_mem(&ctx, zmq_msg_data(&msg), zmq_msg_size(&msg), 0);
-
-      cereal_Event_ptr eventp;
-      eventp.p = capn_getp(capn_root(&ctx), 0, 1);
-      struct cereal_Event eventd;
-      cereal_read_Event(&eventd, eventp);
-
-      struct cereal_GpsLocationData datad;
-      cereal_read_GpsLocationData(&datad, eventd.gpsLocationExternal);
-
-      s->scene.gpsAccuracy = datad.accuracy;
-      if (s->scene.gpsAccuracy > 100)
-      {
+      if (err <= 0) {
         s->scene.gpsAccuracy = 99.99;
+      } else {
+        struct capn ctx;
+        capn_init_mem(&ctx, zmq_msg_data(&msg), zmq_msg_size(&msg), 0);
+ 
+        cereal_Event_ptr eventp;
+        eventp.p = capn_getp(capn_root(&ctx), 0, 1);
+        struct cereal_Event eventd;
+        cereal_read_Event(&eventd, eventp);
+
+        struct cereal_GpsLocationData datad;
+        cereal_read_GpsLocationData(&datad, eventd.gpsLocationExternal);
+
+        s->scene.gpsAccuracy = datad.accuracy;
+        if (s->scene.gpsAccuracy > 100)
+        {
+          s->scene.gpsAccuracy = 99.99;
+        }
+        else if (s->scene.gpsAccuracy == 0)
+        {
+          s->scene.gpsAccuracy = 99.8;
+        }
+        capn_free(&ctx);
       }
-      else if (s->scene.gpsAccuracy == 0)
-      {
-        s->scene.gpsAccuracy = 99.8;
-      }
-      capn_free(&ctx);
       zmq_msg_close(&msg);
     }
 
