@@ -72,7 +72,7 @@ const int header_h = 420;
 const int footer_h = 280;
 const int footer_y = vwp_h-bdr_s-footer_h;
 
-const int UI_FREQ = 60;   // Hz
+const int UI_FREQ = 30;   // Hz
 
 const int MODEL_PATH_MAX_VERTICES_CNT = 98;
 const int MODEL_LANE_PATH_CNT = 3;
@@ -953,19 +953,19 @@ const UIScene *scene = &s->scene;
     // Draw colored MPC track
     if (scene->steerOverride) {
       track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-        nvgRGBA(0, 191, 255, 255), nvgRGBA(0, 95, 128, 150));
+        nvgRGBA(0, 191, 255, 255), nvgRGBA(0, 95, 128, 50));
     } else {
       int torque_scale = (int)fabs(510*(float)s->scene.output_scale);
       int red_lvl = min(255, torque_scale);
       int green_lvl = min(255, 510-torque_scale);
       track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
         nvgRGBA(          red_lvl,            green_lvl,  0, 255),
-        nvgRGBA((int)(0.5*red_lvl), (int)(0.5*green_lvl), 0, 150));
+        nvgRGBA((int)(0.5*red_lvl), (int)(0.5*green_lvl), 0, 50));
     }
   } else {
     // Draw white vision track
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-      nvgRGBA(255, 255, 255, 255), nvgRGBA(255, 255, 255, 100));
+      nvgRGBA(255, 255, 255, 200), nvgRGBA(255, 255, 255, 50));
   }
 
   nvgFillPaint(s->vg, track_bg);
