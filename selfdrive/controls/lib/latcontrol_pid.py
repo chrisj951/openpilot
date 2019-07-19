@@ -72,11 +72,11 @@ class LatControlPID(object):
     self.d_poly[3] += path_plan.cProb * ((path_plan.dPoly[3] - self.d_poly[3])) / self.poly_smoothing
     self.d_poly[2] += path_plan.cProb * ((path_plan.dPoly[2] - self.d_poly[2])) / (self.poly_smoothing * 2)
     self.d_poly[1] += path_plan.cProb * ((path_plan.dPoly[1] - self.d_poly[1])) / (self.poly_smoothing * 4)
-    self.d_poly[0] += path_plan.cProb * ((path_plan.dPoly[0] - self.d_poly[0])) / (self.poly_smoothing * 6)
+    self.d_poly[0] = 0  #+= path_plan.cProb * ((path_plan.dPoly[0] - self.d_poly[0])) / (self.poly_smoothing * 6)
     self.c_poly[3] += path_plan.cProb * ((path_plan.cPoly[3] - self.c_poly[3])) / self.poly_smoothing
     self.c_poly[2] += path_plan.cProb * ((path_plan.cPoly[2] - self.c_poly[2])) / (self.poly_smoothing * 2)
     self.c_poly[1] += path_plan.cProb * ((path_plan.cPoly[1] - self.c_poly[1])) / (self.poly_smoothing * 4)
-    self.c_poly[0] += path_plan.cProb * ((path_plan.cPoly[0] - self.c_poly[0])) / (self.poly_smoothing * 6)
+    self.c_poly[0] = 0  #+= path_plan.cProb * ((path_plan.cPoly[0] - self.c_poly[0])) / (self.poly_smoothing * 6)
     x = v_ego * self.total_poly_projection
     self.d_pts = np.polyval(self.d_poly, np.arange(0, x))
     self.c_pts = np.polyval(self.c_poly, np.arange(0, x))
@@ -170,7 +170,10 @@ class LatControlPID(object):
       else:
         self.cur_poly_scale = 1.0
 
-      self.path_error = v_ego * float(self.get_projected_path_error(v_ego, path_plan)) * self.poly_factor * self.cur_poly_scale
+      if not steer_override:
+        self.path_error = v_ego * float(self.get_projected_path_error(v_ego, path_plan)) * self.poly_factor * self.cur_poly_scale
+      else:
+        self.path_error = 0.0
 
       if self.gernbySteer and not steer_override and v_ego > 10.0:
         if abs(angle_steers) > (self.angle_ff_bp[0][1] / 2.0):

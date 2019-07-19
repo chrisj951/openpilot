@@ -58,7 +58,6 @@ class PathPlanner(object):
   def update(self, sm, CP, VM):
     v_ego = sm['carState'].vEgo
     angle_steers = sm['carState'].steeringAngle
-    #active = sm['controlsState'].active
     cur_time = sec_since_boot()
     angle_offset_average = sm['liveParameters'].angleOffsetAverage
 
@@ -85,10 +84,9 @@ class PathPlanner(object):
     mpc_nans = np.any(np.isnan(list(self.mpc_solution[0].delta)))
 
     if not mpc_nans:
-      self.mpc_angles[0] = math.degrees(self.mpc_solution[0].delta[0] * VM.sR) + angle_offset_average
+      self.mpc_angles[0] = angle_steers
       self.mpc_times[0] = sm.logMonoTime['model'] * 1e-9
-      oversample_limit = 19 if v_ego == 0 else min(19, abs(int(sm['controlsState'].lateralControlState.pidState.oversampling / v_ego)))
-      print(oversample_limit, sm['controlsState'].lateralControlState.pidState.oversampling)
+      oversample_limit = 19 if v_ego == 0 else min(19, int(200.0 / v_ego))
       for i in range(1,20):
         if i < 6:
           self.mpc_times[i] = self.mpc_times[i-1] + 0.05
@@ -110,7 +108,7 @@ class PathPlanner(object):
         self.mpc_angles[i] = (self.mpc_times[i] - self.mpc_times[i-1]) * self.mpc_rates[i-1] + self.mpc_angles[i-1]
 
       rate_desired = math.degrees(self.mpc_solution[0].rate[0] * VM.sR)
-      self.angle_steers_des_mpc = math.degrees(self.mpc_solution[0].delta[1] * VM.sR) + angle_offset_average
+      self.angle_steers_des_mpc = self.mpc_angles[1]
 
     else:
       self.libmpc.init(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, CP.steerRateCost)
@@ -124,7 +122,6 @@ class PathPlanner(object):
     else:
       self.solution_invalid_cnt = 0
     plan_solution_valid = self.solution_invalid_cnt < 2
-    print("%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f " % tuple(self.mpc_rates))
 
     plan_send = messaging.new_message()
     plan_send.init('pathPlan')
@@ -134,7 +131,6 @@ class PathPlanner(object):
     plan_send.pathPlan.cPoly = [float(x) for x in self.MP.c_poly]
     plan_send.pathPlan.cProb = float(self.MP.c_prob)
     plan_send.pathPlan.lPoly = [float(x) for x in self.l_poly]
-    plan_send.pathPlan.pPoly = [float(x) for x in self.p_poly]
     plan_send.pathPlan.lProb = float(self.MP.l_prob)
     plan_send.pathPlan.rPoly = [float(x) for x in self.r_poly]
     plan_send.pathPlan.rProb = float(self.MP.r_prob)
@@ -150,7 +146,6 @@ class PathPlanner(object):
 
     self.plan.send(plan_send.to_bytes())
 
-    #if LOG_MPC:
     dat = messaging.new_message()
     dat.init('liveMpc')
     dat.liveMpc.x = list(self.mpc_solution[0].x)
