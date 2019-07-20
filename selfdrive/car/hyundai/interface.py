@@ -64,8 +64,9 @@ class CarInterface(object):
 
     ret.steerActuatorDelay = 0.1  # Default delay
     ret.steerRateCost = 0.3
-    ret.lateralTuning.pid.dampTime = 0.1
-    ret.lateralTuning.pid.reactMPC = 0.0
+    ret.lateralTuning.pid.dampTime = 0.02
+    ret.lateralTuning.pid.reactMPC = -0.05
+    ret.lateralTuning.pid.dampMPC = 0.25
     ret.lateralTuning.pid.rateFFGain = 0.4
 
     if candidate == CAR.SANTA_FE:

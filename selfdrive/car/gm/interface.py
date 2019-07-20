@@ -53,6 +53,19 @@ class CarInterface(object):
     ret.carFingerprint = candidate
     ret.carVin = vin
 
+    # same tuning for Volt and CT6 for now
+    ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
+    ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.02]]
+    ret.lateralTuning.pid.kf = 0.00004   # full torque for 20 deg at 80mph means 0.00007818594
+    ret.lateralTuning.pid.dampTime = 0.1
+    ret.lateralTuning.pid.reactMPC = 0.1
+    ret.lateralTuning.pid.dampMPC = 0.25
+    ret.lateralTuning.pid.rateFFGain = 0.2
+    ret.lateralTuning.pid.polyFactor = 0.01
+    ret.lateralTuning.pid.polyDampTime = 0.05
+    ret.lateralTuning.pid.polyReactTime = 0.5
+    ret.lateralTuning.pid.polyScale = [[0.0, 0.5, 1.0, 2.0, 5.0], [1.0, 0.5, 0.25, 0.1, 0.0], [1.0, 1.0, 1.0, 1.0, 1.0]]  # [abs rate, scale UP, scale DOWN]
+
     ret.enableCruise = False
 
     # Presence of a camera on the object bus is ok.
