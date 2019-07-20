@@ -1626,7 +1626,7 @@ static void ui_draw_vision_speedlimit(UIState *s) {
 
   int viz_speedlim_w = 180;
   int viz_speedlim_h = 202;
-  int viz_speedlim_x = (ui_viz_rx + (bdr_is*2));
+  int viz_speedlim_x = (ui_viz_rx + (bdr_is*9));
   int viz_speedlim_y = (box_y + (bdr_is*1.5));
   if (!is_speedlim_valid) {
     viz_speedlim_w -= 5;
@@ -1900,9 +1900,7 @@ static void ui_draw_vision_header(UIState *s) {
   //bool hasSidebar = !s->scene.uilayout_sidebarcollapsed;
   ui_draw_vision_maxspeed(s);
 
-#ifdef SHOW_SPEEDLIMIT
   ui_draw_vision_speedlimit(s);
-#endif
   ui_draw_vision_speed(s);
   ui_draw_vision_event(s);
 }
