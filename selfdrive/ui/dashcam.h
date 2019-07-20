@@ -1,4 +1,5 @@
 #include <time.h>
+//#include <dirent.h>
 
 #define CAPTURE_STATE_NONE 0
 #define CAPTURE_STATE_CAPTURING 1
@@ -110,6 +111,17 @@ void start_capture() {
   if (stat(videos_dir, &st) == -1) {
     mkdir(videos_dir,0700);
   }
+  /*if (captureNum == 0 && files_created == 0) {
+    DIR *dir;
+    struct dirent *ent;
+    if ((dir = opendir ("/sdcard/videos")) != NULL) {
+      while ((ent = readdir (dir)) != NULL) {
+        strcpy(filenames[files_created++], ent->d_name);
+      }
+      captureNum = files_created;
+      closedir (dir);
+    }
+  }*/
 
   if (strlen(filenames[captureNum]) && files_created >= RECORD_FILES) {
     if (locked_files[captureNum] > 0) {
@@ -321,4 +333,5 @@ void dashcam( UIState *s, int touch_x, int touch_y ) {
     stop_capture();
     captureState = CAPTURE_STATE_PAUSED;
   }
+  s->scene.recording = (captureState != CAPTURE_STATE_NOT_CAPTURING);
 }
