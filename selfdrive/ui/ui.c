@@ -1899,8 +1899,9 @@ static void ui_draw_vision_header(UIState *s) {
 
   //bool hasSidebar = !s->scene.uilayout_sidebarcollapsed;
   ui_draw_vision_maxspeed(s);
-
+#ifdef SHOW_SPEEDLIMIT
   ui_draw_vision_speedlimit(s);
+#endif
   ui_draw_vision_speed(s);
   ui_draw_vision_event(s);
 }
