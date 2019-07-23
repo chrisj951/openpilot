@@ -962,9 +962,6 @@ const UIScene *scene = &s->scene;
       track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
         nvgRGBA(          red_lvl,            green_lvl,  0, 255),
         nvgRGBA((int)(0.5*red_lvl), (int)(0.5*green_lvl), 0, 50));
-    } else {
-      track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-        nvgRGBA(0, 200, 30, 235), nvgRGBA(0, 100, 30, 30));
     }
   } else {
     // Draw white vision track
