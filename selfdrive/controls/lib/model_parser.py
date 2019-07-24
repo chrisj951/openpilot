@@ -39,7 +39,6 @@ class ModelParser(object):
     p_prob = 1.  # model does not tell this probability yet, so set to 1 for now
     l_prob = md.leftLane.prob  # left line prob
     r_prob = md.rightLane.prob  # right line prob
-
     # Find current lanewidth
     lr_prob = l_prob * r_prob
     decay_rate = interp(lr_prob, [0., 0.5], [0.1, 0.3])
@@ -56,7 +55,7 @@ class ModelParser(object):
 
     # compute target path
     self.d_poly, self.c_poly, self.c_prob = calc_desired_path(
-      l_poly, r_poly, p_poly l_prob, r_prob, p_prob, v_ego, self.lane_width)
+      l_poly, r_poly, p_poly, l_prob, r_prob, p_prob, v_ego, self.lane_width)
 
     self.r_poly = r_poly
     self.r_prob = r_prob
