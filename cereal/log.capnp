@@ -653,6 +653,7 @@ struct PathPlan {
 
   dPoly @1 :List(Float32);
   cPoly @2 :List(Float32);
+  pPoly @19 :List(Float32);
   cProb @3 :Float32;
   lPoly @4 :List(Float32);
   lProb @5 :Float32;
