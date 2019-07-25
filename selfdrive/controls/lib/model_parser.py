@@ -27,6 +27,7 @@ class ModelParser(object):
       #p_poly = np.array(md.path.poly)
       p_poly = np.array(self.d_poly)
       p_poly[3] = 0.0
+      p_poly[2] = 0.0
     else:
       l_poly = model_polyfit(md.leftLane.points, self._path_pinv)  # left line
       r_poly = model_polyfit(md.rightLane.points, self._path_pinv)  # right line
