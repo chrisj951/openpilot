@@ -176,9 +176,9 @@ class CarInterface(object):
     ret.lateralTuning.pid.reactMPC = -0.05
     ret.lateralTuning.pid.dampMPC = 0.25
     ret.lateralTuning.pid.rateFFGain = 0.4
-    ret.lateralTuning.pid.polyFactor = 0.01
+    ret.lateralTuning.pid.polyFactor = 0.001
     ret.lateralTuning.pid.polyDampTime = 0.2
-    ret.lateralTuning.pid.polyReactTime = 0.5
+    ret.lateralTuning.pid.polyReactTime = 1.0
 
     if candidate in [CAR.CIVIC, CAR.CIVIC_BOSCH]:
       stop_and_go = True
@@ -200,6 +200,8 @@ class CarInterface(object):
       ret.lateralTuning.pid.dampTime = 0.1
       ret.lateralTuning.pid.reactMPC = -0.05
       ret.lateralTuning.pid.rateFFGain = 0.4
+      ret.lateralTuning.pid.polyFactor = 0.001
+      ret.lateralTuning.pid.polyDampTime = 1.0
 
 #    elif candidate in (CAR.ACCORD, CAR.ACCORD_15, CAR.ACCORDH):
 #      stop_and_go = True
@@ -231,7 +233,14 @@ class CarInterface(object):
       ret.longitudinalTuning.kpBP = [0., 5., 35.]
       ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5]
       ret.longitudinalTuning.kiBP = [0., 35.]
-      ret.longitudinalTuning.kiV = [0.18, 0.12]  
+      ret.longitudinalTuning.kiV = [0.18, 0.12]
+      ret.lateralTuning.pid.dampTime = 0.1
+      ret.lateralTuning.pid.reactMPC = 0.0
+      ret.lateralTuning.pid.rateFFGain = 0.4
+      ret.lateralTuning.pid.polyFactor = 0.003
+      ret.lateralTuning.pid.polyDampTime = 0.2
+      ret.lateralTuning.pid.polyReactTime = 1.0
+      #ret.lateralTuning.pid.polyScale = [[0.0, 0.5, 1.0, 2.0, 5.0], [1.0, 0.5, 0.25, 0.1, 0.0], [1.0, 1.0, 1.0, 1.0, 1.0]]  # [abs rate, scale UP, scale DOWN]
       ret.steerLimitAlert = False
 
     elif candidate == CAR.ACURA_ILX:

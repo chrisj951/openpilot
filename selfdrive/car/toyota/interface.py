@@ -67,9 +67,9 @@ class CarInterface(object):
     ret.lateralTuning.pid.dampTime = 0.02
     ret.lateralTuning.pid.reactMPC = -0.05
     ret.lateralTuning.pid.rateFFGain = 0.4
-    ret.lateralTuning.pid.polyFactor = 0.01
-    ret.lateralTuning.pid.polyDampTime = 0.3
-    ret.lateralTuning.pid.polyReactTime = 0.5
+    ret.lateralTuning.pid.polyFactor = 0.001
+    ret.lateralTuning.pid.polyDampTime = 0.35
+    ret.lateralTuning.pid.polyReactTime = 1.0
 
     ret.steerActuatorDelay = 0.12  # Default delay, Prius has larger delay
     if candidate != CAR.PRIUS:
@@ -105,8 +105,8 @@ class CarInterface(object):
       ret.steerRatio = 16.30   # 14.5 is spec end-to-end
       tire_stiffness_factor = 0.5533
       ret.mass = 3650. * CV.LB_TO_KG + STD_CARGO_KG  # mean between normal and hybrid
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.4], [0.05]]
-      ret.lateralTuning.pid.kf = 0.00007   # full torque for 10 deg at 80mph means 0.00007818594
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.3], [0.03]]
+      ret.lateralTuning.pid.kf = 0.00005   # full torque for 10 deg at 80mph means 0.00007818594
 
     elif candidate == CAR.COROLLA:
       stop_and_go = False
