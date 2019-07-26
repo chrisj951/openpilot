@@ -4,7 +4,7 @@ from selfdrive.controls.lib.drive_helpers import rate_limit
 from common.numpy_fast import clip
 from selfdrive.car import create_gas_command
 from selfdrive.car.honda import hondacan
-from selfdrive.car.honda.values import AH, CruiseButtons, CAR
+from selfdrive.car.honda.values import AH, CruiseButtons, CAR, CruiseSettings
 from selfdrive.can.packer import CANPacker
 
 
@@ -87,6 +87,7 @@ class CarController(object):
     self.lead_distance_counter = 1
     self.lead_distance_counter_prev = 1
     self.rough_lead_speed = 0.0
+    self.desired_lead_distance = 0
 
   def rough_speed(self, lead_distance):
     if self.prev_lead_distance != lead_distance:
@@ -175,20 +176,28 @@ class CarController(object):
       idx = (frame//10) % 4
       can_sends.extend(hondacan.create_ui_commands(self.packer, pcm_speed, hud, CS.CP.carFingerprint, CS.is_metric, idx))
 
+    if CS.CP.carFingerprint in (CAR.ACCORD, CAR.ACCORD_15, CAR.ACCORDH) and CS.brake_hold:
+      if frame % 500 == 0:
+        self.desired_lead_distance += 1
+        print(self.desired_lead_distance, CS.hud_distance, self.desired_lead_distance)
+      if frame % 100 < 50 and CS.hud_distance != (self.desired_lead_distance % 4):
+        can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.LEAD_DISTANCE, idx))
+        print("     spamming distance")
+
     if CS.CP.radarOffCan:
       # If using stock ACC, spam cancel command to kill gas when OP disengages.
       if pcm_cancel_cmd:
-        can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.CANCEL, idx))
+        can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.CANCEL, 0, idx))
       elif CS.stopped:
         if CS.CP.carFingerprint in (CAR.INSIGHT):
           rough_lead_speed = self.rough_speed(CS.lead_distance)
           if CS.lead_distance > (self.stopped_lead_distance + 5.0) or rough_lead_speed > 0.1:
             self.stopped_lead_distance = 0.0
-            can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, idx))
+            can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, 0, idx))
             #print("spamming")
           print(self.stopped_lead_distance, CS.lead_distance, rough_lead_speed)
         else:
-          can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, idx))
+          can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, 0, idx))
       else:
         self.stopped_lead_distance = CS.lead_distance
         self.prev_lead_distance = CS.lead_distance
