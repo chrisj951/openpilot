@@ -11,8 +11,8 @@
 const int HONDA_GAS_INTERCEPTOR_THRESHOLD = 328;  // ratio between offset and gain from dbc file
 int honda_brake_prev = 0;
 int honda_gas_prev = 0;
-int honda_ego_speed = 0;
-bool honda_bosch_hardware = true;
+bool honda_moving = false;
+bool honda_bosch_hardware = false;
 bool honda_alt_brake_msg = false;
 
 static void honda_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
@@ -23,13 +23,13 @@ static void honda_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
   // sample speed
   if (addr == 0x158) {
     // first 2 bytes
-    honda_ego_speed = to_push->RDLR & 0xFFFF;
+    honda_moving = GET_BYTE(to_push, 0) | GET_BYTE(to_push, 1);
   }
 
   // state machine to enter and exit controls
   // 0x1A6 for the ILX, 0x296 for the Civic Touring
   if ((addr == 0x1A6) || (addr == 0x296)) {
-    int button = (to_push->RDLR & 0xE0) >> 5;
+    int button = (GET_BYTE(to_push, 0) & 0xE0) >> 5;
     switch (button) {
       case 2:  // cancel
         controls_allowed = 0;
@@ -49,14 +49,11 @@ static void honda_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
   // in these cases, this is used instead.
   // most hondas: 0x17C bit 53
   // accord, crv: 0x1BE bit 4
-  #define IS_USER_BRAKE_MSG(addr) (!honda_alt_brake_msg ? ((addr) == 0x17C) : ((addr) == 0x1BE))
-  #define USER_BRAKE_VALUE(to_push)  (!honda_alt_brake_msg ? ((to_push)->RDHR & 0x200000)  : ((to_push)->RDLR & 0x10))
-  // exit controls on rising edge of brake press or on brake press when
-  // speed > 0
-  bool is_user_brake_msg = IS_USER_BRAKE_MSG(addr);  // needed to enforce type
+  // exit controls on rising edge of brake press or on brake press when speed > 0
+  bool is_user_brake_msg = honda_alt_brake_msg ? ((addr) == 0x1BE) : ((addr) == 0x17C);
   if (is_user_brake_msg) {
-    int brake = USER_BRAKE_VALUE(to_push);
-    if (brake && (!(honda_brake_prev) || honda_ego_speed)) {
+    int brake = honda_alt_brake_msg ? (GET_BYTE((to_push), 0) & 0x10) : (GET_BYTE((to_push), 6) & 0x20);
+    if (brake && (!(honda_brake_prev) || honda_moving)) {
       controls_allowed = 0;
     }
     honda_brake_prev = brake;
@@ -66,7 +63,7 @@ static void honda_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
   // length check because bosch hardware also uses this id (0x201 w/ len = 8)
   if ((addr == 0x201) && (len == 6)) {
     gas_interceptor_detected = 1;
-    int gas_interceptor = ((to_push->RDLR & 0xFF) << 8) | ((to_push->RDLR & 0xFF00) >> 8);
+    int gas_interceptor = GET_INTERCEPTOR(to_push);
     if ((gas_interceptor > HONDA_GAS_INTERCEPTOR_THRESHOLD) &&
         (gas_interceptor_prev <= HONDA_GAS_INTERCEPTOR_THRESHOLD) &&
         long_controls_allowed) {
@@ -78,8 +75,8 @@ static void honda_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
   // exit controls on rising edge of gas press if no interceptor
   if (!gas_interceptor_detected) {
     if (addr == 0x17C) {
-      int gas = to_push->RDLR & 0xFF;
-      if (gas && !(honda_gas_prev) && long_controls_allowed && !honda_bosch_hardware) {
+      int gas = GET_BYTE(to_push, 0);
+      if (gas && !(honda_gas_prev) && long_controls_allowed && !(honda_bosch_hardware)) {
         controls_allowed = 0;
       }
       honda_gas_prev = gas;
@@ -101,18 +98,19 @@ static int honda_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
 
   // disallow actuator commands if gas (on non Bosch hardware) or brake (with vehicle moving) are pressed
   // and the the latching controls_allowed flag is True
-  int pedal_pressed = (!honda_bosch_hardware && honda_gas_prev || (gas_interceptor_prev > HONDA_GAS_INTERCEPTOR_THRESHOLD)) ||
-                      (honda_brake_prev && honda_ego_speed);
+  int pedal_pressed = (!honda_bosch_hardware && honda_gas_prev) || (gas_interceptor_prev > HONDA_GAS_INTERCEPTOR_THRESHOLD) ||
+                      (honda_brake_prev && honda_moving);
   bool current_controls_allowed = controls_allowed && !(pedal_pressed);
 
   // BRAKE: safety check
   if (addr == 0x1FA) {
+    int brake = (GET_BYTE(to_send, 0) << 2) + (GET_BYTE(to_send, 1) & 0x3);
     if (!current_controls_allowed || !long_controls_allowed) {
-      if ((to_send->RDLR & 0xFFFF0000) != to_send->RDLR) {
+      if (brake != 0) {
         tx = 0;
       }
     }
-    if ((to_send->RDLR & 0xFFFFFF3F) != to_send->RDLR) {
+    if (brake > 255) {
       tx = 0;
     }
   }
@@ -120,7 +118,8 @@ static int honda_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   // STEER: safety check
   if ((addr == 0xE4) || (addr == 0x194)) {
     if (!current_controls_allowed) {
-      if ((to_send->RDLR & 0xFFFF0000) != to_send->RDLR) {
+      bool steer_applied = GET_BYTE(to_send, 0) | GET_BYTE(to_send, 1);
+      if (steer_applied) {
         tx = 0;
       }
     }
@@ -129,7 +128,7 @@ static int honda_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   // GAS: safety check
   if (addr == 0x200) {
     if (!current_controls_allowed || !long_controls_allowed) {
-      if ((to_send->RDLR & 0xFFFF0000) != to_send->RDLR) {
+      if (!honda_bosch_hardware && (GET_BYTE(to_send, 0) || GET_BYTE(to_send, 1))) {
         tx = 0;
       }
     }
@@ -144,12 +143,10 @@ static int honda_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   //    tx = 0;
   //  }
   //}
-  if (honda_bosch_hardware && ((to_send->RIR>>21) == 0x296)) {
-    int buttons = (to_send->RDLR & 0xE0) >> 5;
-    if (buttons == 4 || buttons == 3) {
-      controls_allowed = 1;
-    } else if (buttons == 2) {
-      controls_allowed = 0;
+  if ((addr == 0x296) && honda_bosch_hardware &&
+      !current_controls_allowed && (bus == 0)) {
+    if (((GET_BYTE(to_send, 0) >> 5) & 0x7) != 2) {
+      tx = 0;
     }
   }
 

@@ -78,6 +78,8 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     commIssue @53;
     manualSteeringRequired @54;
     manualSteeringRequiredBlinkersOn @55;
+    tooDistracted @56;
+    posenetInvalid @57;
   }
 }
 
