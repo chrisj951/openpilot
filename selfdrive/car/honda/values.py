@@ -16,6 +16,7 @@ class CruiseSettings:
   LEAD_DISTANCE   = 3
   BUTTON_TWO      = 2
   BUTTON_ONE      = 1
+  RESET           = 0
 
 #car chimes: enumeration from dbc file. Chimes are for alerts and warnings
 class CM:

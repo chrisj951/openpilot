@@ -176,13 +176,18 @@ class CarController(object):
       idx = (frame//10) % 4
       can_sends.extend(hondacan.create_ui_commands(self.packer, pcm_speed, hud, CS.CP.carFingerprint, CS.is_metric, idx))
 
-    if CS.CP.carFingerprint in (CAR.ACCORD, CAR.ACCORD_15, CAR.ACCORDH) and CS.brake_hold:
-      if frame % 500 == 0:
+    if CS.CP.carFingerprint in (CAR.CIVIC):
+      if frame % 75 == 0:
         self.desired_lead_distance += 1
         print(self.desired_lead_distance, CS.hud_distance, self.desired_lead_distance)
-      if frame % 100 < 50 and CS.hud_distance != (self.desired_lead_distance % 4):
+      if frame % 25 < 10 and CS.hud_distance != (self.desired_lead_distance % 5):
+      # press distance bar button
         can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.LEAD_DISTANCE, idx))
-        print("     spamming distance")
+        #print("     spamming distance: " + str((self.desired_lead_distance % 4)))
+      else:
+      # always set cruise setting to 0 after button press
+        can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.RESET, idx))
+        #print("     spamming distance reset")
 
     if CS.CP.radarOffCan:
       # If using stock ACC, spam cancel command to kill gas when OP disengages.
@@ -201,7 +206,6 @@ class CarController(object):
       else:
         self.stopped_lead_distance = CS.lead_distance
         self.prev_lead_distance = CS.lead_distance
-
     else:
       # Send gas and brake commands.
       if (frame % 2) == 0:

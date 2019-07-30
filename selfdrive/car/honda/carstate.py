@@ -322,6 +322,7 @@ class CarState(object):
 
     if self.CP.radarOffCan:
       self.stopped = cp.vl["ACC_HUD"]['CRUISE_SPEED'] == 252.
+      self.hud_distance = cp.vl["ACC_HUD"]["HUD_DISTANCE"]
       self.cruise_speed_offset = calc_cruise_offset(0, self.v_ego)
       if self.CP.carFingerprint in (CAR.CIVIC_BOSCH,  CAR.CRV_HYBRID, CAR.INSIGHT):
         self.brake_switch = cp.vl["POWERTRAIN_DATA"]['BRAKE_SWITCH']
