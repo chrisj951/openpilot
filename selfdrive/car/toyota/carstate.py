@@ -19,6 +19,7 @@ def get_can_parser(CP):
 
   signals = [
     # sig_name, sig_address, default
+    ("STEER_ANGLE", "STEER_ANGLE_SENSOR", 0),
     ("GEAR", "GEAR_PACKET", 0),
     ("BRAKE_PRESSED", "BRAKE_MODULE", 0),
     ("GAS_PEDAL", "GAS_PEDAL", 0),
@@ -59,10 +60,13 @@ def get_can_parser(CP):
     ("EPS_STATUS", 25),
   ]
 
-  if CP.carFingerprint in TSS2_CAR:
+  if CP.carFingerprint in NO_DSU_CAR:
     signals += [("STEER_ANGLE", "STEER_TORQUE_SENSOR", 0)]
+<<<<<<< HEAD
   else:
     signals += [("STEER_ANGLE", "STEER_ANGLE_SENSOR", 0)]
+=======
+>>>>>>> 2eabdc95... works really nicely, right off the bat
 
   if CP.carFingerprint == CAR.PRIUS:
     signals += [("STATE", "AUTOPARK_STATUS", 0)]

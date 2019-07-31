@@ -169,12 +169,12 @@ class CarController(object):
     # Send steering command.
     idx = frame % 4
     can_sends.append(hondacan.create_steering_control(self.packer, apply_steer,
-      lkas_active, CS.CP.carFingerprint, idx))
+      lkas_active, CS.CP.carFingerprint, idx, CS.CP.isPandaBlack))
 
     # Send dashboard UI commands.
     if (frame % 10) == 0:
       idx = (frame//10) % 4
-      can_sends.extend(hondacan.create_ui_commands(self.packer, pcm_speed, hud, CS.CP.carFingerprint, CS.is_metric, idx))
+      can_sends.extend(hondacan.create_ui_commands(self.packer, pcm_speed, hud, CS.CP.carFingerprint, CS.is_metric, idx, CS.CP.isPandaBlack))
 
     if CS.CP.carFingerprint in (CAR.CIVIC):
       if frame % 75 == 0:
@@ -182,27 +182,27 @@ class CarController(object):
         print(self.desired_lead_distance, CS.hud_distance, self.desired_lead_distance)
       if frame % 25 < 10 and CS.hud_distance != (self.desired_lead_distance % 5):
       # press distance bar button
-        can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.LEAD_DISTANCE, idx))
+        can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.LEAD_DISTANCE, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
         #print("     spamming distance: " + str((self.desired_lead_distance % 4)))
       else:
       # always set cruise setting to 0 after button press
-        can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.RESET, idx))
+        can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.RESET, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
         #print("     spamming distance reset")
 
     if CS.CP.radarOffCan:
       # If using stock ACC, spam cancel command to kill gas when OP disengages.
       if pcm_cancel_cmd:
-        can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.CANCEL, 0, idx))
+        can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.CANCEL, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
       elif CS.stopped:
         if CS.CP.carFingerprint in (CAR.INSIGHT):
           rough_lead_speed = self.rough_speed(CS.lead_distance)
           if CS.lead_distance > (self.stopped_lead_distance + 5.0) or rough_lead_speed > 0.1:
             self.stopped_lead_distance = 0.0
-            can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, 0, idx))
-            #print("spamming")
+            can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
+            print("spamming")
           print(self.stopped_lead_distance, CS.lead_distance, rough_lead_speed)
         else:
-          can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, 0, idx))
+          can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
       else:
         self.stopped_lead_distance = CS.lead_distance
         self.prev_lead_distance = CS.lead_distance
@@ -213,7 +213,7 @@ class CarController(object):
         ts = frame * DT_CTRL
         pump_on, self.last_pump_ts = brake_pump_hysteresis(apply_brake, self.apply_brake_last, self.last_pump_ts, ts)
         can_sends.append(hondacan.create_brake_command(self.packer, apply_brake, pump_on,
-          pcm_override, pcm_cancel_cmd, hud.chime, hud.fcw, idx))
+          pcm_override, pcm_cancel_cmd, hud.chime, hud.fcw, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
         self.apply_brake_last = apply_brake
 
         if CS.CP.enableGasInterceptor:

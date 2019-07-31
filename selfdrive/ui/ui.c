@@ -140,8 +140,7 @@ typedef struct UIScene {
   float v_cruise;
   uint64_t v_cruise_update_ts;
   float v_ego;
-  float v_curvature;
-  bool decel_for_turn;
+  bool decel_for_model;
 
   float speedlimit;
   bool speedlimit_valid;
@@ -1590,17 +1589,6 @@ static void ui_draw_vision_maxspeed(UIState *s) {
     nvgText(s->vg, viz_maxspeed_x+(viz_maxspeed_xo/2)+(viz_maxspeed_w/2), 242-bdr_is, "-", NULL);
   }
 
-#ifdef DEBUG_TURN
-  if (s->scene.decel_for_turn && s->scene.engaged){
-    int v_curvature = s->scene.v_curvature * 2.2369363 + 0.5;
-    snprintf(maxspeed_str, sizeof(maxspeed_str), "%d", v_curvature);
-    nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255));
-    nvgFontSize(s->vg, 25*2.5);
-    nvgText(s->vg, 200 + viz_maxspeed_x+(viz_maxspeed_xo/2)+(viz_maxspeed_w/2), 148, "TURN", NULL);
-    nvgFontSize(s->vg, 50*2.5);
-    nvgText(s->vg, 200 + viz_maxspeed_x+(viz_maxspeed_xo/2)+(viz_maxspeed_w/2), 242, maxspeed_str, NULL);
-  }
-#endif
   //BB START: add new measures panel  const int bb_dml_w = 180;
   bb_ui_draw_UI(s);
   //BB END: add new measures panel
@@ -1759,7 +1747,7 @@ static void ui_draw_vision_event(UIState *s) {
   const int viz_event_x = ((ui_viz_rx + ui_viz_rw) - (viz_event_w + (bdr_is*2)));
   const int viz_event_y = (box_y + (bdr_is*1.5));
   const int viz_event_h = (header_h - (bdr_is*1.5));
-  if (s->scene.decel_for_turn && s->scene.engaged && s->limit_set_speed) {
+  if (s->scene.decel_for_model && s->scene.engaged) {
     // draw winding road sign
     const int img_turn_size = 160*1.5;
     const int img_turn_x = viz_event_x-(img_turn_size/4);
@@ -2158,8 +2146,7 @@ void handle_message(UIState *s, void *which) {
 
     s->scene.frontview = datad.rearViewCam;
 
-    s->scene.v_curvature = datad.vCurvature;
-    s->scene.decel_for_turn = datad.decelForTurn;
+    s->scene.decel_for_model = datad.decelForModel;
 
     if (datad.alertSound.str && datad.alertSound.str[0] != '\0' && strcmp(s->alert_type, datad.alertType.str) != 0) {
       char* error = NULL;
