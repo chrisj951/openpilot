@@ -177,10 +177,10 @@ class CarController(object):
       can_sends.extend(hondacan.create_ui_commands(self.packer, pcm_speed, hud, CS.CP.carFingerprint, CS.is_metric, idx, CS.CP.isPandaBlack))
 
     if CS.CP.carFingerprint in (CAR.CIVIC):
-      if frame % 75 == 0:
+      if frame % 200 == 0:
         self.desired_lead_distance += 1
         print(self.desired_lead_distance, CS.hud_distance, self.desired_lead_distance)
-      if frame % 25 < 10 and CS.hud_distance != (self.desired_lead_distance % 5):
+      if frame % 25 < 5 and CS.hud_distance != (self.desired_lead_distance % 5):
       # press distance bar button
         can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.LEAD_DISTANCE, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
         #print("     spamming distance: " + str((self.desired_lead_distance % 4)))
