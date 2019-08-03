@@ -70,8 +70,10 @@ class CarInterface(object):
     ret.lateralTuning.pid.dampMPC = 0.1
     ret.lateralTuning.pid.rateFFGain = 0.4
     ret.lateralTuning.pid.polyFactor = 0.001
-    ret.lateralTuning.pid.polyDampTime = 0.2
-    ret.lateralTuning.pid.polyReactTime = 1.0
+    ret.lateralTuning.pid.polyDampTime = 0.05
+    ret.lateralTuning.pid.polyReactTime = 0.5
+    ret.steerRateCost = 0.5
+    tire_stiffness_factor = 1.
 
     if candidate == CAR.SANTA_FE:
       ret.lateralTuning.pid.kf = 0.00005
