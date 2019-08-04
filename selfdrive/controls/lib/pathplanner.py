@@ -11,6 +11,7 @@ from selfdrive.controls.lib.model_parser import ModelParser
 import selfdrive.messaging as messaging
 
 LOG_MPC = os.environ.get('LOG_MPC', False)
+MAX_STEER_ACCEL = 10.5
 
 def calc_states_after_delay(states, v_ego, steer_angle, curvature_factor, steer_ratio, delay):
   states[0].x = v_ego * delay
@@ -88,26 +89,12 @@ class PathPlanner(object):
     if not mpc_nans:
       self.mpc_angles[0] = angle_steers
       self.mpc_times[0] = sm.logMonoTime['model'] * 1e-9
-      oversample_limit = 19 if v_ego == 0 else min(19, int(200.0 / v_ego))
-      for i in range(1,20):
-        if i < 6:
-          self.mpc_times[i] = self.mpc_times[i-1] + 0.05
-          self.mpc_rates[i-1] = (float(math.degrees(self.mpc_solution[0].rate[i-1] * VM.sR)) * 2.0 * self.MP.c_prob \
-                                + self.mpc_rates[i] * self.mpc_probs[i]) / (2.0 * self.MP.c_prob + self.mpc_probs[i] + 0.0001)
-          self.mpc_probs[i-1] = (self.MP.c_prob**2 + self.mpc_probs[i]**2) / (self.MP.c_prob + self.mpc_probs[i] + 0.0001)
-        elif i <= oversample_limit:
-          self.mpc_times[i] = self.mpc_times[i-1] + 0.15
-          self.mpc_rates[i-1] = (float(math.degrees(self.mpc_solution[0].rate[i-1] * VM.sR)) * 2.0 * self.MP.c_prob \
-                      + 0.33 * self.mpc_rates[i] * self.mpc_probs[i] \
-                      + 0.66 * self.mpc_rates[i-1] * self.mpc_probs[i-1]) \
-                      / (2.0 * self.MP.c_prob + 0.66 * self.mpc_probs[i-1] + 0.33 * self.mpc_probs[i] + 0.0001)
-          self.mpc_probs[i-1] = (self.MP.c_prob**2 + 0.33 * self.mpc_probs[i]**2 + 0.66 * self.mpc_probs[i-1]**2) \
-                      / (self.MP.c_prob + 0.66 * self.mpc_probs[i-1] + 0.33 * self.mpc_probs[i] + 0.0001)
-        else:
-          self.mpc_times[i] = self.mpc_times[i-1] + 0.15
-          self.mpc_rates[i-1] = float(math.degrees(self.mpc_solution[0].rate[i-1] * VM.sR))
-          self.mpc_probs[i-1] = self.MP.c_prob
-        self.mpc_angles[i] = (self.mpc_times[i] - self.mpc_times[i-1]) * self.mpc_rates[i-1] + self.mpc_angles[i-1]
+      for i in range(1,6):
+        self.mpc_times[i] = self.mpc_times[i-1] + 0.05
+        self.mpc_rates[i-1] = np.clip(float(math.degrees(self.mpc_solution[0].rate[i-1] * VM.sR)), self.mpc_rates[i-1] - MAX_STEER_ACCEL, self.mpc_rates[i-1] + MAX_STEER_ACCEL)
+        self.mpc_angles[i] = (0.05 * self.mpc_rates[i-1] + self.mpc_angles[i-1])
+      self.mpc_angles[6] = (0.15 * self.mpc_rates[5] + self.mpc_angles[5])
+      self.mpc_times[6] = self.mpc_times[5] + 0.15
 
       rate_desired = math.degrees(self.mpc_solution[0].rate[0] * VM.sR)
       self.angle_steers_des_mpc = self.mpc_angles[1]
