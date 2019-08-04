@@ -143,13 +143,19 @@ class kegman_conf():
         self.write_config(self.config)
 
     else:
-      if CP is None or self.type == "pid" or CP.lateralTuning.which() == "pid":
-        self.config = {"type":"pid","Kp":"-1", "Ki":"-1", "Kf":"-1", "dampTime":"-1", "reactMPC":"-1", "rateFFGain":"-1", \
-                     "polyDamp":"-1","polyReact":"-1","polyFactor":"-1", \
-                     "cameraOffset":"0.06", "lastTrMode":"1", "battChargeMin":"60", "battChargeMax":"70", \
-                     "wheelTouchSeconds":"180", "battPercOff":"25", "carVoltageMinEonShutdown":"11800", \
-                     "brakeStoppingTarget":"0.25", "tuneGernby":"1", "liveParams":"1", "leadDistance":"5"}
-      else:
+      try:
+        if CP is None or self.type == "pid" or CP.lateralTuning.which() == "pid":
+          self.config = {"type":"pid","Kp":"-1", "Ki":"-1", "Kf":"-1", "dampTime":"-1", "reactMPC":"-1", "rateFFGain":"-1", \
+                       "polyDamp":"-1","polyReact":"-1","polyFactor":"-1", \
+                       "cameraOffset":"0.06", "lastTrMode":"1", "battChargeMin":"60", "battChargeMax":"70", \
+                       "wheelTouchSeconds":"180", "battPercOff":"25", "carVoltageMinEonShutdown":"11800", \
+                       "brakeStoppingTarget":"0.25", "tuneGernby":"1", "liveParams":"1", "leadDistance":"5"}
+        else:
+          self.config = {"type":"indi","timeConst":"-1", "actEffect":"-1", "outerGain":"-1", "innerGain":"-1", "reactMPC":"-1", \
+                       "cameraOffset":"0.06", "lastTrMode":"1", "battChargeMin":"60", "battChargeMax":"70", \
+                       "wheelTouchSeconds":"180", "battPercOff":"25", "carVoltageMinEonShutdown":"11800", \
+                       "brakeStoppingTarget":"0.25", "tuneGernby":"1", "liveParams":"1", "leadDistance":"5"}
+      except:
         self.config = {"type":"indi","timeConst":"-1", "actEffect":"-1", "outerGain":"-1", "innerGain":"-1", "reactMPC":"-1", \
                      "cameraOffset":"0.06", "lastTrMode":"1", "battChargeMin":"60", "battChargeMax":"70", \
                      "wheelTouchSeconds":"180", "battPercOff":"25", "carVoltageMinEonShutdown":"11800", \
