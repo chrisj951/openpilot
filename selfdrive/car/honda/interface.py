@@ -239,8 +239,8 @@ class CarInterface(object):
       ret.lateralTuning.pid.polyFactor = 0.002
       ret.lateralTuning.pid.polyDampTime = 0.05
       ret.lateralTuning.pid.polyReactTime = 0.75
-      ret.lateralTuning.pid.dampTime = 0.015
-      ret.lateralTuning.pid.dampMPC = 0.12
+      ret.lateralTuning.pid.dampTime = 0.0
+      ret.lateralTuning.pid.dampMPC = 0.0
       ret.lateralTuning.pid.reactMPC = 0.0
       ret.steerLimitAlert = False
 
