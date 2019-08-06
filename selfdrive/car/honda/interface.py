@@ -228,9 +228,9 @@ class CarInterface(object):
       ret.mass = 2987. * CV.LB_TO_KG + STD_CARGO_KG
       ret.wheelbase = 2.7
       ret.centerToFront = ret.wheelbase * 0.39
-      ret.steerRatio = 15.7  # 12.58 is spec end-to-end
-      tire_stiffness_factor = 0.60
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.45], [0.21]]
+      ret.steerRatio = 15  # 12.58 is spec end-to-end
+      tire_stiffness_factor = 0.82
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.18]]
       ret.longitudinalTuning.kpBP = [0., 5., 35.]
       ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5]
       ret.longitudinalTuning.kiBP = [0., 35.]
@@ -238,10 +238,10 @@ class CarInterface(object):
       ret.lateralTuning.pid.rateFFGain = 0.4
       ret.lateralTuning.pid.polyFactor = 0.002
       ret.lateralTuning.pid.polyDampTime = 0.05
-      ret.lateralTuning.pid.polyReactTime = 0.75
-      ret.lateralTuning.pid.dampTime = 0.0
-      ret.lateralTuning.pid.dampMPC = 0.0
-      ret.lateralTuning.pid.reactMPC = 0.0
+      ret.lateralTuning.pid.polyReactTime = 0.5
+      ret.lateralTuning.pid.dampTime = 0.1
+      ret.lateralTuning.pid.dampMPC = 0.12
+      ret.lateralTuning.pid.reactMPC = 0.02
       ret.steerLimitAlert = False
 
     elif candidate == CAR.ACURA_ILX:
