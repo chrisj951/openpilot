@@ -228,7 +228,7 @@ class CarInterface(object):
       ret.mass = 2987. * CV.LB_TO_KG + STD_CARGO_KG
       ret.wheelbase = 2.7
       ret.centerToFront = ret.wheelbase * 0.39
-      ret.steerRatio = 15  # 12.58 is spec end-to-end
+      ret.steerRatio = 15.6  # 12.58 is spec end-to-end
       tire_stiffness_factor = 0.82
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.18]]
       ret.longitudinalTuning.kpBP = [0., 5., 35.]
@@ -239,8 +239,8 @@ class CarInterface(object):
       ret.lateralTuning.pid.polyFactor = 0.002
       ret.lateralTuning.pid.polyDampTime = 0.05
       ret.lateralTuning.pid.polyReactTime = 0.5
-      ret.lateralTuning.pid.dampTime = 0.1
-      ret.lateralTuning.pid.dampMPC = 0.12
+      ret.lateralTuning.pid.dampTime = 0.01
+      ret.lateralTuning.pid.dampMPC = 0.1
       ret.lateralTuning.pid.reactMPC = 0.02
       ret.steerLimitAlert = False
 
@@ -434,7 +434,7 @@ class CarInterface(object):
     ret.startAccel = 0.5
 
     ret.steerActuatorDelay = 0.1
-    ret.steerRateCost = 0.5
+    ret.steerRateCost = 0.4
 
     return ret
 
