@@ -197,7 +197,7 @@ class CarController(object):
       idx = (frame//10) % 4
       can_sends.extend(hondacan.create_ui_commands(self.packer, pcm_speed, hud, CS.CP.carFingerprint, CS.is_metric, idx, CS.CP.isPandaBlack))
 
-    if CS.CP.carFingerprint in (CAR.INSIGHT):
+    if CS.CP.carFingerprint in (CAR.CIVIC): #(CAR.INSIGHT):
       if frame % 200 == 0:
         self.get_TR(CS.lead_distance, CS.v_ego)
       if frame % 25 < 5 and CS.hud_distance != (self.desired_lead_distance % 4):
