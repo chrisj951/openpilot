@@ -109,13 +109,15 @@ class CarController(object):
         self.desired_lead_distance = 4
       elif lead_distance > 170 and lead_distance < 180:
         self.desired_lead_distance = 3
-      elif lead_distance > 150 and lead_distance < 170:
+      elif lead_distance > 160 and lead_distance < 170:
         self.desired_lead_distance = 2
       else:
         self.desired_lead_distance = 1
     else:
       self.desired_lead_distance = 1
-
+    # no lead car at 255
+    if lead_distance > 240:
+      self.desired_lead_distance = 1
     # If caught some traction, lead up closer to lead car.
     if (v_ego > 20) and (rough_speed > 10):
       self.desired_lead_distance = 1
