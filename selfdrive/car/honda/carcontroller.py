@@ -89,6 +89,7 @@ class CarController(object):
     self.rough_lead_speed = 0.0
     self.desired_lead_distance = 0
 
+  # ft/s - lead_distance is in ft
   def rough_speed(self, lead_distance):
     if self.prev_lead_distance != lead_distance:
       self.lead_distance_counter_prev = self.lead_distance_counter
@@ -102,24 +103,24 @@ class CarController(object):
 
   def get_TR(self, lead_distance, v_ego):
     rough_speed = self.rough_speed(lead_distance)
-    if lead_distance > 180:
-      self.desired_lead_distance = 4
-    elif lead_distance > 160 and lead_distance < 180:
-      self.desired_lead_distance = 3
-    elif lead_distance > 140 and lead_distance < 160:
-      self.desired_lead_distance = 2
+    # Slow down sequentially if coming in at higher speed
+    if (rough_speed < 30) and (v_ego > 18):
+      if lead_distance > 180:
+        self.desired_lead_distance = 4
+      elif lead_distance > 170 and lead_distance < 180:
+        self.desired_lead_distance = 3
+      elif lead_distance > 150 and lead_distance < 170:
+        self.desired_lead_distance = 2
+      else:
+        self.desired_lead_distance = 1
     else:
       self.desired_lead_distance = 1
+
+    # If caught some traction, lead up closer to lead car.
+    if (v_ego > 20) and (rough_speed > 10):
+      self.desired_lead_distance = 1
+      
     return self.desired_lead_distance
-#    if lead_distance > 180:
-#      self.desired_lead_distance = 4
-#    elif lead_distance > 160 and lead_distance < 180:
-#      self.desired_lead_distance = 3
-#    elif lead_distance > 140 and lead_distance < 160:
-#      self.desired_lead_distance = 2
-#    else:
-#      self.desired_lead_distance = 1
-#    return self.desired_lead_distance
 
   def update(self, enabled, CS, frame, actuators, \
              pcm_speed, pcm_override, pcm_cancel_cmd, pcm_accel, \
@@ -197,7 +198,7 @@ class CarController(object):
       idx = (frame//10) % 4
       can_sends.extend(hondacan.create_ui_commands(self.packer, pcm_speed, hud, CS.CP.carFingerprint, CS.is_metric, idx, CS.CP.isPandaBlack))
 
-    if CS.CP.carFingerprint in (CAR.CIVIC): #(CAR.INSIGHT):
+    if CS.CP.carFingerprint in (CAR.INSIGHT):
       if frame % 200 == 0:
         self.get_TR(CS.lead_distance, CS.v_ego)
       if frame % 25 < 5 and CS.hud_distance != (self.desired_lead_distance % 4):
