@@ -505,6 +505,7 @@ struct ControlsState @0x97ff69c53601abf1 {
     steerAngle @1 :Float32;
     steerRate @2 :Float32;
     angleError @3 :Float32;
+    p2 @11 :Float32;
     p @4 :Float32;
     i @5 :Float32;
     f @6 :Float32;
@@ -512,9 +513,7 @@ struct ControlsState @0x97ff69c53601abf1 {
     saturated @8 :Bool;
     angleFFRatio @9 :Float32;
     angleFFGain @10 :Float32;
-    p2 @11 :Float32;
-    oversampling @12 :Float32;
-    angleBias @13 :Float32;
+    angleBias@12 :Float32;
    }
 
   struct LateralLQRState {
@@ -702,6 +701,7 @@ struct PathPlan {
   paramsValid @10 :Bool;
   modelValidDEPRECATED @12 :Bool;
   angleOffset @11 :Float32;
+  angleBias @22 :Float32;
   mpcAngles @17 :List(Float32);
   mpcRates @18 :List(Float32);
   mpcTimes @19 :List(Float32);
