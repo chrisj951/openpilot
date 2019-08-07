@@ -208,8 +208,8 @@ class CarController(object):
         can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.LEAD_DISTANCE, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
         #print("     spamming distance: " + str((self.desired_lead_distance % 4)))
       # always set cruise setting to 0 after button press
-      if frame % 50 < 15:
-        can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.RESET, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
+        if frame % 50 < 15:
+          can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.RESET, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
         #print("     spamming distance reset")
 
     if CS.CP.radarOffCan:
