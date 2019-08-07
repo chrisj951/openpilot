@@ -104,12 +104,12 @@ class CarController(object):
   def get_TR(self, lead_distance, v_ego):
     rough_speed = self.rough_speed(lead_distance)
     # Slow down sequentially if coming in at higher speed
-    if (rough_speed < 30) and (v_ego > 18):
-      if lead_distance > 180:
+    if (rough_speed < 30) and (v_ego > 1):
+      if lead_distance > 150:
         self.desired_lead_distance = 4
-      elif lead_distance > 170 and lead_distance < 180:
+      elif lead_distance > 140 and lead_distance < 150:
         self.desired_lead_distance = 3
-      elif lead_distance > 160 and lead_distance < 170:
+      elif lead_distance > 130 and lead_distance < 140:
         self.desired_lead_distance = 2
       else:
         self.desired_lead_distance = 1
@@ -118,8 +118,10 @@ class CarController(object):
     # no lead car at 255
     if lead_distance > 240:
       self.desired_lead_distance = 1
+    if CS.stopped:8
+      self.desired_lead_distance = 1
     # If caught some traction, lead up closer to lead car.
-    if (v_ego > 15) and (rough_speed > 5):
+    if (v_ego > 25) and (rough_speed > 15):
       self.desired_lead_distance = 1
       
     return self.desired_lead_distance
