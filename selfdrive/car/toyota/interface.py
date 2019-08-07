@@ -71,7 +71,7 @@ class CarInterface(object):
     ret.lateralTuning.pid.polyDampTime = 0.35
     ret.lateralTuning.pid.polyReactTime = 1.0
 
-    ret.steerRateCost = 0.7
+    ret.steerRateCost = 1.0
     ret.lateralTuning.init('pid')
     ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
     ret.lateralTuning.pid.dampTime = 0.05
