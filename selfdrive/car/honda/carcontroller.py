@@ -101,7 +101,7 @@ class CarController(object):
     self.prev_lead_distance = lead_distance
     return self.rough_lead_speed
 
-  def get_TR(self, lead_distance, v_ego):
+  def get_TR(self, lead_distance, v_ego, stopped):
     rough_speed = self.rough_speed(lead_distance)
     # Slow down sequentially if coming in at higher speed
     if (rough_speed < 30) and (v_ego > 1):
@@ -118,7 +118,7 @@ class CarController(object):
     # no lead car at 255
     if lead_distance > 240:
       self.desired_lead_distance = 1
-    if CS.stopped:
+    if stopped:
       self.desired_lead_distance = 1
     # If caught some traction, lead up closer to lead car.
     if (v_ego > 25) and (rough_speed > 15):
@@ -204,7 +204,7 @@ class CarController(object):
 
     if CS.CP.carFingerprint in (CAR.INSIGHT):
       if frame % 200 == 0:
-        self.get_TR(CS.lead_distance, CS.v_ego)
+        self.get_TR(CS.lead_distance, CS.v_ego, CS.stopped)
       if frame % 25 < 5 and CS.hud_distance != (self.desired_lead_distance % 4):
       # press distance bar button
         can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.LEAD_DISTANCE, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
