@@ -119,7 +119,7 @@ class CarController(object):
     if lead_distance > 240:
       self.desired_lead_distance = 1
     # If caught some traction, lead up closer to lead car.
-    if (v_ego > 20) and (rough_speed > 10):
+    if (v_ego > 15) and (rough_speed > 5):
       self.desired_lead_distance = 1
       
     return self.desired_lead_distance
