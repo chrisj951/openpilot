@@ -46,7 +46,9 @@ class kegman_conf():
         self.conf['polyReact'] = str(round(CP.lateralTuning.pid.polyReactTime,3))
         self.conf['polyDamp'] = str(round(CP.lateralTuning.pid.polyDampTime,3))
         self.conf['polyFactor'] = str(round(CP.lateralTuning.pid.polyFactor,3))
-        write_conf = True
+        write_conf = Tru
+      if self.conf['simpledd'] == "-1":
+        self.conf['simpledd'] = str(False)
     else:
       self.type = "indi"
       if self.conf['type'] == "-1":
@@ -91,7 +93,11 @@ class kegman_conf():
         self.element_updated = True
 
       if "leadDistance" not in self.config:
-        self.config.update({"leadDistance":"5"})
+        self.config.update({"leadDistance":"8"})
+        self.element_updated = True
+
+      if "simpledd" not in self.config:
+        self.config.update({"simpledd":"False"})
         self.element_updated = True
 
       if ("type" not in self.config or self.config['type'] == "-1") and CP != None:
@@ -145,15 +151,15 @@ class kegman_conf():
         if (CP is not None and CP.lateralTuning.which() == "pid") or self.type == "pid":
           self.config = {"type":"pid","Kp":"-1", "Ki":"-1", "Kf":"-1", "dampTime":"-1", "reactMPC":"-1", "dampMPC":"-1", "rateFFGain":"-1", "polyReact":"-1", \
                     "polyDamp":"-1", "cameraOffset":"0.06", "lastTrMode":"1", "battChargeMin":"60", "battChargeMax":"70", "wheelTouchSeconds":"180", \
-                    "battPercOff":"25", "carVoltageMinEonShutdown":"11800", "brakeStoppingTarget":"0.25", "leadDistance":"5"}
+                    "battPercOff":"25", "carVoltageMinEonShutdown":"11800", "brakeStoppingTarget":"0.25", "leadDistance":"5", "simpledd":"False"}
         else:
           self.config = {"type":"indi","timeConst":"-1", "actEffect":"-1", "outerGain":"-1", "innerGain":"-1", "reactMPC":"-1", "cameraOffset":"0.06", \
                     "lastTrMode":"1", "battChargeMin":"60", "battChargeMax":"70", "wheelTouchSeconds":"180", \
-                    "battPercOff":"25", "carVoltageMinEonShutdown":"11800", "brakeStoppingTarget":"0.25", "leadDistance":"5"}
+                    "battPercOff":"25", "carVoltageMinEonShutdown":"11800", "brakeStoppingTarget":"0.25", "leadDistance":"5", "simpledd":"False"}
       except:
         self.config = {"type":"pid","Kp":"-1", "Ki":"-1", "Kf":"-1", "dampTime":"-1", "reactMPC":"-1", "dampMPC":"-1", "rateFFGain":"-1", "polyReact":"-1", \
                     "polyDamp":"-1", "cameraOffset":"0.06", "lastTrMode":"1", "battChargeMin":"60", "battChargeMax":"70", "wheelTouchSeconds":"180", \
-                    "battPercOff":"25", "carVoltageMinEonShutdown":"11800", "brakeStoppingTarget":"0.25", "leadDistance":"5"}
+                    "battPercOff":"25", "carVoltageMinEonShutdown":"11800", "brakeStoppingTarget":"0.25", "leadDistance":"5", "simpledd":"False"}
 
       self.write_config(self.config)
     return self.config

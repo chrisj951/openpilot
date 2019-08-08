@@ -6,6 +6,9 @@ from selfdrive.car import create_gas_command
 from selfdrive.car.honda import hondacan
 from selfdrive.car.honda.values import AH, CruiseButtons, CAR, CruiseSettings
 from selfdrive.can.packer import CANPacker
+from selfdrive.kegman_conf import kegman_conf
+
+kegman = kegman_conf()
 
 
 def actuator_hystereses(brake, braking, brake_steady, v_ego, car_fingerprint):
@@ -102,6 +105,7 @@ class CarController(object):
     return self.rough_lead_speed
 
   def get_TR(self, lead_distance, v_ego, stopped):
+    rough_speed = self.rough_speed(lead_distance)
     # Slow down sequentially if coming in at higher speed. Radar picks up at about 190ft to 200ft
     if not stopped and (lead_distance > 200):
       if lead_distance > 150:
@@ -114,7 +118,7 @@ class CarController(object):
         self.desired_lead_distance = 1
     else:
       self.desired_lead_distance = 1
-    # If caught some traction, lead up closer to lead car.
+    # If caught some traction, lead up closer to moving lead car.
     if (v_ego > 22) and (rough_speed > 0.1):
       self.desired_lead_distance = 1
       
@@ -196,7 +200,8 @@ class CarController(object):
       idx = (frame//10) % 4
       can_sends.extend(hondacan.create_ui_commands(self.packer, pcm_speed, hud, CS.CP.carFingerprint, CS.is_metric, idx, CS.CP.isPandaBlack))
 
-    if CS.CP.carFingerprint in (CAR.INSIGHT):
+#    if CS.CP.carFingerprint in (CAR.INSIGHT):
+    if kegman.conf['simpledd']) == 'True' and CS.CP.carFingerprint in (CAR.INSIGHT, CAR.ACCORD):
       if frame % 25 < 5 and CS.hud_distance != (self.desired_lead_distance % 4):
         self.get_TR(CS.lead_distance, CS.v_ego, CS.stopped)
       # press distance bar button
