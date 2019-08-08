@@ -1,16 +1,16 @@
 from common.numpy_fast import interp
 import numpy as np
 from selfdrive.controls.lib.latcontrol_helpers import model_polyfit, calc_desired_path, compute_path_pinv
-from selfdrive.kegman_conf import kegman_conf
 
-kegman = kegman_conf()
-CAMERA_OFFSET = float(kegman.conf['cameraOffset'])  # m from center car to camera
+CAMERA_OFFSET = 0.06  # m from center car to camera
 
 
 class ModelParser(object):
   def __init__(self):
     self.d_poly = [0., 0., 0., 0.]
     self.c_poly = [0., 0., 0., 0.]
+    self.l_poly = np.array([0., 0., 0., 0.])
+    self.r_poly = np.array([0., 0., 0., 0.])
     self.p_poly = np.array([0., 0., 0., 0.])
     self.c_prob = 0.
     self.p_prob = 0.
@@ -42,6 +42,14 @@ class ModelParser(object):
 
     l_prob = md.leftLane.prob  # left line prob
     r_prob = md.rightLane.prob  # right line prob
+
+    if self.l_prob > l_prob:
+      l_poly = (l_poly * l_prob + min(1.0 - l_prob, self.l_prob) * self.l_poly) / (l_prob + min(1.0 - l_prob, self.l_prob) + 0.0001)
+      l_prob = (l_prob**2 + min(1.0 - l_prob, 0.9 * self.l_prob) * self.l_prob) / (l_prob + min(1 - l_prob, 0.9 * self.l_prob) + 0.0001)
+    if self.r_prob > r_prob:
+      r_poly = (r_poly * (r_prob) + min(1.0 - r_prob, self.r_prob) * self.r_poly) / (r_prob + min(1.0 - r_prob, self.r_prob) + 0.0001)
+      r_prob = (r_prob**2 + min(1.0 - r_prob, 0.9 * self.r_prob) * self.r_prob) / (r_prob + min(1.0 - r_prob, 0.9 * self.r_prob) + 0.0001)
+
     # Find current lanewidth
     lr_prob = l_prob * r_prob
     self.lane_width_certainty += 0.05 * (lr_prob - self.lane_width_certainty)
