@@ -201,7 +201,7 @@ class CarController(object):
       can_sends.extend(hondacan.create_ui_commands(self.packer, pcm_speed, hud, CS.CP.carFingerprint, CS.is_metric, idx, CS.CP.isPandaBlack))
 
 #    if CS.CP.carFingerprint in (CAR.INSIGHT):
-    if kegman.conf['simpledd']) == 'True' and CS.CP.carFingerprint in (CAR.INSIGHT, CAR.ACCORD):
+    if kegman.conf['simpledd'] == True and CS.CP.carFingerprint in (CAR.INSIGHT, CAR.ACCORD):
       if frame % 25 < 5 and CS.hud_distance != (self.desired_lead_distance % 4):
         self.get_TR(CS.lead_distance, CS.v_ego, CS.stopped)
       # press distance bar button
