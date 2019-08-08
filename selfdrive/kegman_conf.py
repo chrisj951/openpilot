@@ -46,7 +46,7 @@ class kegman_conf():
         self.conf['polyReact'] = str(round(CP.lateralTuning.pid.polyReactTime,3))
         self.conf['polyDamp'] = str(round(CP.lateralTuning.pid.polyDampTime,3))
         self.conf['polyFactor'] = str(round(CP.lateralTuning.pid.polyFactor,3))
-        write_conf = Tru
+        write_conf = True
       if self.conf['simpledd'] == "-1":
         self.conf['simpledd'] = False
     else:
