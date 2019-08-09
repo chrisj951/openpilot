@@ -104,8 +104,7 @@ class CarController(object):
     self.prev_lead_distance = lead_distance
     return self.rough_lead_speed
 
-  def get_TR(self, lead_distance, v_ego, stopped):
-    rough_speed = self.rough_speed(lead_distance)
+  def get_TR(self, lead_distance, stopped):
     # Slow down sequentially if coming in at higher speed. Radar picks up at about 190ft to 200ft
     if not stopped and (lead_distance < 255):
       if lead_distance > 160:
@@ -203,7 +202,6 @@ class CarController(object):
 #    if CS.CP.carFingerprint in (CAR.INSIGHT):
     if kegman.conf['simpledd'] == True and CS.CP.carFingerprint in (CAR.INSIGHT, CAR.ACCORD):
       if frame % 25 < 5 and CS.hud_distance != (self.desired_lead_distance % 4):
-        self.get_TR(CS.lead_distance, CS.v_ego, CS.stopped)
       # press distance bar button
         can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.LEAD_DISTANCE, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
         #print("     spamming distance: " + str((self.desired_lead_distance % 4)))
@@ -213,13 +211,14 @@ class CarController(object):
         #print("     spamming distance reset")
 
     if CS.CP.radarOffCan:
+      self.get_TR(CS.lead_distance, CS.stopped)
       # If using stock ACC, spam cancel command to kill gas when OP disengages.
       if pcm_cancel_cmd:
         can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.CANCEL, 0, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
       elif CS.stopped:
         if CS.CP.carFingerprint in (CAR.INSIGHT):
           rough_lead_speed = self.rough_speed(CS.lead_distance)
-          if CS.lead_distance > (self.stopped_lead_distance + 5.0) or rough_lead_speed > 0.1:
+          if CS.lead_distance > (self.stopped_lead_distance + 8.0) or rough_lead_speed > 0.1:
             self.stopped_lead_distance = 0.0
             can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, 0, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
             print("spamming")
