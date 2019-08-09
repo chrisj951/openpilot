@@ -501,6 +501,10 @@ class CarInterface(object):
     ret.leftBlinker = bool(self.CS.left_blinker_on)
     ret.rightBlinker = bool(self.CS.right_blinker_on)
 
+    # add lead distance from radar hud
+    ret.leadDistance = self.CS.leadDistance
+    ret.desiredTR = self.CS.desiredTR
+
     ret.doorOpen = not self.CS.door_all_closed
     ret.seatbeltUnlatched = not self.CS.seatbelt
 

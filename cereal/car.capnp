@@ -126,6 +126,10 @@ struct CarState {
   genericToggle @23 :Bool;
   lkMode @27 :Bool;
 
+  # radar hud info
+  leadDistance @28 :Float32;
+  desiredTR @29 :UInt64;
+
   # lock info
   doorOpen @24 :Bool;
   seatbeltUnlatched @25 :Bool;

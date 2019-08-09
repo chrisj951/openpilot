@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
+import gc
 import numpy.matlib
 import importlib
 from collections import defaultdict, deque
@@ -165,12 +166,13 @@ class RadarD(object):
 
 # fuses camera and radar data for best lead detection
 def radard_thread(gctx=None):
+  gc.disable()
   set_realtime_priority(2)
 
   # wait for stats about the car to come in from controls
   cloudlog.info("radard is waiting for CarParams")
   CP = car.CarParams.from_bytes(Params().get("CarParams", block=True))
-  mocked = True
+  mocked = CP.carName == "mock" or CP.carName == "honda"
   cloudlog.info("radard got CarParams")
 
   # import the radar from the fingerprint

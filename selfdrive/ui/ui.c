@@ -178,6 +178,8 @@ typedef struct UIScene {
   uint16_t maxCpuTemp;
   uint32_t maxBatTemp;
   //float gpsAccuracy;
+  uint16_t leadDistance;
+  uint16_t desiredTR;
   float freeSpace;
   float angleSteers;
   float angleSteersDes;
@@ -1256,6 +1258,22 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
       value_fontSize, label_fontSize, uom_fontSize );
     bb_ry = bb_y + bb_h;
   }
+
+  // Draw Lead Distance Info
+  if (true) {
+    char val_str[16];
+    char uom_str[3];
+    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+    snprintf(val_str, sizeof(val_str), "%i[%i]", s->scene.leadDistance, s->scene.desiredTR);
+    snprintf(uom_str, sizeof(uom_str), "ft");
+
+    bb_h +=bb_ui_draw_measure(s, val_str, uom_str, "LEAD / BAR",
+      bb_rx, bb_ry, bb_uom_dx,
+      val_color, lab_color, uom_color,
+      value_fontSize, label_fontSize, uom_fontSize );
+    bb_ry = bb_y + bb_h;
+  }
+
   //finally draw the frame
   bb_h += 20;
   nvgBeginPath(s->vg);
@@ -2336,6 +2354,13 @@ void handle_message(UIState *s, void *which) {
   } else if (eventd.which == cereal_Event_carState) {
     struct cereal_CarState datad;
     cereal_read_CarState(&datad, eventd.carState);
+    if(!datad.leadDistance || !datad.desiredTR) {
+      s->scene.leadDistance = 255;
+      s->scene.desiredTR = 1;
+    } else {
+      s->scene.leadDistance = datad.leadDistance;
+      s->scene.desiredTR = datad.desiredTR;
+    }
     s->scene.brakeLights = datad.brakeLights;
     if(s->scene.leftBlinker!=datad.leftBlinker || s->scene.rightBlinker!=datad.rightBlinker)
       s->scene.blinker_blinkingrate = 100;
@@ -2420,7 +2445,7 @@ static void ui_update(UIState *s) {
     s->alert_blinked = false;
   }
 
-  zmq_pollitem_t polls[13] = {{0}};
+  zmq_pollitem_t polls[12] = {{0}};
   // Wait for next rgb image from visiond
   while(true) {
     assert(s->ipc_fd >= 0);
@@ -2499,18 +2524,12 @@ static void ui_update(UIState *s) {
     polls[6].socket = s->uilayout_sock_raw;
     polls[6].events = ZMQ_POLLIN;
 
-#ifdef SHOW_SPEEDLIMIT
-    plus_sock_num++;
-    num_polls++;
-    polls[7].socket = s->map_data_sock_raw;
-    polls[7].events = ZMQ_POLLIN;
-#endif
 
     if (s->vision_connected) {
       num_polls++;
       plus_sock_num++;
-      polls[8].socket = s->carstate_sock_raw;
-      polls[8].events = ZMQ_POLLIN;
+      polls[7].socket = s->carstate_sock_raw;
+      polls[7].events = ZMQ_POLLIN;
       /*num_polls++;
       plus_sock_num++;
       polls[9].socket = s->gps_sock_raw;
@@ -2531,7 +2550,7 @@ static void ui_update(UIState *s) {
 
     if (polls[0].revents || polls[1].revents || polls[2].revents ||
         polls[3].revents || polls[4].revents || polls[6].revents ||
-        polls[8].revents || polls[plus_sock_num].revents) {  //} || polls[9].revents) {
+        polls[7].revents || polls[plus_sock_num].revents) {  //} || polls[9].revents) {
       // awake on any (old) activity
       set_awake(s, true);
     }
