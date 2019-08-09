@@ -106,19 +106,19 @@ class CarController(object):
 
   def get_TR(self, lead_distance, stopped):
     # Slow down sequentially if coming in at higher speed. Radar picks up at about 190ft to 200ft
-    if not stopped and (lead_distance < 255):
-      if lead_distance > 160:
+    if not stopped and (lead_distance <= 255):
+      if lead_distance >= 140:
         self.desired_lead_distance = 4
-      elif lead_distance > 130 and lead_distance < 160:
+      elif lead_distance >= 110 and lead_distance < 140:
         self.desired_lead_distance = 3
-      elif lead_distance > 80 and lead_distance < 130:
+      elif lead_distance >= 60 and lead_distance < 110:
         self.desired_lead_distance = 2
-      else:
+      elif lead_distance >= 0 and lead_distance < 60:
         self.desired_lead_distance = 1
     elif stopped:
       self.desired_lead_distance = 1
     # If caught some traction, lead up closer to moving lead car.
-    if (v_ego > 22) and (rough_speed > 0.1):
+    if (v_ego >= 22) and (lead_distance < 255):
       self.desired_lead_distance = 1
       
     return self.desired_lead_distance
