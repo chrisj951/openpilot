@@ -1265,7 +1265,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
     char uom_str[3];
     NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
     snprintf(val_str, sizeof(val_str), "%i[%i]", s->scene.leadDistance, s->scene.desiredTR);
-    snprintf(uom_str, sizeof(uom_str), "ft");
+    snprintf(uom_str, sizeof(uom_str), "");
 
     bb_h +=bb_ui_draw_measure(s, val_str, uom_str, "LEAD / BAR",
       bb_rx, bb_ry, bb_uom_dx,
