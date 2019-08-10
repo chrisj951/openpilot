@@ -239,19 +239,19 @@ class CarController(object):
       idx = (frame//10) % 4
       can_sends.extend(hondacan.create_ui_commands(self.packer, pcm_speed, hud, CS.CP.carFingerprint, CS.is_metric, idx, CS.CP.isPandaBlack))
 
-    if kegman.conf['simpledd'] == True and CS.CP.carFingerprint in (CAR.INSIGHT, CAR.ACCORD):
+    
+    if CS.CP.carFingerprint in (CAR.INSIGHT, CAR.ACCORD):
       self.rough_speed(CS.leadDistance)
-      if frame % 13 < 2 and CS.hud_distance != (self.desiredTR % 4):
-        if not CS.stopped and CS.leadDistance:
-          self.rough_speed(CS.leadDistance)
-        self.get_TR(CS.leadDistance, CS.v_ego, CS.stopped)
-        # update to CS so we can push it to ui through cereal
-        CS.desiredTR = self.desiredTR
-      # press distance bar button
-        can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.LEAD_DISTANCE, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
-      # always set cruise setting to 0 after button press
-        if frame % 25 < 5:
-          can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.RESET, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
+      if kegman.conf['simpledd'] == True:
+        if frame % 13 < 2 and CS.hud_distance != (self.desiredTR % 4):
+          self.get_TR(CS.leadDistance, CS.v_ego, CS.stopped)
+          # update to CS so we can push it to ui through cereal
+          CS.desiredTR = self.desiredTR
+          # press distance bar button
+          can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.LEAD_DISTANCE, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
+          # always set cruise setting to 0 after button press
+          if frame % 25 < 5:
+            can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.RESET, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
 
     if CS.CP.radarOffCan:
       # If using stock ACC, spam cancel command to kill gas when OP disengages.
@@ -259,7 +259,6 @@ class CarController(object):
         can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.CANCEL, 0, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
       elif CS.stopped:
         if CS.CP.carFingerprint in (CAR.INSIGHT):
-          self.rough_speed(CS.leadDistance)
           if CS.leadDistance > (self.stopped_lead_distance + 8.0) or self.rough_lead_speed > 0.1:
             self.stopped_lead_distance = 0.0
             can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, 0, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
