@@ -130,16 +130,16 @@ class CarController(object):
     elif (v_ego >= 15) and (self.rough_lead_speed > 0.1):
       self.desiredTR = 1
       # car is slowing down
-      if (v_ego < 15) and (self.rough_lead_speed <= 16:
+      if (v_ego < 15) and (self.rough_lead_speed <= 16):
         self.desiredTR = 3
-      elif (v_ego < 10) and (self.rough_lead_speed < 12:
+      elif (v_ego < 10) and (self.rough_lead_speed < 12):
         self.desiredTR = 2
-      elif (v_ego < 7) and (self.rough_lead_speed < 8:
+      elif (v_ego < 7) and (self.rough_lead_speed < 8):
         self.desiredTR = 1
     # If caught some traction >45mph, lead up closer to moving lead car.
     elif (v_ego >= 20) and (self.rough_lead_speed > 0.1):
       self.desiredTR = 1
-      if (v_ego < 20) and (self.rough_lead_speed <= 16:
+      if (v_ego < 20) and (self.rough_lead_speed <= 16):
         self.desiredTR = 4
       elif (v_ego < 17) and (self.rough_lead_speed <= 12):
         self.desiredTR = 3
