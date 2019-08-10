@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import numpy as np
-import gc
 import numpy.matlib
 import importlib
 from collections import defaultdict, deque
@@ -166,7 +165,6 @@ class RadarD(object):
 
 # fuses camera and radar data for best lead detection
 def radard_thread(gctx=None):
-  gc.disable()
   set_realtime_priority(2)
 
   # wait for stats about the car to come in from controls
