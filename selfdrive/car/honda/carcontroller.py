@@ -115,44 +115,48 @@ class CarController(object):
       self.lead_distance_counter = 1.0
     #increase counter by 0.01 (1/100 of a second)
     self.lead_distance_counter += 0.01
+    print("{0} ft/s".format(self.rough_lead_speed))
 
   # relative distance is in ft from output
   # v_ego is current car speed
   # stopped is a CS telling whether vehicle is in stopped state or not
   def get_TR(self, lead_distance, v_ego, stopped):
-    # Slow down sequentially if coming in at higher speed. Radar picks up at about 190ft to 200ft
+    # Radar picks up at about 190ft to 200ft
     # Testing out a bunch of random numbers..
-    if not stopped and (lead_distance < 255 and self.rough_lead_speed <= 1):
-      if lead_distance >= 180:
-        self.desiredTR = 4
-      elif lead_distance >= 160 and lead_distance < 180:
+    # If car and lead car is moving set to 1 always and let different speed rules take over..
+    if (v_ego >= 1) and (self.rough_lead_speed >= 1):
+      self.desiredTR = 1
+    # If in slower speeds >33.55mph
+    elif (v_ego >= 15) and (self.rough_lead_speed > 0.1):
+      self.desiredTR = 1
+      # car is slowing down
+      if (v_ego < 15) and (self.rough_lead_speed <= 16:
         self.desiredTR = 3
-      elif lead_distance >= 140 and lead_distance < 160:
+      elif (v_ego < 10) and (self.rough_lead_speed < 12:
         self.desiredTR = 2
-      elif lead_distance >= 0 and lead_distance < 140:
+      elif (v_ego < 7) and (self.rough_lead_speed < 8:
         self.desiredTR = 1
-    # If caught some traction, lead up closer to moving lead car.
-    if (v_ego >= 20) and (self.rough_lead_speed <= 11):
+    # If caught some traction >45mph, lead up closer to moving lead car.
+    elif (v_ego >= 20) and (self.rough_lead_speed > 0.1):
       self.desiredTR = 1
-      # If car is slowing down set to 2
-      if (v_ego < 20) and (self.rough_lead_speed <= 8):
-        self.desiredTR = 2
-      # set to 3
-      elif (v_ego < 17) and (self.rough_lead_speed <= 6):
-        self.desiredTR = 3
-      # set to 4
-      elif (v_ego < 14) and (self.rough_lead_speed <= 4):
+      if (v_ego < 20) and (self.rough_lead_speed <= 16:
         self.desiredTR = 4
+      elif (v_ego < 17) and (self.rough_lead_speed <= 12):
+        self.desiredTR = 3
+      elif (v_ego < 14) and (self.rough_lead_speed <= 8):
+        self.desiredTR = 2
+      elif (v_ego < 7) and (self.rough_lead_speed < 4):
+        self.desiredTR = 1
 
-    # if both cars are accelerating and within distance set to 1
-    if (v_ego > 0.1) and (lead_distance < 140) and (self.rough_lead_speed > 0.1):
-      self.desiredTR = 1
 
-
+    # if detects car between 180ft and 254ft and if car is going >55mph and rough lead_speed is less than 20 ft/s
+    if (lead_distance < 255 and lead_distance >= 180) and (v_ego >= 25) and (self.rough_lead_speed <= 20): 
+      self.desiredTR = 3
+    elif (lead_distance < 180) and (v_ego < 25) and (self.rough_lead_speed <= 12):
+      self.desiredTR = 2
     # No lead car found
     if lead_distance == 255:
       self.desiredTR = 1
-
     # Reset to 1 if car is stopped in front of car
     if stopped:
       self.desiredTR = 1
@@ -237,7 +241,7 @@ class CarController(object):
 
     if kegman.conf['simpledd'] == True and CS.CP.carFingerprint in (CAR.INSIGHT, CAR.ACCORD):
       self.rough_speed(CS.leadDistance)
-      if frame % 25 < 5 and CS.hud_distance != (self.desiredTR % 4):
+      if frame % 13 < 2 and CS.hud_distance != (self.desiredTR % 4):
         if not CS.stopped and CS.leadDistance:
           self.rough_speed(CS.leadDistance)
         self.get_TR(CS.leadDistance, CS.v_ego, CS.stopped)
@@ -246,7 +250,7 @@ class CarController(object):
       # press distance bar button
         can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.LEAD_DISTANCE, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
       # always set cruise setting to 0 after button press
-        if frame % 50 < 15:
+        if frame % 25 < 5:
           can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.RESET, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
 
     if CS.CP.radarOffCan:
