@@ -121,39 +121,23 @@ class CarController(object):
   # v_ego is current car speed
   # stopped is a CS telling whether vehicle is in stopped state or not
   def get_TR(self, lead_distance, v_ego, stopped):
-    # Radar picks up at about 190ft to 200ft
+    # Radar picks up at about ~230ft
+    # lead distance at 1 keeps about ~135ft-151ft
     # Testing out a bunch of random numbers..
     # If car and lead car is moving set to 1 always and let different speed rules take over..
-    if (v_ego >= 1) and (self.rough_lead_speed >= 1):
+    if (v_ego >= 1) and (self.rough_lead_speed >= 0.1) and (lead_distance <= 230):
       self.desiredTR = 1
-    # If in slower speeds >33.55mph
-    elif (v_ego >= 15) and (self.rough_lead_speed > 0.1):
+    # if lead car is positive relative speed set to 1 to catch up
+    elif (self.rough_lead_speed > 0.1):
       self.desiredTR = 1
-      # car is slowing down
-      if (v_ego < 15) and (self.rough_lead_speed <= 16):
-        self.desiredTR = 3
-      elif (v_ego < 10) and (self.rough_lead_speed < 12):
+      # car is slowing down?
+      if (self.rough_lead_speed <= 0.1):
         self.desiredTR = 2
-      elif (v_ego < 7) and (self.rough_lead_speed < 8):
-        self.desiredTR = 1
-    # If caught some traction >45mph, lead up closer to moving lead car.
-    elif (v_ego >= 20) and (self.rough_lead_speed > 0.1):
-      self.desiredTR = 1
-      if (v_ego < 20) and (self.rough_lead_speed <= 16):
+      elif (self.rough_lead_speed < -1):
+        self.desiredTR = 3
+      elif (self.rough_lead_speed < -6):
         self.desiredTR = 4
-      elif (v_ego < 17) and (self.rough_lead_speed <= 12):
-        self.desiredTR = 3
-      elif (v_ego < 14) and (self.rough_lead_speed <= 8):
-        self.desiredTR = 2
-      elif (v_ego < 7) and (self.rough_lead_speed < 4):
-        self.desiredTR = 1
 
-
-    # if detects car between 180ft and 254ft and if car is going >55mph and rough lead_speed is less than 20 ft/s
-    if (lead_distance < 255 and lead_distance >= 180) and (v_ego >= 25) and (self.rough_lead_speed <= 20): 
-      self.desiredTR = 3
-    elif (lead_distance < 180) and (v_ego < 25) and (self.rough_lead_speed <= 12):
-      self.desiredTR = 2
     # No lead car found
     if lead_distance == 255:
       self.desiredTR = 1
