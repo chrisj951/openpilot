@@ -37,10 +37,8 @@ class ModelParser(object):
       r_poly = model_polyfit(md.rightLane.points, self._path_pinv)  # right line
       p_poly = model_polyfit(md.path.points, self._path_pinv)  # predicted path
 
-    l_offset_factor = ((l_poly[3] - CAMERA_OFFSET) / max(0.01, l_poly[3]))
-    r_offset_factor = ((r_poly[3] - CAMERA_OFFSET) / min(-0.01, r_poly[3]))
-    l_poly[2] *= l_offset_factor
-    r_poly[2] *= r_offset_factor
+    l_poly[2] *= ((l_poly[3] - CAMERA_OFFSET) / max(0.01, l_poly[3]))
+    r_poly[2] *= ((r_poly[3] - CAMERA_OFFSET) / min(-0.01, r_poly[3]))
 
     # only offset left and right lane lines; offsetting p_poly does not make sense
     l_poly[3] += CAMERA_OFFSET

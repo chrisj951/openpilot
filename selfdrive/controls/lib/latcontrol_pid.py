@@ -171,7 +171,7 @@ class LatControlPID(object):
       steers_max = get_steer_max(CP, v_ego)
       self.pid.pos_limit = steers_max
       self.pid.neg_limit = -steers_max
-      angle_feedforward = float(self.damp_angle_steers_des + angle_bias)
+      angle_feedforward = float(self.damp_angle_steers_des - path_plan.angleOffset)
       self.angle_ff_ratio = interp(abs(angle_feedforward), self.angle_ff_bp[0], self.angle_ff_bp[1])
       rate_feedforward = (1.0 - self.angle_ff_ratio) * self.rate_ff_gain * self.damp_rate_steers_des
       steer_feedforward = float(v_ego)**2 * (rate_feedforward + angle_feedforward * self.angle_ff_ratio * self.angle_ff_gain)
@@ -230,7 +230,7 @@ class LatControlPID(object):
       pid_log.output = float(output_steer)
       pid_log.saturated = bool(self.pid.saturated)
       pid_log.angleFFRatio = self.angle_ff_ratio
-      pid_log.angleBias = angle_bias
+      pid_log.angleBias = self.angle_bias
 
     self.prev_angle_steers = angle_steers
     self.prev_override = steer_override
