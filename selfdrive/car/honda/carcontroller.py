@@ -73,7 +73,7 @@ def process_hud_alert(hud_alert):
 
 HUDData = namedtuple("HUDData",
                      ["pcm_accel", "v_cruise", "mini_car", "car", "X4",
-                      "lanes", "beep", "chime", "fcw", "acc_alert", "steer_required", "dashed_lanes"])
+                      "lanes", "fcw", "acc_alert", "steer_required", "dashed_lanes"])
 
 
 class CarController(object):
@@ -187,7 +187,8 @@ class CarController(object):
     fcw_display, steer_required, acc_alert = process_hud_alert(hud_alert)
 
     hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), 1, hud_car,
-                  0xc1, hud_lanes, int(snd_beep), snd_chime, fcw_display, acc_alert, steer_required, CS.lkMode)
+                  0xc1, hud_lanes, fcw_display, acc_alert, steer_required, CS.lkMode)
+
 
     # **** process the car messages ****
 

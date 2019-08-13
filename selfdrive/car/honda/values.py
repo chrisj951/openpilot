@@ -17,21 +17,6 @@ class CruiseSettings:
   BUTTON_ONE      = 1
   RESET           = 0
 
-#car chimes: enumeration from dbc file. Chimes are for alerts and warnings
-class CM:
-  MUTE = 0
-  SINGLE = 3
-  DOUBLE = 4
-  REPEATED = 1
-  CONTINUOUS = 2
-
-#car beeps: enumeration from dbc file. Beeps are for engage and disengage
-class BP:
-  MUTE = 0
-  SINGLE = 3
-  TRIPLE = 2
-  REPEATED = 1
-
 class AH:
   #[alert_idx, value]
   # See dbc files for info on values"

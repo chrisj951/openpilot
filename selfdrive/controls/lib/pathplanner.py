@@ -67,7 +67,6 @@ class PathPlanner(object):
     self.angle_offset = np.clip(angle_offset_average + sm['controlsState'].lateralControlState.pidState.angleBias, self.angle_offset - max_offset_change, self.angle_offset + max_offset_change)
 
 
-
     self.LP.update(v_ego, sm['model'])
 
     # Run MPC
@@ -95,6 +94,18 @@ class PathPlanner(object):
     self.libmpc.run_mpc(self.cur_state, self.mpc_solution,
                         list(self.LP.l_poly), list(self.LP.r_poly), list(self.LP.d_poly),
                         self.LP.l_prob, self.LP.r_prob, curvature_factor, v_ego_mpc, self.LP.lane_width)
+
+    # reset to current steer angle if not active or overriding
+    if active:
+      delta_desired = self.mpc_solution[0].delta[1]
+      rate_desired = math.degrees(self.mpc_solution[0].rate[0] * VM.sR)
+    else:
+      delta_desired = math.radians(angle_steers - angle_offset_bias) / VM.sR
+      rate_desired = 0.0
+
+    self.cur_state[0].delta = delta_desired
+
+    self.angle_steers_des_mpc = float(math.degrees(delta_desired * VM.sR) + angle_offset_bias)
 
     #  Check for infeasable MPC solution
     mpc_nans = np.any(np.isnan(list(self.mpc_solution[0].delta)))
