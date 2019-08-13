@@ -32,16 +32,6 @@ class BP:
   TRIPLE = 2
   REPEATED = 1
 
-AUDIO_HUD = {
-  AudibleAlert.none: (BP.MUTE, CM.MUTE),
-  AudibleAlert.chimeEngage: (BP.SINGLE, CM.MUTE),
-  AudibleAlert.chimeDisengage: (BP.SINGLE, CM.MUTE),
-  AudibleAlert.chimeError: (BP.MUTE, CM.DOUBLE),
-  AudibleAlert.chimePrompt: (BP.MUTE, CM.SINGLE),
-  AudibleAlert.chimeWarning1: (BP.MUTE, CM.DOUBLE),
-  AudibleAlert.chimeWarning2: (BP.MUTE, CM.REPEATED),
-  AudibleAlert.chimeWarningRepeat: (BP.MUTE, CM.REPEATED)}
-
 class AH:
   #[alert_idx, value]
   # See dbc files for info on values"
