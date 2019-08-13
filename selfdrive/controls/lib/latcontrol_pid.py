@@ -123,7 +123,7 @@ class LatControlPID(object):
       self.starting_angle = angle_steers
       self.lane_change_adjustment = 1.0
 
-  def update(self, active, v_ego, angle_steers, angle_steers_rate, steer_override, blinkers_on, CP, VM, path_plan, live_params):
+  def update(self, active, v_ego, angle_steers, angle_steers_rate, eps_torque, steer_override, blinkers_on, CP, VM, path_plan, live_params):
 
     if angle_steers_rate == 0.0 and self.calculate_rate:
       if angle_steers != self.prev_angle_steers:

@@ -1,7 +1,6 @@
 from cereal import car
 from selfdrive.car import dbc_dict
 
-AudibleAlert = car.CarControl.HUDControl.AudibleAlert
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
 # Car button codes 
