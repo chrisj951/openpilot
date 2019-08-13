@@ -174,15 +174,6 @@ class CarController(object):
     else:
       hud_car = 1
 
-    # For lateral control-only, send chimes as a beep since we don't send 0x1fa
-    if CS.CP.radarOffCan:
-      snd_beep = snd_beep if snd_beep != 0 else snd_chime
-
-    # Do not send audible alert when steering is disabled
-    if not CS.lkMode:
-      snd_beep = 0
-      snd_chime = 0
-
     #print("{0} {1} {2}".format(chime, alert_id, hud_alert))
     fcw_display, steer_required, acc_alert = process_hud_alert(hud_alert)
 
