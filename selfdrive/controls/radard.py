@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import gc
 import numpy as np
 import numpy.matlib
 import importlib
@@ -166,7 +167,7 @@ class RadarD(object):
 # fuses camera and radar data for best lead detection
 def radard_thread(gctx=None):
   set_realtime_priority(2)
-
+  gc.disable()
   # wait for stats about the car to come in from controls
   cloudlog.info("radard is waiting for CarParams")
   CP = car.CarParams.from_bytes(Params().get("CarParams", block=True))
