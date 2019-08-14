@@ -250,7 +250,7 @@ class CarController(object):
         can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.CANCEL, 0, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
       elif CS.stopped:
         if CS.CP.carFingerprint in (CAR.INSIGHT):
-          if CS.leadDistance > (self.stopped_lead_distance + 8.0) or self.rough_lead_speed > 0.1:
+          if CS.leadDistance > (self.stopped_lead_distance + 10.0) or self.rough_lead_speed > 1:
             self.stopped_lead_distance = 0.0
             can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, 0, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
         else:
