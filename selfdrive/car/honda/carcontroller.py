@@ -112,6 +112,7 @@ class CarController(object):
     self.lead_distance_counter_prev = 1
     self.rough_lead_speed = 0.0 #delta ft/s
     self.desiredTR = 0 # the desired distance bar
+    self.params = CarControllerParams(car_fingerprint)
 
   # ft/s - lead_distance is in ft
   # Must be called every frame and assumes 100hz (frames per second)
@@ -167,7 +168,6 @@ class CarController(object):
       self.desiredTR = 1
       
     return self.desiredTR
-    self.params = CarControllerParams(car_fingerprint)
 
   def update(self, enabled, CS, frame, actuators, \
              pcm_speed, pcm_override, pcm_cancel_cmd, pcm_accel, \
