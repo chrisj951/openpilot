@@ -13,7 +13,6 @@ class kegman_conf():
         self.conf = self.read_config(CP, True)
         self.init_config(CP)
 
-
   def init_config(self, CP):
     write_conf = False
     if CP.lateralTuning.which() == 'pid':
@@ -71,97 +70,39 @@ class kegman_conf():
   def read_config(self, CP=None, Reset=False):
     self.element_updated = False
 
-    if not Reset and os.path.isfile('/data/kegman.json'):
+    if Reset or not os.path.isfile('/data/kegman.json'):
+      self.config = {"cameraOffset":"0.06", "lastTrMode":"1", "battChargeMin":"60", "battChargeMax":"70", "wheelTouchSeconds":"180", \
+              "battPercOff":"25", "carVoltageMinEonShutdown":"11800", "brakeStoppingTarget":"0.25", "leadDistance":"8", "simpledd": False}
+    else:
       with open('/data/kegman.json', 'r') as f:
         self.config = json.load(f)
-        self.write_config(self.config)
 
-      if "battPercOff" not in self.config:
-        self.config.update({"battPercOff":"25"})
-        self.config.update({"carVoltageMinEonShutdown":"11800"})
-        self.config.update({"brakeStoppingTarget":"0.25"})
+    if "battPercOff" not in self.config:
+      self.config.update({"battPercOff":"25"})
+      self.config.update({"carVoltageMinEonShutdown":"11800"})
+      self.config.update({"brakeStoppingTarget":"0.25"})
+      self.element_updated = True
+
+    if "liveParams" not in self.config:
+      self.config.update({"liveParams":"1"})
+      self.element_updated = True
+
+    if "leadDistance" not in self.config:
+      self.config.update({"leadDistance":"5"})
+      self.element_updated = True
+
+    if "simpledd" not in self.config:
+      self.config.update({"simpledd":False})
+
+    if ("type" not in self.config or self.config['type'] == "-1") and CP != None:
+        self.config.update({"type":CP.lateralTuning.which()})
+        print(CP.lateralTuning.which())
         self.element_updated = True
 
-      if "tuneGernby" not in self.config:
-        self.config.update({"tuneGernby":"1"})
-        self.config.update({"Kp":"-1"})
-        self.config.update({"Ki":"-1"})
-      	self.element_updated = True
-
-      if "liveParams" not in self.config:
-        self.config.update({"liveParams":"1"})
-        self.element_updated = True
-
-      if "leadDistance" not in self.config:
-        self.config.update({"leadDistance":"8"})
-        self.element_updated = True
-
-      if "simpledd" not in self.config:
-        self.config.update({"simpledd":False})
-        self.element_updated = True
-
-      if ("type" not in self.config or self.config['type'] == "-1") and CP != None:
-          self.config.update({"type":CP.lateralTuning.which()})
-          print(CP.lateralTuning.which())
-          self.element_updated = True
-
-      if self.config["type"] == "pid":
-        if "Kf" not in self.config:
-          self.config.update({"Kf":"-1"})
-          self.element_updated = True
-
-        if "dampTime" not in self.config:
-          self.config.update({"dampTime":"-1"})
-          self.element_updated = True
-        if "reactMPC" not in self.config:
-          self.config.update({"reactMPC":"-1"})
-          self.element_updated = True
-        if "dampMPC" not in self.config:
-          self.config.update({"dampMPC":"-1"})
-          self.element_updated = True
-        if "type" not in self.config:
-          self.config.update({"type":"pid"})
-          self.element_updated = True
-        if "rateFFGain" not in self.config:
-          self.config.update({"rateFFGain":"-1"})
-          self.element_updated = True
-        if "polyDamp" not in self.config:
-          self.config.update({"polyFactor":"-1"})
-          self.config.update({"polyDamp":"-1"})
-          self.config.update({"polyReact":"-1"})
-          self.element_updated = True
-
-      else:
-        if "timeConst" not in self.config:
-          self.config.update({"type":"indi", "timeConst":"-1", "actEffect":"-1", "outerGain":"-1", "innerGain":"-1", "reactMPC":"-1"})
-          self.element_updated = True
-        if "type" not in self.config:
-          self.config.update({"type":"indi"})
-          self.element_updated = True
-        if "reactMPC" not in self.config:
-          self.config.update({"reactMPC":"-1"})
-          self.element_updated = True
-
-      if self.element_updated:
-        print("updated")
-        self.write_config(self.config)
-
-    else:
-      try:
-        if (CP is not None and CP.lateralTuning.which() == "pid") or self.type == "pid":
-          self.config = {"type":"pid","Kp":"-1", "Ki":"-1", "Kf":"-1", "dampTime":"-1", "reactMPC":"-1", "dampMPC":"-1", "rateFFGain":"-1", "polyReact":"-1", \
-                    "polyDamp":"-1", "cameraOffset":"0.06", "lastTrMode":"1", "battChargeMin":"60", "battChargeMax":"70", "wheelTouchSeconds":"180", \
-                    "battPercOff":"25", "carVoltageMinEonShutdown":"11800", "brakeStoppingTarget":"0.25", "leadDistance":"5", "simpledd":False}
-        else:
-          self.config = {"type":"indi","timeConst":"-1", "actEffect":"-1", "outerGain":"-1", "innerGain":"-1", "reactMPC":"-1", "cameraOffset":"0.06", \
-                    "lastTrMode":"1", "battChargeMin":"60", "battChargeMax":"70", "wheelTouchSeconds":"180", \
-                    "battPercOff":"25", "carVoltageMinEonShutdown":"11800", "brakeStoppingTarget":"0.25", "leadDistance":"5", "simpledd":False}
-      except:
-        self.config = {"type":"pid","Kp":"-1", "Ki":"-1", "Kf":"-1", "dampTime":"-1", "reactMPC":"-1", "dampMPC":"-1", "rateFFGain":"-1", "polyReact":"-1", \
-                    "polyDamp":"-1", "cameraOffset":"0.06", "lastTrMode":"1", "battChargeMin":"60", "battChargeMax":"70", "wheelTouchSeconds":"180", \
-                    "battPercOff":"25", "carVoltageMinEonShutdown":"11800", "brakeStoppingTarget":"0.25", "leadDistance":"5", "simpledd":False}
-
+    if self.element_updated:
+      print("updated")
       self.write_config(self.config)
+
     return self.config
 
   def write_config(self, config):

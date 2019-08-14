@@ -141,7 +141,7 @@ class CarInterface(object):
       ret.safetyModel = car.CarParams.SafetyModel.hondaBosch
       ret.enableCamera = True
       ret.radarOffCan = True
-      ret.openpilotLongitudinalControl = True
+      ret.openpilotLongitudinalControl = False
     else:
       ret.safetyModel = car.CarParams.SafetyModel.honda
       ret.enableCamera = not any(x for x in CAMERA_MSGS if x in fingerprint) or is_panda_black
@@ -239,7 +239,7 @@ class CarInterface(object):
       ret.lateralTuning.pid.polyFactor = 0.002
       ret.lateralTuning.pid.polyDampTime = 0.15
       ret.lateralTuning.pid.polyReactTime = 0.5
-      ret.lateralTuning.pid.dampTime = 0.0
+      ret.lateralTuning.pid.dampTime = 0.1
       ret.lateralTuning.pid.dampMPC = 0.1
       ret.lateralTuning.pid.reactMPC = 0.005
       ret.steerLimitAlert = False

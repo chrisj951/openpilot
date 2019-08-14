@@ -67,7 +67,7 @@ class PIController(object):
     if override and not self.saturated:
       self.i -= self.i_unwind_rate * float(np.sign(self.i))
     else:
-      i = self.i + (error + add_error) * self.k_i * self.i_rate
+      i = self.i + (error + add_error * 0.5) * self.k_i * self.i_rate
       control = self.p + self.p2 + self.f + i
 
       if self.convert is not None:
