@@ -253,8 +253,6 @@ class CarController(object):
           if CS.leadDistance > (self.prev_lead_distance + 8.0): #or self.rough_lead_speed > 1:
             self.prev_lead_distance = 0.0
             can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, 0, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
-          else:
-            can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, 0, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
       else:
         self.prev_lead_distance = CS.leadDistance
     else:
