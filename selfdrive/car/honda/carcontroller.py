@@ -107,7 +107,6 @@ class CarController(object):
     self.packer = CANPacker(dbc_name)
     self.new_radar_config = False
     self.prev_lead_distance = 0.0
-    self.stopped_lead_distance = 0.0
     self.lead_distance_counter = 1.0 # seconds since last update
     self.lead_distance_counter_prev = 1
     self.rough_lead_speed = 0.0 #delta ft/s
@@ -250,9 +249,10 @@ class CarController(object):
         can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.CANCEL, 0, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
       if CS.stopped:
         if CS.CP.carFingerprint in (CAR.INSIGHT):
-          if CS.leadDistance > (self.prev_lead_distance + 5.0) or self.rough_lead_speed > 1:
-            self.prev_lead_distance = 0.0
+          if CS.leadDistance > (self.prev_lead_distance + 5.0) or self.rough_lead_speed > 0.1:
             can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, 0, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
+        else:
+          can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, 0, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
       else:
         self.prev_lead_distance = CS.leadDistance
     else:
