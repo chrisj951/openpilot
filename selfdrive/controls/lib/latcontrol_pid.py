@@ -75,19 +75,20 @@ class LatControlPID(object):
       self.total_poly_projection = max(0.0, float(kegman.conf['polyReact']) + float(kegman.conf['polyDamp']))
       self.poly_smoothing = max(1.0, float(kegman.conf['polyDamp']) * 100.)
       self.poly_factor = float(kegman.conf['polyFactor'])
+      self.bias_factor = float()
 
   def get_projected_path_error(self, v_ego, angle_feedforward, angle_steers, live_params, path_plan, VM):
     curv_factor = interp(abs(angle_feedforward), [1.0, 5.0], [0.0, 1.0])
     self.d_poly[3] += (path_plan.dPoly[3] - self.d_poly[3]) / self.poly_smoothing
-    self.d_poly[2] += curv_factor * (path_plan.dPoly[2] - self.d_poly[2]) / (self.poly_smoothing * 1.5)
-    self.d_poly[1] += curv_factor * (path_plan.dPoly[1] - self.d_poly[1]) / (self.poly_smoothing * 3.0)
-    self.d_poly[0] += curv_factor * (path_plan.dPoly[0] - self.d_poly[0]) / (self.poly_smoothing * 4.5)
+    self.d_poly[2] += curv_factor * (path_plan.dPoly[2] - self.d_poly[2]) / (self.poly_smoothing) # * 1.5)
+    self.d_poly[1] += curv_factor * (path_plan.dPoly[1] - self.d_poly[1]) / (self.poly_smoothing) # * 3.0)
+    self.d_poly[0] += curv_factor * (path_plan.dPoly[0] - self.d_poly[0]) / (self.poly_smoothing) # * 4.5)
     #self.p_prob += (path_plan.pProb - self. p_prob) / (self.poly_smoothing)
-    self.s_poly[1] = float(np.tan(VM.calc_curvature(np.radians(angle_steers - live_params.angleOffset), float(v_ego))))
+    self.s_poly[1] = float(np.tan(VM.calc_curvature(np.radians(angle_steers - live_params.angleOffsetAverage - self.angle_bias), float(v_ego))))
     x = int(float(v_ego) * self.total_poly_projection * interp(abs(angle_feedforward), [0., 5.], [0.25, 1.0]))
-    self.p_pts = np.polyval(self.d_poly, np.arange(0, x))
+    self.d_pts = np.polyval(self.d_poly, np.arange(0, x))
     self.s_pts = np.polyval(self.s_poly, np.arange(0, x))
-    return (np.sum(self.p_pts) - np.sum(self.s_pts))
+    return (np.sum(self.d_pts) - np.sum(self.s_pts))
 
   def reset(self):
     self.pid.reset()
@@ -142,7 +143,9 @@ class LatControlPID(object):
     pid_log.steerAngle = float(angle_steers)
     pid_log.steerRate = float(angle_steers_rate)
 
-    max_bias_change = 0.0002 / (abs(self.angle_bias) + 0.0001)
+    max_bias_change = 0.001  #min(0.001, 0.0002 / (abs(self.angle_bias) + 0.000001))
+    max_bias_change *= interp(abs(angle_steers - live_params.angleOffsetAverage - self.angle_bias), [0.0, 5.0], [0.25, 1.0])
+    max_bias_change *= interp(abs(path_plan.rateSteers), [1.0, 5.0], [0.25, 1.0])
     self.angle_bias = float(np.clip(live_params.angleOffset - live_params.angleOffsetAverage, self.angle_bias - max_bias_change, self.angle_bias + max_bias_change))
     self.live_tune(CP)
 

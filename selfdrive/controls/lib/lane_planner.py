@@ -37,6 +37,7 @@ class LanePlanner(object):
     self.l_prob = 0.
     self.r_prob = 0.
     self.lr_prob = 0.
+    self.race_factor = 0.
 
     self._path_pinv = compute_path_pinv()
     self.x_points = np.arange(50)
@@ -53,7 +54,7 @@ class LanePlanner(object):
     self.l_prob = md.leftLane.prob  # left line prob
     self.r_prob = md.rightLane.prob  # right line prob
 
-  def update_lane(self, v_ego):
+  def update_lane(self, controls):
     # only offset left and right lane lines; offsetting p_poly does not make sense
     self.l_poly[3] += CAMERA_OFFSET
     self.r_poly[3] += CAMERA_OFFSET
@@ -64,12 +65,36 @@ class LanePlanner(object):
     self.lane_width_certainty += 0.05 * (self.l_prob * self.r_prob - self.lane_width_certainty)
     current_lane_width = abs(self.l_poly[3] - self.r_poly[3])
     self.lane_width_estimate += 0.005 * (current_lane_width - self.lane_width_estimate)
-    speed_lane_width = interp(v_ego, [0., 31.], [2.8, 3.5])
+    speed_lane_width = interp(controls.vEgo, [0., 31.], [2.8, 3.5])
     self.lane_width = self.lane_width_certainty * self.lane_width_estimate + \
                       (1 - self.lane_width_certainty) * speed_lane_width
 
-    self.d_poly = calc_d_poly(self.l_poly, self.r_poly, self.p_poly, self.l_prob, self.r_prob, self.lane_width)
+    d_poly = calc_d_poly(self.l_poly, self.r_poly, self.p_poly, self.l_prob, self.r_prob, self.lane_width)
 
-  def update(self, v_ego, md):
+    '''self.p_poly = d_poly.copy()
+
+    if controls.lateralControlState.which() == "pidState":
+      torque_request = controls.lateralControlState.pidState.output
+    elif controls.lateralControlState.which() == "lqrState":
+      torque_request = controls.lateralControlState.lqrState.output
+    else:
+      torque_request = controls.lateralControlState.indiState.output
+    self.race_factor += 0.05 * (abs(torque_request) - self.race_factor)
+    curv_factor = abs(d_poly[1] / 0.001)
+
+    if (d_poly[3] <= 0) != (self.d_poly[1] <= 0) and (self.d_poly[3] <= 0) != (torque_request <= 0): # and abs(d_poly[3]) <= abs(self.d_poly[3]):
+      self.p_poly[3] *= max(0.0, 1.0 - self.race_factor * curv_factor)
+    #else:
+    #  self.p_poly[3] += (d_poly[3] - self.d_poly[3]) * self.race_factor * 10.0
+
+    #if (d_poly[2] <= 0) != (self.d_poly[1] <= 0) and (self.d_poly[2] <= 0) != (torque_request <= 0): # and abs(d_poly[2]) <= abs(self.d_poly[2]):
+    #  self.p_poly[2] *= max(0.5, 1.0 - self.race_factor * curv_factor)
+    #else:
+    #  self.p_poly[2] += (d_poly[2] - self.d_poly[2]) * self.race_factor * 10.0
+    '''
+
+    self.d_poly = d_poly
+
+  def update(self, md, controls):
     self.parse_model(md)
-    self.update_lane(v_ego)
+    self.update_lane(controls)
