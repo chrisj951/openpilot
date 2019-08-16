@@ -1,7 +1,7 @@
 import os
 import math
 import numpy as np
-from common.numpy_fast import interp
+from common.numpy_fast import clip
 
 from common.realtime import sec_since_boot
 from selfdrive.services import service_list
@@ -75,11 +75,12 @@ class PathPlanner(object):
     self.r_poly = list(self.LP.r_poly)
     self.p_poly = list(self.LP.p_poly)
     self.d_poly = list(self.LP.d_poly)
+    self.g_poly = list(self.LP.g_poly)
 
     # prevent over-inflation of desired angle
     actual_delta = math.radians(angle_steers - angle_offset) / VM.sR
     delta_limit = abs(actual_delta) + abs(3.0 * self.mpc_solution[0].rate[0])
-    self.cur_state[0].delta = np.clip(self.cur_state[0].delta, -delta_limit, delta_limit)
+    self.cur_state[0].delta = clip(self.cur_state[0].delta, -delta_limit, delta_limit)
 
     # account for actuation delay
     self.cur_state = calc_states_after_delay(self.cur_state, v_ego, angle_steers - angle_offset, curvature_factor, VM.sR, CP.steerActuatorDelay)
@@ -128,10 +129,14 @@ class PathPlanner(object):
     plan_send.pathPlan.laneWidth = float(self.LP.lane_width)
     plan_send.pathPlan.pPoly = [float(x) for x in self.LP.p_poly]
     plan_send.pathPlan.dPoly = [float(x) for x in self.LP.d_poly]
+    plan_send.pathPlan.gPoly = [float(x) for x in self.LP.g_poly]
+    plan_send.pathPlan.cPoly = [float(x) for x in self.LP.c_poly]
     plan_send.pathPlan.lPoly = [float(x) for x in self.l_poly]
     plan_send.pathPlan.lProb = float(self.LP.l_prob)
+    plan_send.pathPlan.cProb = float(self.LP.c_prob)
     plan_send.pathPlan.rPoly = [float(x) for x in self.r_poly]
     plan_send.pathPlan.rProb = float(self.LP.r_prob)
+    plan_send.pathPlan.gProb = float(self.LP.g_prob)
     plan_send.pathPlan.angleSteers = float(self.angle_steers_des_mpc)
     plan_send.pathPlan.rateSteers = float(rate_desired)
     plan_send.pathPlan.angleBias = float(angle_offset - angle_offset_average)
