@@ -695,6 +695,8 @@ struct PathPlan {
   rProb @7 :Float32;
   pPoly @20 :List(Float32);
   pProb @21 :Float32;
+  gPoly @23 :List(Float32);
+  gProb @24 :Float32;
 
   angleSteers @8 :Float32; # deg
   rateSteers @13 :Float32; # deg/s
