@@ -106,20 +106,29 @@ class CarController(object):
     self.last_pump_ts = 0.
     self.packer = CANPacker(dbc_name)
     self.new_radar_config = False
-    self.prev_lead_distance = 0.0
+    self.prev_lead_distance = 0.0 # a non-linear value
     self.lead_distance_counter = 1.0 # seconds since last update
     self.lead_distance_counter_prev = 1
-    self.rough_lead_speed = 0.0 #delta ft/s
+    self.rough_lead_speed = 0.0 #delta m/s
     self.desiredTR = 0 # the desired distance bar
     self.params = CarControllerParams(car_fingerprint)
 
-  # ft/s - lead_distance is in ft
+  def honda_bosch_to_meters(self, lead_distance):
+    if lead_distance < 100:
+      return (0.1 * lead_distance) * 0.9144
+    elif lead_distance < 160:
+      t = (lead_distance - 100) /60.0
+      return ( (35 * t**2) + (10 * (1 - t)**2) + (28 * t *(1 - t))) * 0.9144
+    else:
+      return (lead_distance - 125) * 0.9144
+
+  # lead_distance is non linear
   # Must be called every frame and assumes 100hz (frames per second)
   def rough_speed(self, lead_distance):
     #If we got an updated lead distance calculate the closing rate
     if self.prev_lead_distance != lead_distance:
       #delta distance is negative when approaching
-      delta_distance = lead_distance - self.prev_lead_distance
+      delta_distance = self.honda_bosch_to_meters(lead_distance) - self.honda_bosch_to_meters(self.prev_lead_distance)
       #delta_speed is distance / time (seconds when called at 100hz)
       delta_speed = delta_distance / self.lead_distance_counter
       #set the rough lead speed by feathering in the updated values
@@ -136,7 +145,7 @@ class CarController(object):
       self.lead_distance_counter = 1.0
     #increase counter by 0.01 (1/100 of a second)
     self.lead_distance_counter += 0.01
-    print("{0} ft/s".format(self.rough_lead_speed))
+    print("{0} m/s".format(self.rough_lead_speed))
 
   # relative distance is in ft from output
   # v_ego is current car speed
@@ -233,10 +242,11 @@ class CarController(object):
     if CS.CP.carFingerprint in (CAR.INSIGHT, CAR.ACCORD):
       self.rough_speed(CS.leadDistance)
       if kegman.conf['simpledd'] == True:
+        #Get the desiredTR before using it.
+        self.get_TR(CS.leadDistance, CS.v_ego, CS.stopped)
+        # update to CS so we can push it to ui through cereal
+        CS.desiredTR = self.desiredTR
         if frame % 13 < 2 and CS.hud_distance != (self.desiredTR % 4):
-          self.get_TR(CS.leadDistance, CS.v_ego, CS.stopped)
-          # update to CS so we can push it to ui through cereal
-          CS.desiredTR = self.desiredTR
           # press distance bar button
           can_sends.append(hondacan.spam_buttons_command(self.packer, 0, CruiseSettings.LEAD_DISTANCE, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
           # always set cruise setting to 0 after button press
