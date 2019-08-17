@@ -29,7 +29,7 @@ class LatControlPID(object):
     self.damp_angle_steers = 0.
     self.damp_time = 0.1
     self.react_mpc = 0.0
-    self.damp_mpc = 0.25
+    self.damp_mpc = 0.1
     self.angle_ff_ratio = 0.0
     self.gernbySteer = True
     self.standard_ff_ratio = 0.0

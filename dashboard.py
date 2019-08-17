@@ -98,7 +98,7 @@ def dashboard_thread(rate=100):
   polyDataString = "%.10f,%0.8f,%0.6f,%0.4f,"
   pathDataString = ""
   liveParamsFormatString = "liveParameters,user=" + user_id + " yaw_rate=%s,gyro_bias=%s,angle_offset=%s,angle_offset_avg=%s,tire_stiffness=%s,steer_ratio=%s %s\n"
-  liveParamsString = "%0.2f,%0.2f,%0.2f,%0.2f,%0.2f,%0.2f,%d|"
+  liveParamsString = "%0.4f,%0.4f,%0.4f,%0.4f,%0.4f,%0.4f,%d|"
   liveParamsDataString = ""
   influxDataString = ""
   kegmanDataString = ""
