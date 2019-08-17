@@ -55,7 +55,7 @@ def brake_pump_hysteresis(apply_brake, apply_brake_last, last_pump_ts, ts):
   return pump_on, last_pump_ts
 
 
-def process_hud_alert(hud_alert):
+def process_hud_alert(hud_alert, vEgo):
   # initialize to no alert
   fcw_display = 0
   steer_required = 0
@@ -67,7 +67,7 @@ def process_hud_alert(hud_alert):
     fcw_display = hud_alert[1]
   elif hud_alert == AH.STEER:       # STEER
     steer_required = hud_alert[1]
-  elif hud_alert == AH.LDW and self.vEgo >= 20:         # LDW
+  elif hud_alert == AH.LDW and vEgo >= 20:         # LDW
     ldw_display = hud_alert[1]
   else:                             # any other ACC alert
     acc_alert = hud_alert[1]
@@ -110,7 +110,6 @@ class CarController(object):
     self.lead_distance_counter = 1.0 # seconds since last update
     self.lead_distance_counter_prev = 1
     self.rough_lead_speed = 0.0 #delta m/s
-    self.vEgo = 0.0 # m/s
     self.desiredTR = 0 # the desired distance bar
     self.params = CarControllerParams(car_fingerprint)
 
@@ -184,8 +183,6 @@ class CarController(object):
 
     P = self.params
 
-    self.vEgo = CS.v_ego
-
     # *** apply brake hysteresis ***
     brake, self.braking, self.brake_steady = actuator_hystereses(actuators.brake, self.braking, self.brake_steady, CS.v_ego, CS.CP.carFingerprint)
 
@@ -210,7 +207,7 @@ class CarController(object):
       hud_car = 1
 
     #print("{0} {1} {2}".format(chime, alert_id, hud_alert))
-    fcw_display, steer_required, acc_alert, ldw_display = process_hud_alert(hud_alert)
+    fcw_display, steer_required, acc_alert, ldw_display = process_hud_alert(hud_alert, CS.v_ego)
 
     hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), 1, hud_car,
                   0xc1, hud_lanes, fcw_display, acc_alert, steer_required, CS.lkMode, ldw_display)
