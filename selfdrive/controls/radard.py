@@ -166,9 +166,9 @@ class RadarD(object):
     dat.radarState.radarErrors = list(rr.errors)
     dat.radarState.controlsStateMonoTime = self.last_controls_state_ts
 
-    #if has_radar:
-    dat.radarState.leadOne = get_lead(self.v_ego, self.ready, clusters, sm['model'].lead, low_speed_override=True)
-    dat.radarState.leadTwo = get_lead(self.v_ego, self.ready, clusters, sm['model'].leadFuture, low_speed_override=False)
+    if has_radar:
+      dat.radarState.leadOne = get_lead(self.v_ego, self.ready, clusters, sm['model'].lead, low_speed_override=True)
+      dat.radarState.leadTwo = get_lead(self.v_ego, self.ready, clusters, sm['model'].leadFuture, low_speed_override=False)
     return dat
 
 
@@ -197,7 +197,7 @@ def radard_thread(gctx=None):
   rk = Ratekeeper(rate, print_delay_threshold=None)
   RD = RadarD(mocked)
 
-  has_radar = not CP.radarOffCan
+  has_radar = CP.radarOffCan
 
   while 1:
     can_strings = messaging.drain_sock_raw(can_sock, wait_for_one=True)
