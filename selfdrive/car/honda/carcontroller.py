@@ -67,7 +67,7 @@ def process_hud_alert(hud_alert, vEgo):
     fcw_display = hud_alert[1]
   elif hud_alert == AH.STEER:       # STEER
     steer_required = hud_alert[1]
-  elif hud_alert == AH.LDW and vEgo >= 20:         # LDW
+  elif hud_alert == AH.LDW and vEgo >= 25:         # LDW
     ldw_display = hud_alert[1]
   else:                             # any other ACC alert
     acc_alert = hud_alert[1]
