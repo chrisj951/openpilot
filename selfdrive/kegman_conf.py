@@ -46,8 +46,9 @@ class kegman_conf():
         self.conf['polyDamp'] = str(round(CP.lateralTuning.pid.polyDampTime,3))
         self.conf['polyFactor'] = str(round(CP.lateralTuning.pid.polyFactor,3))
         write_conf = True
-      if self.conf['simpledd'] == "-1":
-        self.conf['simpledd'] = False
+      if self.conf['lgain'] == "-1":
+        self.conf['lgain'] = str(CP.lateralTuning.pid.lqr.dcGain)
+        self.conf['lscale'] = "1.0"
     else:
       self.type = "indi"
       if self.conf['type'] == "-1":
@@ -69,10 +70,17 @@ class kegman_conf():
 
   def read_config(self, CP=None, Reset=False):
     self.element_updated = False
+    try:
+      with open('/data/openpilot/selfdrive/gernby.json', 'r') as f:
+        base_config = json.load(f)
+    except IOError:
+      base_config = {  "tuneRev": "0.0.2","Kf": "-1","Ki": "-1","Kp": "-1","dampTime": "-1","rateFFGain": "-1","reactMPC": "-1", \
+        "type": "-1","dampMPC":"-1","polyReact":"-1","polyDamp":"-1","polyFactor":"-1","timeConst":"-1","actEffect":"-1", \
+        "outerGain":"-1","innerGain":"-1","innerGain":"-1","outerGain":"-1","actEffect":"-1","timeConst":"-1","lgain":"-1","lscale":"1.0"}
 
     if Reset or not os.path.isfile('/data/kegman.json'):
       self.config = {"cameraOffset":"0.06", "lastTrMode":"1", "battChargeMin":"60", "battChargeMax":"70", "wheelTouchSeconds":"180", \
-              "battPercOff":"25", "carVoltageMinEonShutdown":"11800", "brakeStoppingTarget":"0.25", "leadDistance":"8", "simpledd": False}
+      "battPercOff":"25", "carVoltageMinEonShutdown":"11800", "brakeStoppingTarget":"0.25", "leadDistance":"5", "simpledd":False}
     else:
       with open('/data/kegman.json', 'r') as f:
         self.config = json.load(f)
@@ -93,6 +101,16 @@ class kegman_conf():
 
     if "simpledd" not in self.config:
       self.config.update({"simpledd":False})
+      self.element_updated = True
+
+    if "cameraOffset" not in self.config:
+      self.config.update({"cameraOffset":"0.06"})
+      self.element_updated = True
+
+    if "tuneRev" not in self.config or self.config['tuneRev'] != base_config['tuneRev']:
+      for key, value in base_config.iteritems():
+        self.config.update({key: value})
+        self.element_updated = True
 
     if ("type" not in self.config or self.config['type'] == "-1") and CP != None:
         self.config.update({"type":CP.lateralTuning.which()})
