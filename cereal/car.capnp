@@ -367,6 +367,7 @@ struct CarParams {
     polyReactTime @11 :Float32;
     polyScale @12 :List(List(Float32));
     steerPscale @13 :List(List(Float32));
+    lqr @14 :LateralLQRTuning;
   }
 
   struct LongitudinalPIDTuning {
