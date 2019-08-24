@@ -236,13 +236,10 @@ class CarInterface(object):
       ret.longitudinalTuning.kiBP = [0., 35.]
       ret.longitudinalTuning.kiV = [0.18, 0.12]
       ret.lateralTuning.pid.kf = 0.00006 # feed-forward
-      ret.lateralTuning.pid.rateFFGain = 0.4
-      ret.lateralTuning.pid.polyFactor = 0.002
+      ret.lateralTuning.pid.polyFactor = 0.001
       ret.lateralTuning.pid.polyDampTime = 0.125
-      ret.lateralTuning.pid.polyReactTime = 0.42
-      ret.lateralTuning.pid.dampTime = 0.0
+      ret.lateralTuning.pid.polyReactTime = 0.5
       ret.lateralTuning.pid.dampMPC = 0.1
-      ret.lateralTuning.pid.reactMPC = 0.0
       ret.steerLimitAlert = False
 
     elif candidate == CAR.ACURA_ILX:
