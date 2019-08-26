@@ -173,7 +173,7 @@ class CarInterface(object):
 
     ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
     ret.lateralTuning.pid.kf = 0.00006 # conservative feed-forward
-    ret.lateralTuning.pid.dampTime = 0.02
+    ret.lateralTuning.pid.dampTime = 0.01
     ret.lateralTuning.pid.reactMPC = 0.025
     ret.lateralTuning.pid.dampMPC = 0.1
     ret.lateralTuning.pid.rateFFGain = 0.4
@@ -237,7 +237,7 @@ class CarInterface(object):
       ret.longitudinalTuning.kiV = [0.18, 0.12]
       ret.lateralTuning.pid.kf = 0.00006 # feed-forward
       ret.lateralTuning.pid.polyFactor = 0.001
-      ret.lateralTuning.pid.polyDampTime = 0.125
+      ret.lateralTuning.pid.polyDampTime = 0.135
       ret.lateralTuning.pid.polyReactTime = 0.5
       ret.lateralTuning.pid.dampMPC = 0.1
       ret.steerLimitAlert = False
@@ -432,7 +432,7 @@ class CarInterface(object):
     ret.startAccel = 0.5
 
     ret.steerActuatorDelay = 0.1
-    ret.steerRateCost = 0.5
+    ret.steerRateCost = 0.3
 
     return ret
 
@@ -556,8 +556,8 @@ class CarInterface(object):
     # events
     events = []
     # wait 1.0s before throwing the alert to avoid it popping when you turn off the car
-    #if self.cp_cam.can_invalid_cnt >= 100 and self.CS.CP.carFingerprint not in HONDA_BOSCH and self.CP.enableCamera:
-    #  events.append(create_event('invalidGiraffeHonda', [ET.NO_ENTRY, ET.IMMEDIATE_DISABLE, ET.PERMANENT]))
+    if self.cp_cam.can_invalid_cnt >= 100 and self.CS.CP.carFingerprint not in HONDA_BOSCH and self.CP.enableCamera:
+      events.append(create_event('invalidGiraffeHonda', [ET.NO_ENTRY, ET.IMMEDIATE_DISABLE, ET.PERMANENT]))
 
     if not self.CS.lkMode:
       events.append(create_event('manualSteeringRequired', [ET.WARNING]))
@@ -589,6 +589,9 @@ class CarInterface(object):
     if self.CP.enableCruise and ret.vEgo < self.CP.minEnableSpeed:
       events.append(create_event('speedTooLow', [ET.NO_ENTRY]))
 
+    if ret.brakePressed and not self.brake_pressed_prev:
+      self.CS.auto_resume = ret.cruiseState.enabled
+
     # disable on pedals rising edge or when brake is pressed and speed isn't zero
     if ((not self.CS.CP.carFingerprint in HONDA_BOSCH) and ret.gasPressed and not self.gas_pressed_prev) or \
        (ret.brakePressed and (not self.brake_pressed_prev or ret.vEgo > 0.001)):
@@ -596,6 +599,14 @@ class CarInterface(object):
 
     if (not self.CS.CP.carFingerprint in HONDA_BOSCH) and ret.gasPressed:
       events.append(create_event('pedalPressed', [ET.PRE_ENABLE]))
+
+    if not self.CP.radarOffCan and self.CS.auto_resume and self.CS.pedal_gas > 0 and self.CS.v_ego > 3.0:
+      if not self.CS.auto_resuming:
+        self.CS.auto_resuming = True
+      else:
+        events.append(create_event('buttonEnable', [ET.ENABLE]))
+        self.CS.auto_resuming = False
+        self.CS.auto_resume = False
 
     # it can happen that car cruise disables while comma system is enabled: need to
     # keep braking if needed or if the speed is very low
@@ -633,6 +644,8 @@ class CarInterface(object):
          (enable_pressed and get_events(events, [ET.NO_ENTRY])):
         events.append(create_event('buttonEnable', [ET.ENABLE]))
         self.last_enable_sent = cur_time
+      elif ret.cruiseState.enabled and self.CS.auto_resume:
+        events.append(create_event('buttonEnable', [ET.ENABLE]))
     elif enable_pressed:
       events.append(create_event('buttonEnable', [ET.ENABLE]))
 

@@ -205,6 +205,7 @@ class CarState(object):
 
     self.cruise_mode = 0
     self.stopped = 0
+    self.auto_resume = False
 
     # vEgo kalman filter
     dt = 0.01
@@ -290,6 +291,7 @@ class CarState(object):
     self.gear = 0 if self.CP.carFingerprint == CAR.CIVIC else cp.vl["GEARBOX"]['GEAR']
     self.angle_steers = cp.vl["STEERING_SENSORS"]['STEER_ANGLE']
     self.angle_steers_rate = cp.vl["STEERING_SENSORS"]['STEER_ANGLE_RATE']
+    self.auto_resume = self.auto_resume and abs(self.angle_steers) < 30.0
     steer_counter = cp.vl["STEERING_SENSORS"]['COUNTER']
     if not (steer_counter == (self.prev_steering_counter + 1) % 4):
       if steer_counter == self.prev_steering_counter:
@@ -304,7 +306,7 @@ class CarState(object):
     self.cruise_buttons = cp.vl["SCM_BUTTONS"]['CRUISE_BUTTONS']
 
     if cp.vl["SCM_FEEDBACK"]['LEFT_BLINKER'] or cp.vl["SCM_FEEDBACK"]['RIGHT_BLINKER']:
-      self.blinker_on = 150
+      self.blinker_on = 200
       self.left_blinker_on = cp.vl["SCM_FEEDBACK"]['LEFT_BLINKER']
       self.right_blinker_on = cp.vl["SCM_FEEDBACK"]['RIGHT_BLINKER']
     elif self.blinker_on == 0:

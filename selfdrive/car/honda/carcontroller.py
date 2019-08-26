@@ -110,6 +110,7 @@ class CarController(object):
     self.lead_distance_counter = 1.0 # seconds since last update
     self.lead_distance_counter_prev = 1
     self.rough_lead_speed = 0.0 #delta m/s
+    self.resume_count = 0
     self.desiredTR = 0 # the desired distance bar
     self.params = CarControllerParams(car_fingerprint)
 
@@ -263,8 +264,27 @@ class CarController(object):
             can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, 0, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
         else:
           can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, 0, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
+      elif CS.auto_resume and CS.pedal_gas > 0 and CS.v_ego > 3.0:
+        if self.resume_count < 10:
+          can_sends.append(hondacan.spam_buttons_command(self.packer, 0, 0, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
+          CS.auto_resuming = False
+          self.resume_count += 1
+        elif self.resume_count < 20:
+          can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, 0, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
+          CS.auto_resuming = (self.resume_count < 15)
+          self.resume_count += 1
+        elif self.resume_count < 30:
+          can_sends.append(hondacan.spam_buttons_command(self.packer, 0, 0, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
+          CS.auto_resuming = False
+          self.resume_count += 1
+        else:
+          CS.auto_resuming = False
+          CS.auto_resume = False
+          self.resume_count = 0
       else:
         self.prev_lead_distance = CS.leadDistance
+        self.resume_count = 0
+        CS.auto_resuming = False
     else:
       # Send gas and brake commands.
       if (frame % 2) == 0:

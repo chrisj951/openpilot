@@ -225,7 +225,8 @@ def state_control(frame, rcv_frame, plan, path_plan, live_params, CS, CP, state,
   # check if user has interacted with the car
   driver_engaged = len(CS.buttonEvents) > 0 or \
                    v_cruise_kph != v_cruise_kph_last or \
-                   CS.steeringPressed
+                   CS.steeringPressed or CS.vEgo == 0.0 or \
+                   CS.gasPressed
 
   # add eventual driver distracted events
   events = driver_status.update(events, driver_engaged, isActive(state), CS.standstill)
