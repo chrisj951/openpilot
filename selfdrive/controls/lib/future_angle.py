@@ -18,17 +18,17 @@ class future_angle(object):
     self.outer_angle = 0.
     self.inner_angle = 0.
     self.deadzone = 1.5
-  def update(self, v_ego, angle_steers, rate_steers, eps_torque, steer_override):
+  def update(self, v_ego, angle_steers, rate_steers, rate_steers_des, eps_torque, steer_override):
 
+    rate_steers = 0.5 * rate_steers + 0.5 * rate_steers_des
     v_index = int(v_ego // 3)
 
     isOutward = (angle_steers > 0) == (self.inverted * eps_torque > 0) and (eps_torque != 0)
-    isConsistent = max(max(self.torque_samples_inward), max(self.torque_samples_outward)) * min(min(self.torque_samples_inward), min(self.torque_samples_outward)) >= 0 and max(self.angle_samples) * min(self.angle_samples) >= 0
     isDeadzone = (isOutward and abs(angle_steers - self.inner_angle) < self.deadzone) or (not isOutward and abs(angle_steers - self.outer_angle) < self.deadzone)
 
-    if isConsistent and not isDeadzone and abs(self.inverted) >= 1.0 and \
-      (self.torque_samples_inward.sum != 0 or self.torque_samples_outward.sum != 0) and \
-      abs(angle_steers) > 1.0 and abs(rate_steers) > 1.0 and abs(eps_torque) > 1.0:
+    if not isDeadzone and not steer_override and abs(self.inverted) >= 1.0 and abs(angle_steers) > 1.0 and abs(rate_steers) > 1.0 and abs(eps_torque) > 1.0 and \
+      max(max(self.torque_samples_inward), max(self.torque_samples_outward)) * min(min(self.torque_samples_inward), min(self.torque_samples_outward)) >= 0 and \
+      max(self.angle_samples) * min(self.angle_samples) >= 0:
 
       if isOutward:
         self.torque_gain_outward_count[v_index] += self.index_increment
@@ -37,7 +37,7 @@ class future_angle(object):
         self.torque_gain_inward_count[v_index] += self.index_increment
         self.torque_gain_inward[v_index] += ((abs(self.torque_samples_inward[self.frame % self.torque_count]) / abs(rate_steers)) - self.torque_gain_inward[v_index]) / min(1000,self.torque_gain_inward_count[v_index])
 
-    elif abs(self.inverted) < 1.0 and abs(rate_steers * (self.torque_samples_inward[self.frame % self.torque_count] + self.torque_samples_outward[self.frame % self.torque_count])) > 0:
+    elif not steer_override and abs(self.inverted) < 1.0 and abs(rate_steers * (self.torque_samples_inward[self.frame % self.torque_count] + self.torque_samples_outward[self.frame % self.torque_count])) > 0:
       if (rate_steers < 0) == ((self.torque_samples_inward[self.frame % self.torque_count] + self.torque_samples_outward[self.frame % self.torque_count]) < 0):
         self.inverted += 0.001
       else:

@@ -8,6 +8,7 @@ from common.realtime import sec_since_boot
 from common.params import Params
 import json
 import numpy as np
+from numpy import array
 
 class LatControlLIF(object):
   def __init__(self, CP):
@@ -26,6 +27,7 @@ class LatControlLIF(object):
     self.s_poly = [0., 0., 0., 0.]
     self.c_prob = 1.0
     self.damp_angle_steers = 0.
+    self.damp_rate_steers_des = 0.
     self.damp_time = 0.1
     self.react_mpc = 0.0
     self.damp_mpc = 0.1
@@ -82,7 +84,7 @@ class LatControlLIF(object):
       self.future_angle.spring_factor = float(kegman.conf['springFactor'])
       self.future_angle.deadzone = float(kegman.conf['deadzone'])
 
-  def get_projected_path_error(self, v_ego, angle_feedforward, angle_steers, live_params, path_plan, VM):
+  '''def get_projected_path_error(self, v_ego, angle_feedforward, angle_steers, live_params, path_plan, VM):
     curv_factor = interp(abs(angle_feedforward), [1.0, 5.0], [0.0, 1.0])
     self.p_poly[3] += (path_plan.pPoly[3] - self.p_poly[3]) # / 1.0
     self.p_poly[2] += curv_factor * (path_plan.pPoly[2] - self.p_poly[2]) # / (1.5)
@@ -93,6 +95,18 @@ class LatControlLIF(object):
     self.p_pts = np.polyval(self.p_poly, np.arange(0, x))
     self.s_pts = np.polyval(self.s_poly, np.arange(0, x))
     path_error = path_plan.cProb * (np.sum(self.p_pts) - np.sum(self.s_pts))
+    if abs(path_error) < abs(self.path_error):
+      path_error *= 0.25
+    return path_error
+  '''
+
+  def get_projected_path_error(self, v_ego, angle_feedforward, angle_steers, live_params, live_mpc, VM):
+    self.s_poly[1] = float(np.tan(VM.calc_curvature(np.radians(angle_steers - live_params.angleOffsetAverage), float(v_ego))))
+    x = int(float(v_ego) * self.total_poly_projection * interp(abs(angle_feedforward), [0., 5.], [0.25, 1.0]))
+    self.s_pts = np.polyval(self.s_poly, live_mpc.x)
+    path_error = np.sum(array(live_mpc.y)[6:9]) - np.sum(array(self.s_pts)[5:8])
+    #if self.frame % 100 == 0:  print(live_mpc.y)
+    #elif self.frame % 50 == 0:  print(self.s_pts)
     if abs(path_error) < abs(self.path_error):
       path_error *= 0.25
     return path_error
@@ -127,13 +141,8 @@ class LatControlLIF(object):
     pid_log.steerAngle = float(angle_steers)
     pid_log.steerRate = float(angle_steers_rate)
 
-    max_bias_change = 0.002  #min(0.001, 0.0002 / (abs(self.angle_bias) + 0.000001))
-    max_bias_change *= interp(abs(angle_steers - live_params.angleOffsetAverage - self.angle_bias), [0.0, 5.0], [0.25, 1.0])
-    max_bias_change *= interp(abs(path_plan.rateSteers), [0.0, 5.0], [0.25, 1.0])
-    max_bias_change = max(0.0005, max_bias_change)
-    self.angle_bias = 0.0 #float(np.clip(live_params.angleOffset - live_params.angleOffsetAverage, self.angle_bias - max_bias_change, self.angle_bias + max_bias_change))
     self.live_tune(CP)
-    self.advance_angle = self.future_angle.update(v_ego, angle_steers - path_plan.angleOffset, angle_steers_rate, steering_torque, steer_override or not active)
+    self.advance_angle = self.future_angle.update(v_ego, angle_steers - path_plan.angleOffset, angle_steers_rate, self.damp_rate_steers_des, steering_torque, steer_override or not active)
 
     if v_ego < 0.3 or not active:
       output_steer = 0.0
@@ -175,7 +184,7 @@ class LatControlLIF(object):
       else:
         self.driver_assist_hold = steer_override and self.driver_assist_hold
 
-      self.path_error += (float(v_ego) * float(self.get_projected_path_error(v_ego, angle_feedforward, angle_steers + self.advance_angle, live_params, path_plan, VM)) \
+      self.path_error += (float(v_ego) * float(self.get_projected_path_error(v_ego, angle_feedforward, angle_steers + self.advance_angle, live_params, live_mpc, VM)) \
                           * self.poly_factor * self.angle_ff_gain - self.path_error) / (self.poly_smoothing)
       if self.driver_assist_hold and not steer_override and abs(angle_steers) > abs(self.damp_angle_steers_des):
         driver_opposing_i = False
