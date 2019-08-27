@@ -39,7 +39,7 @@ class PathPlanner(object):
   def setup_mpc(self, steer_rate_cost):
     self.libmpc = libmpc_py.libmpc
     #self.libmpc.init(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, steer_rate_cost)
-    self.libmpc.init(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, steer_rate_cost)
+    self.libmpc.init(MPC_COST_LAT.PATH * 0.1, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, steer_rate_cost)
 
     self.mpc_solution = libmpc_py.ffi.new("log_t *")
     self.cur_state = libmpc_py.ffi.new("state_t *")
@@ -110,7 +110,7 @@ class PathPlanner(object):
       rate_desired = math.degrees(self.mpc_solution[0].rate[0] * VM.sR)
       self.angle_steers_des_mpc = float(math.degrees(self.mpc_solution[0].delta[1] * VM.sR) + angle_offset_average)
     else:
-      self.libmpc.init(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, CP.steerRateCost)
+      self.libmpc.init(MPC_COST_LAT.PATH * 0.1, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, CP.steerRateCost)
       rate_desired = 0.0
       if cur_time > self.last_cloudlog_t + 5.0:
         self.last_cloudlog_t = cur_time
