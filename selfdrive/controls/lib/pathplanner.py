@@ -78,7 +78,8 @@ class PathPlanner(object):
     self.g_poly = list(self.LP.g_poly)
 
     # prevent over-inflation of desired angle
-    actual_delta = math.radians(angle_steers - angle_offset) / VM.sR
+    #actual_delta = math.radians(angle_steers - angle_offset) / VM.sR
+    actual_delta = math.radians(max(abs(sm['controlsState'].futureAngleSteers), abs(angle_steers)) - angle_offset) / VM.sR
     delta_limit = abs(actual_delta) + abs(3.0 * self.mpc_solution[0].rate[0])
     self.cur_state[0].delta = clip(self.cur_state[0].delta, -delta_limit, delta_limit)
 

@@ -45,10 +45,9 @@ class kegman_conf():
         self.conf['polyReact'] = str(round(CP.lateralTuning.pid.polyReactTime,3))
         self.conf['polyDamp'] = str(round(CP.lateralTuning.pid.polyDampTime,3))
         self.conf['polyFactor'] = str(round(CP.lateralTuning.pid.polyFactor,3))
+        self.conf['springFactor'] = str(round(CP.lateralTuning.pid.springFactor,3))
+        self.conf['deadzone'] = str(round(CP.lateralTuning.pid.deadzone,3))
         write_conf = True
-      if self.conf['lgain'] == "-1":
-        self.conf['lgain'] = str(CP.lateralTuning.pid.lqr.dcGain)
-        self.conf['lscale'] = "1.0"
     else:
       self.type = "indi"
       if self.conf['type'] == "-1":
@@ -76,11 +75,11 @@ class kegman_conf():
     except IOError:
       base_config = {  "tuneRev": "0.0.2","Kf": "-1","Ki": "-1","Kp": "-1","dampTime": "-1","rateFFGain": "-1","reactMPC": "-1", \
         "type": "-1","dampMPC":"-1","polyReact":"-1","polyDamp":"-1","polyFactor":"-1","timeConst":"-1","actEffect":"-1", \
-        "outerGain":"-1","innerGain":"-1","innerGain":"-1","outerGain":"-1","actEffect":"-1","timeConst":"-1","lgain":"-1","lscale":"1.0"}
+        "outerGain":"-1","innerGain":"-1","innerGain":"-1","outerGain":"-1","actEffect":"-1","timeConst":"-1","springFactor":"-1","deadzone":"-1","simpledd":False}
 
     if Reset or not os.path.isfile('/data/kegman.json'):
       self.config = {"cameraOffset":"0.06", "lastTrMode":"1", "battChargeMin":"60", "battChargeMax":"70", "wheelTouchSeconds":"180", \
-      "battPercOff":"25", "carVoltageMinEonShutdown":"11800", "brakeStoppingTarget":"0.25", "leadDistance":"5", "simpledd":False}
+        "battPercOff":"25", "carVoltageMinEonShutdown":"11800", "brakeStoppingTarget":"0.25", "leadDistance":"5", "simpledd":False}
     else:
       with open('/data/kegman.json', 'r') as f:
         self.config = json.load(f)

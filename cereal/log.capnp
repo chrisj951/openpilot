@@ -421,6 +421,8 @@ struct ControlsState @0x97ff69c53601abf1 {
   dampAngleSteers @57 :Float32;     # Steering angle in degrees.
   angleSteersDes @29 :Float32;
   dampAngleSteersDes @56 :Float32;
+  futureAngleSteers @59 :Float32;
+  dampAngleBias @60 :Float32;
   curvature @37 :Float32;       # path curvature from vehicle model
   hudLeadDEPRECATED @14 :Int32;
   cumLagMs @15 :Float32;
@@ -501,7 +503,7 @@ struct ControlsState @0x97ff69c53601abf1 {
     output @9 :Float32;
   }
 
-  struct LateralPIDState {
+  struct LateralPIDState @0x9065e678a62436b9 {
     active @0 :Bool;
     steerAngle @1 :Float32;
     steerRate @2 :Float32;
