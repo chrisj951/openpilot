@@ -79,12 +79,11 @@ class PathPlanner(object):
 
     # prevent over-inflation of desired angle
     #actual_delta = math.radians(angle_steers - angle_offset) / VM.sR
-    actual_delta = math.radians(max(abs(sm['controlsState'].futureAngleSteers), abs(angle_steers)) - angle_offset) / VM.sR
-    delta_limit = abs(actual_delta) + abs(3.0 * self.mpc_solution[0].rate[0])
-    self.cur_state[0].delta = clip(self.cur_state[0].delta, -delta_limit, delta_limit)
+    actual_delta = math.radians(max(abs(angle_steers - angle_offset_average), abs(sm['controlsState'].futureAngleSteers - angle_offset_average))) / VM.sR
+    self.cur_state[0].delta = clip(self.cur_state[0].delta, -actual_delta, actual_delta)
 
     # account for actuation delay
-    self.cur_state = calc_states_after_delay(self.cur_state, v_ego, angle_steers - angle_offset, curvature_factor, VM.sR, CP.steerActuatorDelay)
+    self.cur_state = calc_states_after_delay(self.cur_state, v_ego, angle_steers - angle_offset_average, curvature_factor, VM.sR, CP.steerActuatorDelay)
 
     v_ego_mpc = max(v_ego, 5.0)  # avoid mpc roughness due to low speed
     self.libmpc.run_mpc(self.cur_state, self.mpc_solution,
@@ -95,10 +94,6 @@ class PathPlanner(object):
     mpc_nans = np.any(np.isnan(list(self.mpc_solution[0].delta)))
 
     if not mpc_nans:
-      if (self.rate_des_prev < 0) != (self.mpc_solution[0].rate[0] < 0):
-        delta_adjust = self.cur_state[0].delta - actual_delta
-        self.cur_state[0].delta = actual_delta
-        self.mpc_solution[0].delta[0] -= delta_adjust
 
       self.mpc_angles[0] = float(math.degrees(self.cur_state[0].delta * VM.sR) + angle_offset_average)
       self.mpc_times[0] = sm.logMonoTime['model'] * 1e-9
@@ -140,7 +135,7 @@ class PathPlanner(object):
     plan_send.pathPlan.gProb = float(self.LP.g_prob)
     plan_send.pathPlan.angleSteers = float(self.angle_steers_des_mpc)
     plan_send.pathPlan.rateSteers = float(rate_desired)
-    plan_send.pathPlan.angleBias = float(angle_offset - angle_offset_average)
+    #plan_send.pathPlan.angleBias = float(angle_offset - angle_offset_average)
     plan_send.pathPlan.angleOffset = float(angle_offset_average)
     plan_send.pathPlan.mpcAngles = [float(x) for x in self.mpc_angles]
     plan_send.pathPlan.mpcTimes = [float(x) for x in self.mpc_times]

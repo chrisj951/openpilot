@@ -147,7 +147,7 @@ def dashboard_thread(rate=100):
           boolStockRcvd = True
           eps_torque = _cs.carState.steeringTorqueEps
           eps_angle = _cs.carState.steeringAngle
-          eps_rate = _cs.carState.steeringRate
+          angle_rate = _cs.carState.steeringRate
           eps_driver = _cs.carState.steeringTorque
 
       if socket is liveParameters:
@@ -214,7 +214,7 @@ def dashboard_thread(rate=100):
           if lateral_type == "":
             if l100.controlsState.lateralControlState.which == "pidState":
               lateral_type = "pid"
-              influxFormatString = user_id + ",sources=capnp curvature=%s,v_curvature=%s,ff_angle=%s,damp_angle_steers_des=%s,angle_steers_des=%s,angle_steers=%s,damp_angle_steers=%s,angle_bias=%s,angle_rate=%s,future_angle=%s,steer_override=%s,v_ego=%s,p2=%s,p=%s,i=%s,f=%s,output=%s,eps_torque=%s,eps_rate=%s,eps_angle=%s,eps_driver=%s %s\n"
+              influxFormatString = user_id + ",sources=capnp curvature=%s,v_curvature=%s,ff_angle=%s,damp_angle_steers_des=%s,angle_steers_des=%s,angle_steers=%s,damp_angle_steers=%s,angle_bias=%s,eps_rate=%s,future_angle=%s,steer_override=%s,v_ego=%s,p2=%s,p=%s,i=%s,f=%s,output=%s,eps_torque=%s,angle_rate=%s,eps_angle=%s,eps_driver=%s %s\n"
               kegmanFormatString = user_id + ",sources=kegman KpV=%s,KiV=%s,Kf=%s,dampMPC=%s,reactMPC=%s,rate_ff_gain=%s,dampTime=%s,polyFactor=%s,reactPoly=%s,dampPoly=%s %s\n"
             else:
               lateral_type = "indi"

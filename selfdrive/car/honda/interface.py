@@ -179,10 +179,10 @@ class CarInterface(object):
     ret.lateralTuning.pid.dampMPC = 0.1
     ret.lateralTuning.pid.rateFFGain = 0.4
     ret.lateralTuning.pid.polyFactor = 0.002
-    ret.lateralTuning.pid.polyDampTime = 0.15
-    ret.lateralTuning.pid.polyReactTime = 0.75
-    ret.lateralTuning.pid.springFactor = 1.0
-    ret.lateralTuning.pid.deadzone = 1.5
+    ret.lateralTuning.pid.polyDampTime = 0.25
+    ret.lateralTuning.pid.polyReactTime = 1.0
+    ret.lateralTuning.pid.springFactor = 0.8
+    ret.lateralTuning.pid.deadzone = 1.0
 
     if candidate in [CAR.CIVIC, CAR.CIVIC_BOSCH]:
       stop_and_go = True
@@ -597,14 +597,6 @@ class CarInterface(object):
 
     if (not self.CS.CP.carFingerprint in HONDA_BOSCH) and ret.gasPressed:
       events.append(create_event('pedalPressed', [ET.PRE_ENABLE]))
-
-    if not self.CP.radarOffCan and self.CS.auto_resume and self.CS.pedal_gas > 0 and self.CS.v_ego > 3.0:
-      if not self.CS.auto_resuming:
-        self.CS.auto_resuming = True
-      else:
-        events.append(create_event('buttonEnable', [ET.ENABLE]))
-        self.CS.auto_resuming = False
-        self.CS.auto_resume = False
 
     # it can happen that car cruise disables while comma system is enabled: need to
     # keep braking if needed or if the speed is very low
