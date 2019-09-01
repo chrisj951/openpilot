@@ -17,10 +17,24 @@ def dashboard_thread(rate=100):
   #url_string = 'http://192.168.137.1:8086/write?db=carDB'
   #url_string = 'http://kevo.live:8086/write?db=carDB'
 
+  try:
+    if os.path.isfile('/data/kegman.json'):
+      with open('/data/kegman.json', 'r') as f:
+        config = json.load(f)
+        user_id = config['userID']
+    else:
+        params = Params()
+        user_id = params.get("DongleId")
+  except:
+    params = Params()
+    user_id = params.get("DongleId")
+    config['userID'] = user_id
+
   context = zmq.Context()
   poller = zmq.Poller()
   vEgo = 0.0
-  controlsState = messaging.sub_sock(service_list['controlsState'].port)
+  services = str(config['dashCapture']).split(",")
+  controlsState = messaging.sub_sock(service_list['controlsState'].port) if "controlsState" in services else None
   #controlsState = messaging.sub_sock(context, service_list['controlsState'].port, addr=ipaddress, conflate=False, poller=poller)
   carState = messaging.sub_sock(service_list['carState'].port)
   liveMap = None #messaging.sub_sock(context, service_list['liveMapData'].port, addr=ipaddress, conflate=False, poller=poller)
@@ -28,9 +42,9 @@ def dashboard_thread(rate=100):
   osmData = None #messaging.sub_sock(context, 8601, addr=ipaddress, conflate=False, poller=poller)
   canData = None #messaging.sub_sock(context, 8602, addr=ipaddress, conflate=False, poller=poller)
   #pathPlan = messaging.sub_sock(context, service_list['pathPlan'].port, addr=ipaddress, conflate=False, poller=poller)
-  pathPlan = messaging.sub_sock(service_list['pathPlan'].port)
-  liveParameters = messaging.sub_sock(service_list['liveParameters'].port)
-  gpsLocation = messaging.sub_sock(service_list['gpsLocation'].port)
+  pathPlan = messaging.sub_sock(service_list['pathPlan'].port) if "pathPlan" in services else None
+  liveParameters = messaging.sub_sock(service_list['liveParameters'].port) if "liveParameters" in services else None
+  gpsLocation = messaging.sub_sock(service_list['gpsLocation'].port) if "gpsLocation" in services else None
   #gpsNMEA = messaging.sub_sock(context, service_list['gpsNMEA'].port, addr=ipaddress, conflate=True)
 
   #_controlsState = None
@@ -38,7 +52,7 @@ def dashboard_thread(rate=100):
   frame_count = 0
 
   if len(sys.argv) < 2 or sys.argv[1] == 0:
-    server_address = "tcp://gernstation.synology.me"
+    server_address = config['dashIP']
   elif int(sys.argv[1]) == 1:
     server_address = "tcp://192.168.137.1"
   elif int(sys.argv[1]) == 2:
@@ -48,7 +62,7 @@ def dashboard_thread(rate=100):
   elif int(sys.argv[1]) == 4:
     server_address = "tcp://kevo.live"
   else:
-    server_address = None
+    server_address = config['dashIP']
 
   print("using %s" % (server_address))
 
@@ -62,30 +76,15 @@ def dashboard_thread(rate=100):
     tuneSub.connect(server_address + ":8596")
     poller.register(tuneSub, zmq.POLLIN)
 
+  if server_address != None:
+    tunePush.send_json(config)
+  tunePush = None
+
   if controlsState != None: poller.register(controlsState, zmq.POLLIN)
   if liveParameters != None: poller.register(liveParameters, zmq.POLLIN)
   if gpsLocation != None: poller.register(gpsLocation, zmq.POLLIN)
   if pathPlan != None: poller.register(pathPlan, zmq.POLLIN)
   if carState != None: poller.register(carState, zmq.POLLIN)
-
-  try:
-    if os.path.isfile('/data/kegman.json'):
-      with open('/data/kegman.json', 'r') as f:
-        config = json.load(f)
-        user_id = config['userID']
-        if server_address != None:
-          tunePush.send_json(config)
-        tunePush = None
-    else:
-        params = Params()
-        user_id = params.get("DongleId")
-  except:
-    params = Params()
-    user_id = params.get("DongleId")
-    config['userID'] = user_id
-    if server_address != None:
-      tunePush.send_json(config)
-    tunePush = None
 
   lateral_type = ""
   if server_address != None: tuneSub.setsockopt(zmq.SUBSCRIBE, str(user_id))

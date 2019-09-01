@@ -193,9 +193,9 @@ void dashboard( UIState *s, int touch_x, int touch_y ) {
   }
   if (s->scene.v_ego > 3.1 && dashState == DASH_STATE_PAUSED) {
     startDash();
-  } else if (s->scene.v_ego < 2.9 && dashState == DASH_STATE_CAPTURING) {
+  } /*else if (s->scene.v_ego < 2.9 && dashState == DASH_STATE_CAPTURING) {
     stopDash();
     dashState = DASH_STATE_PAUSED;
-  }
+  }*/
   s->scene.recordDash = (dashState != DASH_STATE_NOT_CAPTURING);
 }

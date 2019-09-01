@@ -112,9 +112,14 @@ class kegman_conf():
         self.element_updated = True
 
     if ("type" not in self.config or self.config['type'] == "-1") and CP != None:
-        self.config.update({"type":CP.lateralTuning.which()})
-        print(CP.lateralTuning.which())
-        self.element_updated = True
+      self.config.update({"type":CP.lateralTuning.which()})
+      print(CP.lateralTuning.which())
+      self.element_updated = True
+
+    if "dashIP" not in self.config:
+      self.config.update({"dashIP":"tcp://gernstation.synology.me"})
+      self.config.update({"dashCapture":"controlsState,liveParameters,gpsLocation"})
+      self.element_updated = True
 
     if self.element_updated:
       print("updated")
