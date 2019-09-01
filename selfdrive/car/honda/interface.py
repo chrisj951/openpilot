@@ -12,7 +12,7 @@ from selfdrive.car.honda.carstate import CarState, get_can_parser, get_cam_can_p
 from selfdrive.car.honda.values import CruiseButtons, CAR, HONDA_BOSCH, VISUAL_HUD, CAMERA_MSGS
 from selfdrive.car import STD_CARGO_KG, CivicParams, scale_rot_inertia, scale_tire_stiffness
 from selfdrive.controls.lib.planner import _A_CRUISE_MAX_V_FOLLOWING
-from selfdrive.controls.lib.future_angle import future_angle
+from selfdrive.car.advance_angle import advance_angle
 
 A_ACC_MAX = max(_A_CRUISE_MAX_V_FOLLOWING)
 
@@ -74,7 +74,6 @@ def get_compute_gb_acura():
 class CarInterface(object):
   def __init__(self, CP, CarController):
     self.CP = CP
-    self.future_angle = future_angle(CP)
     self.frame = 0
     self.last_enable_pressed = 0
     self.last_enable_sent = 0
@@ -96,6 +95,8 @@ class CarInterface(object):
       self.compute_gb = get_compute_gb_acura()
     else:
       self.compute_gb = compute_gb_honda
+
+    self.AA = advance_angle(CP)
 
   @staticmethod
   def calc_accel_override(a_ego, a_target, v_ego, v_target):
@@ -183,6 +184,7 @@ class CarInterface(object):
     ret.lateralTuning.pid.polyReactTime = 1.0
     ret.lateralTuning.pid.springFactor = 0.8
     ret.lateralTuning.pid.deadzone = 1.0
+    ret.steerAdvanceCycles = 9
 
     if candidate in [CAR.CIVIC, CAR.CIVIC_BOSCH]:
       stop_and_go = True
@@ -475,13 +477,14 @@ class CarInterface(object):
 
     # steering wheel
     ret.steeringAngle = self.CS.angle_steers
-    ret.steeringRate = self.CS.angle_steers_rate
+    ret.steeringRate = self.CS.steer_rate_motor
+    self.CS.steer_advance = self.AA.get_steer_advance(self.CS.steer_advance, self.CS.steer_rate_motor * DT_CTRL, self.CS.steer_override, self.frame, self.CS.CP)
+    ret.steeringAdvance = float(self.CS.steer_advance)
 
     # gear shifter lever
     ret.gearShifter = self.CS.gear_shifter
 
     ret.steeringTorque = self.CS.steer_torque_driver
-    ret.steeringTorqueEps = self.CS.steer_torque_motor
     ret.steeringPressed = self.CS.steer_override
 
     # cruise state

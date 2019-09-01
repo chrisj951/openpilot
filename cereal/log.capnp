@@ -420,6 +420,7 @@ struct ControlsState @0x97ff69c53601abf1 {
   angleSteers @13 :Float32;     # Steering angle in degrees.
   rateSteers @61 :Float32;
   dampAngleSteers @57 :Float32;     # Steering angle in degrees.
+  angleSteersAdvance @62 :Float32;
   angleSteersDes @29 :Float32;
   dampAngleSteersDes @56 :Float32;
   futureAngleSteers @59 :Float32;

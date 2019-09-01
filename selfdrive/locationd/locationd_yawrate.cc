@@ -52,7 +52,7 @@ void Localizer::handle_camera_odometry(cereal::CameraOdometry::Reader camera_odo
 }
 
 void Localizer::handle_controls_state(cereal::ControlsState::Reader controls_state, double current_time) {
-  steering_angle = controls_state.getFutureAngleSteers() * DEGREES_TO_RADIANS;
+  steering_angle = (controls_state.getDampAngleSteers() + controls_state.getAngleSteersAdvance()) * DEGREES_TO_RADIANS;
   car_speed = controls_state.getVEgo();
   controls_state_time = current_time;
 }

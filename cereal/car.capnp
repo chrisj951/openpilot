@@ -110,9 +110,10 @@ struct CarState {
 
   # steering wheel
   steeringAngle @7 :Float32;   # deg
+  steeringAdvance @30 :Float32;  # deg
   steeringRate @15 :Float32;   # deg/s
   steeringTorque @8 :Float32;  # TODO: standardize units
-  steeringTorqueEps @30 :Float32;  # TODO: standardize units
+  steeringTorqueEps @27 :Float32;  # TODO: standardize units
   steeringPressed @9 :Bool;    # if the user is using the steering wheel
 
   # cruise state
@@ -126,7 +127,7 @@ struct CarState {
   leftBlinker @20 :Bool;
   rightBlinker @21 :Bool;
   genericToggle @23 :Bool;
-  lkMode @27 :Bool;
+  lkMode @31 :Bool;
 
   # radar hud info
   leadDistance @28 :Float32;
@@ -348,6 +349,7 @@ struct CarParams {
   radarOffCan @35 :Bool; # True when radar objects aren't visible on CAN
 
   steerActuatorDelay @36 :Float32; # Steering wheel actuator delay in seconds
+  steerAdvanceCycles @41 :Int16;
   openpilotLongitudinalControl @37 :Bool; # is openpilot doing the longitudinal control?
   carVin @38 :Text; # VIN number queried during fingerprinting
   isPandaBlack @39: Bool;
@@ -400,6 +402,7 @@ struct CarParams {
 
     k @6 :List(Float32);  # LQR gain
     l @7 :List(Float32);  # Kalman gain
+    reactMPC @8 :Float32;
   }
 
 

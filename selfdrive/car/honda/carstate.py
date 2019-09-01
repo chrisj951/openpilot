@@ -38,7 +38,6 @@ def get_can_signals(CP):
       ("STEER_ANGLE", "STEERING_SENSORS", 0),
       ("STEER_ANGLE_RATE", "STEERING_SENSORS", 0),
       ("STEER_TORQUE_SENSOR", "STEER_STATUS", 0),
-      ("STEER_TORQUE_MOTOR", "STEER_STATUS", 0),
       ("LEFT_BLINKER", "SCM_FEEDBACK", 0),
       ("RIGHT_BLINKER", "SCM_FEEDBACK", 0),
       ("GEAR", "GEARBOX", 0),
@@ -52,6 +51,7 @@ def get_can_signals(CP):
       ("BRAKE_HOLD_ACTIVE", "VSA_STATUS", 0),
       ("HUD_LEAD", "ACC_HUD", 0),
       ("STEER_STATUS", "STEER_STATUS", 5),
+      ("STEER_RATE_MOTOR", "STEER_STATUS", 0),
       ("GEAR_SHIFTER", "GEARBOX", 0),
       ("PEDAL_GAS", "POWERTRAIN_DATA", 0),
       ("CRUISE_SETTING", "SCM_BUTTONS", 0),
@@ -202,6 +202,7 @@ class CarState(object):
     self.left_blinker_on = 0
     self.right_blinker_on = 0
     self.cruise_mode = 0
+    self.steer_advance = 0.
 
     self.cruise_mode = 0
     self.stopped = 0
@@ -292,16 +293,6 @@ class CarState(object):
     self.angle_steers = cp.vl["STEERING_SENSORS"]['STEER_ANGLE']
     self.angle_steers_rate = cp.vl["STEERING_SENSORS"]['STEER_ANGLE_RATE']
     self.auto_resume = self.auto_resume and abs(self.angle_steers) < 30.0
-    steer_counter = cp.vl["STEERING_SENSORS"]['COUNTER']
-    if not (steer_counter == (self.prev_steering_counter + 1) % 4):
-      if steer_counter == self.prev_steering_counter:
-        self.steer_data_reused += 1
-        #print("data reused: %d  skipped %d  good %d   %d vs %d" % (self.steer_data_reused, self.steer_data_skipped, self.steer_good_count, steer_counter, (self.prev_steering_counter + 1) % 4))
-      else:
-        self.steer_data_skipped += 1
-    else:
-      self.steer_good_count += 1
-    self.prev_steering_counter = steer_counter
 
     self.cruise_buttons = cp.vl["SCM_BUTTONS"]['CRUISE_BUTTONS']
 
@@ -338,8 +329,20 @@ class CarState(object):
       self.car_gas = cp.vl["GAS_PEDAL_2"]['CAR_GAS']
 
     self.steer_torque_driver = cp.vl["STEER_STATUS"]['STEER_TORQUE_SENSOR']
-    self.steer_torque_motor = cp.vl["STEER_STATUS"]['STEER_TORQUE_MOTOR']
+    self.steer_rate_motor = cp.vl["STEER_STATUS"]['STEER_RATE_MOTOR']
     self.steer_override = abs(self.steer_torque_driver) > STEER_THRESHOLD[self.CP.carFingerprint]
+
+    steer_counter = cp.vl["STEER_STATUS"]['COUNTER']
+    if not (steer_counter == (self.prev_steering_counter + 1) % 4):
+      if steer_counter == self.prev_steering_counter:
+        self.steer_data_reused += 1
+        self.steer_rate_motor = 0.0
+        print("data reused: %d  skipped %d  good %d   %d vs %d" % (self.steer_data_reused, self.steer_data_skipped, self.steer_good_count, steer_counter, (self.prev_steering_counter + 1) % 4))
+      else:
+        self.steer_data_skipped += 1
+    else:
+      self.steer_good_count += 1
+    self.prev_steering_counter = steer_counter
 
     self.brake_switch = cp.vl["POWERTRAIN_DATA"]['BRAKE_SWITCH']
 
