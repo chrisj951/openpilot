@@ -46,20 +46,6 @@ struct tm getTimeStruct() {
   return tm;
 }
 
-bool screenLockButton_clicked(int touch_x, int touch_y, dashboard_element el) {
-  if (dashState == DASH_STATE_NOT_CAPTURING) {
-    // Don't register click if we're not running
-    return false;
-  }
-
-  if (touch_x >= el.pos_x && touch_x <= el.pos_x + el.width) {
-    if (touch_y >= el.pos_y && touch_y <= el.pos_y + el.height) {
-      return true;
-    }
-  }
-  return false;
-}
-
 bool screenButton_clicked(int touch_x, int touch_y) {
   if (touch_x >= 1660 && touch_x <= 1810) {
     if (touch_y >= 785 && touch_y <= 935) {
@@ -125,11 +111,13 @@ void screenToggle_lock() {
 }
 
 static void screenDraw_button(UIState *s, int touch_x, int touch_y) {
+  float alpha = 0.8f;
   // Set button to bottom left of screen
   if (s->vision_connected && s->plus_state == 0) {
 
-    if (dashState == DASH_STATE_CAPTURING) {
-      drawLock_button(s);
+    if (!dash_image) {
+      // Load the dashboard grafana icon
+      dash_image = nvgCreateImage(s->vg, "../assets/img_dashboard.png", 1);
     }
 
     int btn_w = 150;
@@ -152,7 +140,10 @@ static void screenDraw_button(UIState *s, int touch_x, int touch_y) {
       } else {
       nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 200));
       }
-      nvgText(s->vg,btn_x-88,btn_y-105,"DBG",NULL);
+      NVGpaint imgPaint = nvgImagePattern(s->vg, btn_x-115, btn_y-205, btn_w, btn_h, 0, dash_image, alpha);
+      nvgRoundedRect(s->vg, btn_x-115, btn_y-205, btn_w, btn_h, 100);
+      nvgFillPaint(s->vg, imgPaint);
+      nvgFill(s->vg);
   }
 
   if (dashState == DASH_STATE_CAPTURING) {
@@ -184,9 +175,6 @@ void dashboard( UIState *s, int touch_x, int touch_y ) {
     }
   }
 
-  if (screenLockButton_clicked(touch_x,touch_y,dash_button)) {
-    screenToggle_lock();
-  }
   if (!s->vision_connected) {
     // Assume car is not in drive so stop running dashboard
     stopDash();
