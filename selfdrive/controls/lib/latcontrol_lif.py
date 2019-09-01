@@ -108,7 +108,7 @@ class LatControlLIF(object):
     #max_bias_change = 0.0002 / (abs(self.angle_bias) + 0.0001)
     #self.angle_bias = float(clip(live_params.angleOffset - live_params.angleOffsetAverage, self.angle_bias - max_bias_change, self.angle_bias + max_bias_change))
     #max_bias_change = 0.01  # / (abs(self.angle_bias) + 0.0001)
-    self.angle_bias += 0.0 * (float(clip(live_params.angleOffset - live_params.angleOffsetAverage, self.angle_bias - max_bias_change, self.angle_bias + max_bias_change)) - self.angle_bias)
+    self.angle_bias += 0.0 #0.1 * (float(clip(live_params.angleOffset - live_params.angleOffsetAverage, self.angle_bias - max_bias_change, self.angle_bias + max_bias_change)) - self.angle_bias)
 
     self.live_tune(CP)
 
