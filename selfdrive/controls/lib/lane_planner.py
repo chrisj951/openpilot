@@ -9,8 +9,8 @@ CAMERA_OFFSET = float(kegman.conf['cameraOffset'])  # m from center car to camer
 def calc_d_poly(l_poly, r_poly, g_poly, l_prob, r_prob, g_prob, lane_width):
   # This will improve behaviour when lanes suddenly widen
   lane_width = min(4.0, lane_width)
-  l_prob = l_prob * interp(abs(l_poly[3]), [2, 2.5], [1.0, 0.0])
-  r_prob = r_prob * interp(abs(r_poly[3]), [2, 2.5], [1.0, 0.0])
+  l_prob = l_prob * gernterp(abs(l_poly[3]), [2, 2.5], [1.0, 0.0])
+  r_prob = r_prob * gernterp(abs(r_poly[3]), [2, 2.5], [1.0, 0.0])
 
   path_from_left_lane = l_poly.copy()
   path_from_left_lane[3] -= lane_width / 2.0
