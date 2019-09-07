@@ -166,15 +166,13 @@ def get_can_parser(CP):
 
 
 def get_cam_can_parser(CP):
-  signals = []
-
   # all hondas except CRV, RDX and 2019 Odyssey@China use 0xe4 for steering
   checks = [(0xe4, 100)]
   if CP.carFingerprint in [CAR.CRV, CAR.ACURA_RDX, CAR.ODYSSEY_CHN]:
     checks = [(0x194, 100)]
 
   bus_cam = 1 if CP.carFingerprint in HONDA_BOSCH  and not CP.isPandaBlack else 2
-  return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, bus_cam)
+  return CANParser(DBC[CP.carFingerprint]['pt'], [], checks, bus_cam)
 
 class CarState(object):
   def __init__(self, CP):
@@ -329,7 +327,7 @@ class CarState(object):
       self.car_gas = cp.vl["GAS_PEDAL_2"]['CAR_GAS']
 
     self.steer_torque_driver = cp.vl["STEER_STATUS"]['STEER_TORQUE_SENSOR']
-    self.steer_rate_motor = cp.vl["STEER_STATUS"]['STEER_RATE_MOTOR']
+    self.steer_rate_motor = self.CP.epsSteerRateFactor * cp.vl["STEER_STATUS"]['STEER_RATE_MOTOR']
     self.steer_override = abs(self.steer_torque_driver) > STEER_THRESHOLD[self.CP.carFingerprint]
 
     steer_counter = cp.vl["STEER_STATUS"]['COUNTER']

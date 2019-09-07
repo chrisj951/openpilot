@@ -1,5 +1,5 @@
 from selfdrive.kegman_conf import kegman_conf
-from common.numpy_fast import interp, clip
+from common.numpy_fast import gernterp, interp, clip
 import numpy as np
 from selfdrive.controls.lib.latcontrol_helpers import model_polyfit, compute_path_pinv
 
@@ -37,7 +37,7 @@ def calc_g_poly(l_poly, r_poly, c_poly, g_poly, l_prob, r_prob, c_prob, g_prob, 
   g_poly[0] = c_poly[0]
 
   if l_center < 0.0 or r_center > 0.0:
-    race_line_adjust = interp(abs(g_poly[3]), [0.0, 0.3], [0.0, 1.0])
+    race_line_adjust = gernterp(abs(g_poly[3]), [0.0, 0.3], [0.0, 1.0])
     l_race_poly = (race_line_adjust * l_poly * l_prob + g_prob * g_poly) / (race_line_adjust * l_prob + g_prob + 0.0001)
     r_race_poly = (race_line_adjust * r_poly * r_prob + g_prob * g_poly) / (race_line_adjust * r_prob + g_prob + 0.0001)
     if l_center > -r_center:
@@ -98,7 +98,7 @@ class LanePlanner(object):
     self.lane_width_certainty += 0.05 * (self.l_prob * self.r_prob - self.lane_width_certainty)
     current_lane_width = abs(self.l_poly[3] - self.r_poly[3])
     self.lane_width_estimate += 0.005 * (current_lane_width - self.lane_width_estimate)
-    speed_lane_width = interp(controls.vEgo, [0., 31.], [2.8, 3.5])
+    speed_lane_width = gernterp(controls.vEgo, [0., 31.], [2.8, 3.5])
     self.lane_width = self.lane_width_certainty * self.lane_width_estimate + \
                       (1 - self.lane_width_certainty) * speed_lane_width
 
