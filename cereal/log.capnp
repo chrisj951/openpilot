@@ -448,7 +448,7 @@ struct ControlsState @0x97ff69c53601abf1 {
   alertSoundDEPRECATED @45 :Text;
   alertSound @58 :Car.CarControl.HUDControl.AudibleAlert;
   awarenessStatus @26 :Float32;
-  angleModelBias @27 :Float32;
+  angleModelBiasDEPRECATED @27 :Float32;
   gpsPlannerActive @40 :Bool;
   engageable @41 :Bool;  # can OP be engaged?
   driverMonitoringOn @43 :Bool;
@@ -526,7 +526,9 @@ struct ControlsState @0x97ff69c53601abf1 {
     steerAngle @1 :Float32;
     i @2 :Float32;
     output @3 :Float32;
+    lqrOutput @4 :Float32;
    }
+
 
 }
 
@@ -537,6 +539,7 @@ struct LiveEventData {
 
 struct ModelData {
   frameId @0 :UInt32;
+  timestampEof @9 :UInt64;
 
   path @1 :PathData;
   leftLane @2 :PathData;
@@ -715,6 +718,32 @@ struct PathPlan {
   sensorValid @14 :Bool;
   commIssue @15 :Bool;
   posenetValid @16 :Bool;
+  desire @25 :Desire;
+  laneChangeState @26 :LaneChangeState;
+  laneChangeDirection @27 :LaneChangeDirection;
+
+  enum Desire {
+    none @0;
+    turnLeft @1;
+    turnRight @2;
+    laneChangeLeft @3;
+    laneChangeRight @4;
+    keepLeft @5;
+    keepRight @6;
+  }
+
+  enum LaneChangeState {
+    off @0;
+    preLaneChange @1;
+    laneChangeStarting @2;
+    laneChangeFinishing @3;
+  }
+
+  enum LaneChangeDirection {
+    none @0;
+    left @1;
+    right @2;
+  }
 }
 
 struct LiveLocationData {
@@ -1744,6 +1773,8 @@ struct LiveMapData {
 }
 
 struct CameraOdometry {
+  frameId @4 :UInt32;
+  timestampEof @5 :UInt64;
   trans @0 :List(Float32); # m/s in device frame
   rot @1 :List(Float32); # rad/s in device frame
   transStd @2 :List(Float32); # std m/s in device frame
