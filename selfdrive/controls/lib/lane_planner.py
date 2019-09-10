@@ -1,7 +1,6 @@
+from selfdrive.kegman_conf import kegman_conf
 from common.numpy_fast import interp
 import numpy as np
-from selfdrive.kegman_conf import kegman_conf^M
-
 
 kegman = kegman_conf()
 CAMERA_OFFSET = float(kegman.conf['cameraOffset'])  # m from center car to camera
