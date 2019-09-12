@@ -72,7 +72,7 @@ class LatControlINDI(object):
     self.output_steer = 0.
     self.counter = 0
 
-  def update(self, active, v_ego, angle_steers, angle_steers_rate, eps_torque, steer_override, blinkers_on, CP, VM, path_plan):
+  def update(self, active, v_ego, angle_steers, angle_steers_rate, eps_torque, steer_override, blinkers_on, CP, VM, path_plan, live_params):
     # Update Kalman filter
 
     self.live_tune(CP)
@@ -93,7 +93,10 @@ class LatControlINDI(object):
     else:
       self.damp_angle_steers_des = interp(path_plan.mpcTimes[0] + self.reactMPC, path_plan.mpcTimes, path_plan.mpcAngles)
       self.damp_rate_steers_des = interp(path_plan.mpcTimes[0] + self.reactMPC, path_plan.mpcTimes, path_plan.mpcRates)
-      self.angle_steers_des = path_plan.angleSteers
+      #self.angle_steers_des = path_plan.angleSteers
+      angle_bias = live_params.angleOffset - live_params.angleOffsetAverage
+      self.angle_steers_des = path_plan.angleSteers + angle_bias  # get from MPC/PathPlanner
+
       self.rate_steers_des = path_plan.rateSteers
 
       steers_des = math.radians(self.damp_angle_steers_des)
