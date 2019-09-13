@@ -87,15 +87,15 @@ class PathPlanner(object):
 
     # reset to current steer angle if not active or overriding
     if active:
-      delta_desired = self.mpc_solution[0].delta[1]
+      #delta_desired = self.mpc_solution[0].delta[1]
       #rate_desired = math.degrees(self.mpc_solution[0].rate[0] * VM.sR)
       self.cur_state[0].delta = math.radians(self.angle_steers_des_prev - self.angle_offset) / VM.sR
     else:
-      delta_desired = math.radians(angle_steers - angle_offset) / VM.sR
+      #delta_desired = math.radians(angle_steers - angle_offset) / VM.sR
       rate_desired = 0.0
       self.cur_state[0].delta = math.radians(angle_steers - self.angle_offset) / VM.sR
 
-    self.cur_state[0].delta = delta_desired
+    #self.cur_state[0].delta = delta_desired
 
     self.angle_steers_des_mpc = float(math.degrees(delta_desired * VM.sR) + angle_offset_average)
     v_ego_mpc = max(v_ego, 5.0)  # avoid mpc roughness due to low speed
