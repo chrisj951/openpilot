@@ -81,13 +81,6 @@ ALERTS = [
       Priority.HIGHEST, VisualAlert.fcw, AudibleAlert.chimeWarningRepeat, 1., 2., 2.),
 
   Alert(
-      "ldw",
-      "TAKE CONTROL",
-      "Lane Departure Warning",
-      AlertStatus.userPrompt, AlertSize.mid,
-      Priority.HIGH, VisualAlert.ldw, AudibleAlert.chimeWarningRepeat, 1., 2., 2.),
-
-  Alert(
       "steerSaturated",
       "TAKE CONTROL",
       "Turn Exceeds Steering Limit",
@@ -306,20 +299,6 @@ ALERTS = [
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
-      "manualSteeringRequiredBlinkersOn",
-      "",
-      "",
-      AlertStatus.normal, AlertSize.small,
-      Priority.LOW_LOWEST, VisualAlert.none, AudibleAlert.none, .4, 2., 3.),
-
-  Alert(
-      "manualSteeringRequired",
-      "openpilot Unavailable",
-      "LKAS Disabled",
-      AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeError, .4, 2., 3.),
-
-  Alert(
       "soundsUnavailableNoEntry",
       "openpilot Unavailable",
       "Speaker not found",
@@ -439,20 +418,6 @@ ALERTS = [
       "CAN Error: Check Connections",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 1., 3., 4.),
-
-  Alert(
-      "manualSteeringRequired",
-      "STEERING REQUIRED: Lane Keeping OFF",
-      "",
-      AlertStatus.normal, AlertSize.small,
-      Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.25),
-
-  Alert(
-      "manualSteeringRequiredBlinkersOn",
-      "STEERING REQUIRED: Blinkers ON",
-      "",
-      AlertStatus.normal, AlertSize.small,
-      Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.25),
 
   Alert(
       "steerUnavailable",
