@@ -15,7 +15,6 @@ class LatControlPID(object):
     self.angle_steers_des = 0.
     self.frame = 0.
     self.angle_bias = 0.
-    self.sat_time = 0.0
 
   def live_tune(self, CP):
     self.frame += 1
