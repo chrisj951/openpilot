@@ -100,8 +100,8 @@ class PathPlanner(object):
     self.angle_steers_des_mpc = float(math.degrees(delta_desired * VM.sR) + angle_offset_average)
     v_ego_mpc = max(v_ego, 5.0)  # avoid mpc roughness due to low speed
     self.libmpc.run_mpc(self.cur_state, self.mpc_solution,
-                        l_poly, r_poly, p_poly,
-                        self.LP.l_prob, self.LP.r_prob, self.LP.p_prob, curvature_factor, v_ego_mpc, self.LP.lane_width)
+                        list(self.LP.l_poly), list(self.LP.r_poly), list(self.LP.p_poly),
+                        self.LP.l_prob, self.LP.r_prob, curvature_factor, v_ego_mpc, self.LP.lane_width)
 
     #  Check for infeasable MPC solution
     mpc_nans = np.any(np.isnan(list(self.mpc_solution[0].delta)))

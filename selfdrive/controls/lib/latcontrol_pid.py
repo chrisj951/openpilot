@@ -4,7 +4,7 @@ from cereal import car
 from cereal import log
 from common.numpy_fast import clip
 from selfdrive.kegman_conf import kegman_conf
-
+from common.realtime import sec_since_boot
 
 class LatControlPID(object):
   def __init__(self, CP):
