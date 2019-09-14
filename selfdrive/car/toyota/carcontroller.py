@@ -1,17 +1,15 @@
 from cereal import car
 from common.numpy_fast import clip, interp
-from selfdrive.boardd.boardd import can_list_to_can_capnp
 from selfdrive.car import apply_toyota_steer_torque_limits
 from selfdrive.car import create_gas_command
 from selfdrive.car.toyota.toyotacan import make_can_msg, create_video_target,\
                                            create_steer_command, create_ui_command, \
                                            create_ipas_steer_command, create_accel_command, \
                                            create_fcw_command
-from selfdrive.car.toyota.values import ECU, STATIC_MSGS
+from selfdrive.car.toyota.values import ECU, STATIC_MSGS, TSS2_CAR
 from selfdrive.can.packer import CANPacker
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
-AudibleAlert = car.CarControl.HUDControl.AudibleAlert
 
 # Accel limits
 ACCEL_HYST_GAP = 0.02  # don't change accel command for small oscilalitons within this value
@@ -54,25 +52,17 @@ def accel_hysteresis(accel, accel_steady, enabled):
   return accel, accel_steady
 
 
-def process_hud_alert(hud_alert, audible_alert):
+def process_hud_alert(hud_alert):
   # initialize to no alert
   steer = 0
   fcw = 0
-  sound1 = 0
-  sound2 = 0
 
   if hud_alert == VisualAlert.fcw:
     fcw = 1
   elif hud_alert == VisualAlert.steerRequired:
     steer = 1
 
-  if audible_alert == AudibleAlert.chimeWarningRepeat:
-    sound1 = 1
-  elif audible_alert != AudibleAlert.none:
-    # TODO: find a way to send single chimes
-    sound2 = 1
-
-  return steer, fcw, sound1, sound2
+  return steer, fcw
 
 
 def ipas_state_transition(steer_angle_enabled, enabled, ipas_active, ipas_reset_counter):
@@ -124,8 +114,9 @@ class CarController(object):
 
     self.packer = CANPacker(dbc_name)
 
-  def update(self, sendcan, enabled, CS, frame, actuators,
-             pcm_cancel_cmd, hud_alert, audible_alert, forwarding_camera, left_line, right_line, lead):
+  def update(self, enabled, CS, frame, actuators,
+             pcm_cancel_cmd, hud_alert, forwarding_camera, left_line,
+             right_line, lead, left_lane_depart, right_lane_depart):
 
     # *** compute control surfaces ***
 
@@ -161,7 +152,7 @@ class CarController(object):
 
     self.steer_angle_enabled, self.ipas_reset_counter = \
       ipas_state_transition(self.steer_angle_enabled, enabled, CS.ipas_active, self.ipas_reset_counter)
-    #print self.steer_angle_enabled, self.ipas_reset_counter, CS.ipas_active
+    #print("{0} {1} {2}".format(self.steer_angle_enabled, self.ipas_reset_counter, CS.ipas_active))
 
     # steer angle
     if self.steer_angle_enabled and CS.ipas_active:
@@ -198,7 +189,7 @@ class CarController(object):
     can_sends = []
 
     #*** control msgs ***
-    #print "steer", apply_steer, min_lim, max_lim, CS.steer_torque_motor
+    #print("steer {0} {1} {2} {3}".format(apply_steer, min_lim, max_lim, CS.steer_torque_motor)
 
     # toyota can trace shows this message at 42Hz, with counter adding alternatively 1 and 2;
     # sending it at 100Hz seem to allow a higher rate limit, as the rate limit seems imposed
@@ -226,17 +217,17 @@ class CarController(object):
     if (frame % 2 == 0) and (CS.CP.enableGasInterceptor):
         # send exactly zero if apply_gas is zero. Interceptor will send the max between read value and apply_gas.
         # This prevents unexpected pedal range rescaling
-        can_sends.append(create_gas_command(self.packer, apply_gas, frame/2))
+        can_sends.append(create_gas_command(self.packer, apply_gas, frame//2))
 
     if frame % 10 == 0 and ECU.CAM in self.fake_ecus and not forwarding_camera:
       for addr in TARGET_IDS:
-        can_sends.append(create_video_target(frame/10, addr))
+        can_sends.append(create_video_target(frame//10, addr))
 
     # ui mesg is at 100Hz but we send asap if:
     # - there is something to display
     # - there is something to stop displaying
-    alert_out = process_hud_alert(hud_alert, audible_alert)
-    steer, fcw, sound1, sound2 = alert_out
+    alert_out = process_hud_alert(hud_alert)
+    steer, fcw = alert_out
 
     if (any(alert_out) and not self.alert_active) or \
        (not any(alert_out) and self.alert_active):
@@ -246,9 +237,9 @@ class CarController(object):
       send_ui = False
 
     if (frame % 100 == 0 or send_ui) and ECU.CAM in self.fake_ecus:
-      can_sends.append(create_ui_command(self.packer, steer, sound1, sound2, left_line, right_line))
+      can_sends.append(create_ui_command(self.packer, steer, left_line, right_line, left_lane_depart, right_lane_depart))
 
-    if frame % 100 == 0 and ECU.DSU in self.fake_ecus:
+    if frame % 100 == 0 and ECU.DSU in self.fake_ecus and self.car_fingerprint not in TSS2_CAR:
       can_sends.append(create_fcw_command(self.packer, fcw))
 
     #*** static msgs ***
@@ -257,11 +248,11 @@ class CarController(object):
       if frame % fr_step == 0 and ecu in self.fake_ecus and self.car_fingerprint in cars and not (ecu == ECU.CAM and forwarding_camera):
         # special cases
         if fr_step == 5 and ecu == ECU.CAM and bus == 1:
-          cnt = (((frame / 5) % 7) + 1) << 5
+          cnt = (((frame // 5) % 7) + 1) << 5
           vl = chr(cnt) + vl
         elif addr in (0x489, 0x48a) and bus == 0:
           # add counter for those 2 messages (last 4 bits)
-          cnt = ((frame/100)%0xf) + 1
+          cnt = ((frame // 100) % 0xf) + 1
           if addr == 0x48a:
             # 0x48a has a 8 preceding the counter
             cnt += 1 << 7
@@ -269,5 +260,4 @@ class CarController(object):
 
         can_sends.append(make_can_msg(addr, vl, bus, False))
 
-
-    sendcan.send(can_list_to_can_capnp(can_sends, msgtype='sendcan').to_bytes())
+    return can_sends
