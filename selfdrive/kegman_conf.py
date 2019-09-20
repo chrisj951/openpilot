@@ -79,7 +79,7 @@ class kegman_conf():
 
     if Reset or not os.path.isfile('/data/kegman.json'):
       self.config = {"cameraOffset":"0.06", "lastTrMode":"1", "battChargeMin":"60", "battChargeMax":"70", "wheelTouchSeconds":"180", \
-        "battPercOff":"25", "carVoltageMinEonShutdown":"11800", "brakeStoppingTarget":"0.25", "leadDistance":"5", "simpledd":False}
+              "battPercOff":"25", "carVoltageMinEonShutdown":"11800", "brakeStoppingTarget":"0.25", "leadDistance":"5", "deadzone":"-1", "simpledd":False}
     else:
       with open('/data/kegman.json', 'r') as f:
         self.config = json.load(f)
@@ -96,6 +96,10 @@ class kegman_conf():
 
     if "leadDistance" not in self.config:
       self.config.update({"leadDistance":"5"})
+      self.element_updated = True
+
+    if "deadzone" not in self.config:
+      self.config.update({"deadzone":"0.0"})
       self.element_updated = True
 
     if "simpledd" not in self.config:

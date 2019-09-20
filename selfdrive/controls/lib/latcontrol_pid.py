@@ -7,6 +7,7 @@ from selfdrive.kegman_conf import kegman_conf
 class LatControlPID(object):
   def __init__(self, CP):
     kegman_conf(CP)
+    self.deadzone = float(self.kegman.conf['deadzone'])
     self.pid = PIController((CP.lateralTuning.pid.kpBP, CP.lateralTuning.pid.kpV),
                             (CP.lateralTuning.pid.kiBP, CP.lateralTuning.pid.kiV),
                             k_f=CP.lateralTuning.pid.kf, pos_limit=1.0)
@@ -21,6 +22,11 @@ class LatControlPID(object):
       self.pid._k_i = ([0.], [float(kegman.conf['Ki'])])
       self.pid._k_p = ([0.], [float(kegman.conf['Kp'])])
       self.pid.k_f = (float(kegman.conf['Kf']))
+      self.deadzone = float(self.kegman.conf['deadzone'])
+      self.pid = PIController((CP.lateralTuning.pid.kpBP, self.steerKpV),
+                          (CP.lateralTuning.pid.kiBP, self.steerKiV),
+                          k_f=CP.lateralTuning.pid.kf, pos_limit=1.0)
+      self.frame = 0
 
   def reset(self):
     self.pid.reset()
@@ -47,7 +53,7 @@ class LatControlPID(object):
         # TODO: feedforward something based on path_plan.rateSteers
         steer_feedforward -= path_plan.angleOffset   # subtract the offset, since it does not contribute to resistive torque
         steer_feedforward *= v_ego**2  # proportional to realigning tire momentum (~ lateral accel)
-      deadzone = 0.0
+      deadzone = self.deadzone
       output_steer = self.pid.update(self.angle_steers_des, angle_steers, check_saturation=(v_ego > 10), override=steer_override,
                                      feedforward=steer_feedforward, speed=v_ego, deadzone=deadzone)
       pid_log.active = True
