@@ -79,6 +79,7 @@ Supported Cars
 | Honda                | CR-V 2015-16               | Touring              | Yes     | Yes            | 25mph<sup>1</sup>| 12mph          | Nidec             |
 | Honda                | CR-V 2017-19               | Honda Sensing        | Yes     | Stock          | 0mph             | 12mph          | Bosch             |
 | Honda                | CR-V Hybrid 2017-2019      | Honda Sensing        | Yes     | Stock          | 0mph             | 12mph          | Bosch             |
+| Honda                | Fit 2018-19                | Honda Sensing        | Yes     | Yes            | 25mph<sup>1</sup>| 12mph          | Inverted Nidec    |
 | Honda                | Odyssey 2018-19            | Honda Sensing        | Yes     | Yes            | 25mph<sup>1</sup>| 0mph           | Inverted Nidec    |
 | Honda                | Passport 2019              | All                  | Yes     | Yes            | 25mph<sup>1</sup>| 12mph          | Inverted Nidec    |
 | Honda                | Pilot 2016-18              | Honda Sensing        | Yes     | Yes            | 25mph<sup>1</sup>| 12mph          | Nidec             |
@@ -111,7 +112,7 @@ Supported Cars
 | Toyota               | Highlander Hybrid 2017-19  | All                  | Yes     | Yes<sup>2</sup>| 0mph             | 0mph           | Toyota            |
 | Toyota               | Prius 2016                 | TSS-P                | Yes     | Yes<sup>2</sup>| 0mph             | 0mph           | Toyota            |
 | Toyota               | Prius 2017-19              | All                  | Yes     | Yes<sup>2</sup>| 0mph             | 0mph           | Toyota            |
-| Toyota               | Prius Prime 2017-19        | All                  | Yes     | Yes<sup>2</sup>| 0mph             | 0mph           | Toyota            |
+| Toyota               | Prius Prime 2017-20        | All                  | Yes     | Yes<sup>2</sup>| 0mph             | 0mph           | Toyota            |
 | Toyota               | Rav4 2016                  | TSS-P                | Yes     | Yes<sup>2</sup>| 20mph<sup>1</sup>| 0mph           | Toyota            |
 | Toyota               | Rav4 2017-18               | All                  | Yes     | Yes<sup>2</sup>| 20mph<sup>1</sup>| 0mph           | Toyota            |
 | Toyota               | Rav4 2019                  | All                  | Yes     | Yes            | 0mph             | 0mph           | Toyota            |
