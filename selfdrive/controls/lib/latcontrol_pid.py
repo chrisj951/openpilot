@@ -19,13 +19,13 @@ class LatControlPID(object):
     if self.frame % 300 == 0:
       # live tuning through /data/openpilot/tune.py overrides interface.py settings
       self.kegman = kegman_conf()
-      self.pid._k_i = ([0.], [float(self.kegman.conf['Ki'])])
-      self.pid._k_p = ([0.], [float(self.kegman.conf['Kp'])])
-      self.pid.k_f = (float(self.kegman.conf['Kf']))
+      self.steerKiV = ([0.], [float(self.kegman.conf['Ki'])])
+      self.steerKpV = ([0.], [float(self.kegman.conf['Kp'])])
+      self.steerKf = (float(self.kegman.conf['Kf']))
       self.deadzone = float(self.kegman.conf['deadzone'])
-      self.pid = PIController((CP.lateralTuning.pid.kpBP, self.pid._k_p),
-                          (CP.lateralTuning.pid.kiBP, self.pid._k_i),
-                          k_f=CP.lateralTuning.pid.kf, pos_limit=1.0)
+      self.pid = PIController((CP.lateralTuning.pid.kpBP, self.steerKpV),
+                          (CP.lateralTuning.pid.kiBP, self.steerKiV),
+                          k_f=self.steerKf, pos_limit=1.0)
       self.frame = 0
 
   def reset(self):
