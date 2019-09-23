@@ -11,6 +11,7 @@ from selfdrive.controls.lib.lane_planner import LanePlanner
 import selfdrive.messaging as messaging
 import os.path
 import pickle
+import csv
 
 LOG_MPC = os.environ.get('LOG_MPC', True)
 
@@ -18,6 +19,7 @@ LOG_MPC = os.environ.get('LOG_MPC', True)
 def calc_states_after_delay(states, v_ego, steer_angle, curvature_factor, steer_ratio, delay):
   states[0].x = v_ego * delay
   states[0].psi = v_ego * curvature_factor * math.radians(steer_angle) / steer_ratio * delay
+  states[0].delta = math.radians(steer_angle) / steer_ratio
   return states
 
 
@@ -94,7 +96,7 @@ class PathPlanner(object):
       delta_desired = math.radians(angle_steers - angle_offset) / VM.sR
       rate_desired = 0.0
 
-    self.cur_state[0].delta = delta_desired
+    #self.cur_state[0].delta = delta_desired
 
     self.angle_steers_des_mpc = float(math.degrees(delta_desired * VM.sR) + angle_offset)
 
@@ -132,6 +134,12 @@ class PathPlanner(object):
     plan_send.pathPlan.paramsValid = bool(sm['liveParameters'].valid)
     plan_send.pathPlan.sensorValid = bool(sm['liveParameters'].sensorValid)
     plan_send.pathPlan.posenetValid = bool(sm['liveParameters'].posenetValid)
+    #keras datalogging
+    if v_ego > 11.176:
+      with open('/data/kerasdata.csv', mode='a') as kerasdata:
+          self.keras_writer = csv.writer(kerasdata, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+          self.keras_writer.writerow([angle_steers, v_ego, self.LP.l_poly, self.LP.r_poly, self.LP.d_poly,
+          self.LP.l_prob, self.LP.r_prob])
 
     pm.send('pathPlan', plan_send)
 
