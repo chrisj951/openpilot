@@ -51,5 +51,5 @@ class CurvatureLearner:
         if self.debug:
             with open('/data/curvdebug.csv', 'a') as csv_file:
                 csv_file_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                csv_file_writer.writerow(self.learned_offsets, v_ego)
+                csv_file_writer.writerow([self.learned_offsets, v_ego])
         return self.offset
