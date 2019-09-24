@@ -26,7 +26,7 @@ class CurvatureLearner:
             }
             pickle.dump(self.learned_offsets, open("/data/curvaturev1.p", "wb"))
 
-    def update(self, angle_steers=0., d_poly=None):
+    def update(self, angle_steers=0., d_poly=None, v_ego=0.):
         if angle_steers > 0.5:
             if abs(angle_steers) < 3.:
                 self.learned_offsets["center"] -= d_poly[3] / self.learning_rate
@@ -51,5 +51,5 @@ class CurvatureLearner:
         if self.debug:
             with open('/data/curvdebug.csv', 'a') as csv_file:
                 csv_file_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                csv_file_writer.writerow(self.learned_offsets)
+                csv_file_writer.writerow(self.learned_offsets, v_ego)
         return self.offset

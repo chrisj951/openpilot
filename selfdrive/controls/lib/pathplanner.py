@@ -88,7 +88,7 @@ class PathPlanner(object):
         self.setup_mpc(self.steerRateCost)
         self.steerRateCost_prev = self.steerRateCost
       self.frame = 0
-    curvature_factor = VM.curvature_factor(v_ego) + self.curvature_offset.update(angle_steers - angle_offset, self.LP.d_poly)
+    curvature_factor = VM.curvature_factor(v_ego) + self.curvature_offset.update(angle_steers - angle_offset, self.LP.d_poly, v_ego)
 
     # account for actuation delay
     self.cur_state = calc_states_after_delay(self.cur_state, v_ego, angle_steers - angle_offset, curvature_factor, self.steerRatio, CP.steerActuatorDelay)
