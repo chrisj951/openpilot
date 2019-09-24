@@ -43,7 +43,7 @@ button_delay = 0.2
 kegman = kegman_conf()
 #kegman.conf['tuneGernby'] = "1"
 #kegman.write_config(kegman.conf)
-param = ["cameraOffset", "deadzone", "steerRatio", "steerRateCost", "Kp", "Ki"]
+param = ["cameraOffset", "deadzone", "steerRatio", "steerRateCost", "Kp", "Ki", "Kf"]
 
 j = 0
 while True:
