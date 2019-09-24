@@ -48,7 +48,7 @@ class CurvatureLearner:
             elif 2. < abs(angle_steers) < 5.:
                 self.learned_offsets["rightinner"] += d_poly[3] / self.learning_rate
                 self.offset = self.learned_offsets["rightinner"]
-            elif abs(angle_steers) > 2.:
+            elif abs(angle_steers) > 5.:
                 self.learned_offsets["rightouter"] += d_poly[3] / self.learning_rate
                 self.offset = self.learned_offsets["rightouter"]
 
