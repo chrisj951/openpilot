@@ -34,16 +34,16 @@ class PathPlanner(object):
     self.solution_invalid_cnt = 0
     #self.path_offset_i = 0.0
     self.frame = 0
-    kegman = kegman_conf(CP)
-    if kegman.conf['steerRatio'] == "-1":
+    self.kegman = kegman_conf(CP)
+    if self.kegman.conf['steerRatio'] == "-1":
       self.steerRatio = CP.steerRatio
     else:
-      self.steerRatio = float(kegman.conf['steerRatio'])
+      self.steerRatio = float(self.kegman.conf['steerRatio'])
 
-    if kegman.conf['steerRateCost'] == "-1":
+    if self.kegman.conf['steerRateCost'] == "-1":
       self.steerRateCost = CP.steerRateCost
     else:
-      self.steerRateCost = float(kegman.conf['steerRateCost'])
+      self.steerRateCost = float(self.kegman.conf['steerRateCost'])
       self.setup_mpc(self.steerRateCost)
     self.steerRateCost_prev = self.steerRateCost
 
@@ -92,8 +92,9 @@ class PathPlanner(object):
     self.frame += 1
     if self.frame % 300 == 0:
       # live tuning
-      self.steerRatio = float(kegman.conf['steerRatio'])
-      self.steerRateCost = float(kegman.conf['steerRateCost'])
+      self.kegman = kegman_conf()
+      self.steerRatio = float(self.kegman.conf['steerRatio'])
+      self.steerRateCost = float(self.kegman.conf['steerRateCost'])
       if self.steerRateCost != self.steerRateCost_prev:
         self.setup_mpc(self.steerRateCost)
         self.steerRateCost_prev = self.steerRateCost
