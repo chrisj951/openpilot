@@ -26,26 +26,17 @@ class kegman_conf():
       if self.conf['Ki'] == "-1":
         self.conf['Ki'] = str(round(CP.lateralTuning.pid.kiV[0],3))
         write_conf = True
+      if self.conf['steerRatio'] == "-1":
+        self.conf['steerRatio'] = str(round(CP.steerRatio,3))
+        write_conf = True
+      if self.conf['steerRateCost'] == "-1":
+        self.conf['steerRateCost'] = str(round(CP.steerRateCost,3))
+        write_conf = True
       if self.conf['Kf'] == "-1":
         self.conf['Kf'] = str(round(CP.lateralTuning.pid.kf,5))
         write_conf = True
-      if self.conf['dampTime'] == "-1":
-        self.conf['dampTime'] = str(round(CP.lateralTuning.pid.dampTime,3))
-        write_conf = True
-      if self.conf['reactMPC'] == "-1":
-        self.conf['reactMPC'] = str(round(CP.lateralTuning.pid.reactMPC,3))
-        write_conf = True
-      if self.conf['dampMPC'] == "-1":
-        self.conf['dampMPC'] = str(round(CP.lateralTuning.pid.dampMPC,3))
-        write_conf = True
       if self.conf['rateFFGain'] == "-1":
         self.conf['rateFFGain'] = str(round(CP.lateralTuning.pid.rateFFGain,3))
-        write_conf = True
-      if self.conf['polyDamp'] == "-1":
-        self.conf['polyReact'] = str(round(CP.lateralTuning.pid.polyReactTime,3))
-        self.conf['polyDamp'] = str(round(CP.lateralTuning.pid.polyDampTime,3))
-        self.conf['polyFactor'] = str(round(CP.lateralTuning.pid.polyFactor,3))
-        self.conf['springFactor'] = str(round(CP.lateralTuning.pid.springFactor,3))
         self.conf['deadzone'] = str(round(CP.lateralTuning.pid.deadzone,3))
         write_conf = True
     else:
@@ -60,9 +51,6 @@ class kegman_conf():
         self.conf['outerGain'] = str(round(CP.lateralTuning.indi.outerLoopGain,3))
         self.conf['innerGain'] = str(round(CP.lateralTuning.indi.innerLoopGain,3))
         write_conf = True
-      if self.conf['reactMPC'] == "-1":
-        self.conf['reactMPC'] = str(round(CP.lateralTuning.indi.reactMPC,3))
-        write_conf = True
 
     if write_conf:
       self.write_config(self.config)
@@ -73,13 +61,13 @@ class kegman_conf():
       with open('/data/openpilot/selfdrive/gernby.json', 'r') as f:
         base_config = json.load(f)
     except IOError:
-      base_config = {  "tuneRev": "0.0.2","Kf": "-1","Ki": "-1","Kp": "-1","dampTime": "-1","rateFFGain": "-1","reactMPC": "-1", \
+        base_config = {  "tuneRev": "0.0.2","Kf": "-1","Ki": "-1","steerRatio":"-1","steerRateCost":"-1","Kp": "-1","dampTime": "-1","rateFFGain": "-1","reactMPC": "-1", \
         "type": "-1","dampMPC":"-1","polyReact":"-1","polyDamp":"-1","polyFactor":"-1","timeConst":"-1","actEffect":"-1", \
         "outerGain":"-1","innerGain":"-1","innerGain":"-1","outerGain":"-1","actEffect":"-1","timeConst":"-1","springFactor":"-1","deadzone":"0.25","simpledd":False}
 
     if Reset or not os.path.isfile('/data/kegman.json'):
       self.config = {"cameraOffset":"0.06", "lastTrMode":"1", "battChargeMin":"60", "battChargeMax":"70", "wheelTouchSeconds":"180", \
-              "battPercOff":"25", "carVoltageMinEonShutdown":"11800", "brakeStoppingTarget":"0.25", "leadDistance":"5", "deadzone":"0.25", "simpledd":False}
+              "battPercOff":"25", "carVoltageMinEonShutdown":"11800", "brakeStoppingTarget":"0.25", "leadDistance":"5", "steerRatio":"-1", "steerRateCost":"-1", "deadzone":"0.25", "simpledd":False}
     else:
       with open('/data/kegman.json', 'r') as f:
         self.config = json.load(f)
@@ -94,12 +82,17 @@ class kegman_conf():
       self.config.update({"liveParams":"1"})
       self.element_updated = True
 
+    if "steerRatio" not in self.config:
+      self.config.update({"steerRatio":"-1"})
+      self.config.update({"steerRateCost":"-1"})
+      self.element_updated = True
+
     if "leadDistance" not in self.config:
       self.config.update({"leadDistance":"5"})
       self.element_updated = True
 
     if "deadzone" not in self.config:
-      self.config.update({"deadzone":"0.0"})
+      self.config.update({"deadzone":"0.25"})
       self.element_updated = True
 
     if "simpledd" not in self.config:
