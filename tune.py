@@ -130,6 +130,11 @@ while True:
 
   if float(kegman.conf['Kf']) < 0 and float(kegman.conf['Kf']) != -1:
     kegman.conf['Kf'] = "0"
+ 
+  if float(kegman.conf['Kf']) > 0.01:
+    kegman.conf['Kf'] = "0.01"
+
+  kegman.conf['Kf'] = str("{:.5f}".format(float(kegman.conf['Kf'])))
 
   if float(kegman.conf['steerRatio']) < 1 and float(kegman.conf['steerRatio']) != -1:
     kegman.conf['steerRatio'] = "1"

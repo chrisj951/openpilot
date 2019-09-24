@@ -33,7 +33,7 @@ class kegman_conf():
         self.conf['steerRateCost'] = str(round(CP.steerRateCost,3))
         write_conf = True
       if self.conf['Kf'] == "-1":
-        self.conf['Kf'] = str(round(CP.lateralTuning.pid.kf,5))
+        self.conf['Kf'] = str('{:f}'.format(CP.lateralTuning.pid.kf))
         write_conf = True
       if self.conf['rateFFGain'] == "-1":
         self.conf['rateFFGain'] = str(round(CP.lateralTuning.pid.rateFFGain,3))
@@ -80,6 +80,10 @@ class kegman_conf():
 
     if "liveParams" not in self.config:
       self.config.update({"liveParams":"1"})
+      self.element_updated = True
+
+    if "Kf" not in self.config:
+      self.config.update({"Kf":"-1"})
       self.element_updated = True
 
     if "steerRatio" not in self.config:
