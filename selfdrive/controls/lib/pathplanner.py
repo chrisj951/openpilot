@@ -10,8 +10,6 @@ from selfdrive.controls.lib.drive_helpers import MPC_COST_LAT
 from selfdrive.controls.lib.lane_planner import LanePlanner
 from selfdrive.kegman_conf import kegman_conf
 import selfdrive.messaging as messaging
-import os.path
-import pickle
 import csv
 from selfdrive.controls.lib.curvature_learner import CurvatureLearner
 
