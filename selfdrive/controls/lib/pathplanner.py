@@ -46,7 +46,7 @@ class PathPlanner(object):
       self.setup_mpc(self.steerRateCost)
     self.steerRateCost_prev = self.steerRateCost
 
-    self.curvature_offset = CurvatureLearner(debug=True)
+    self.curvature_offset = CurvatureLearner(debug=False)
 
   def setup_mpc(self, steer_rate_cost):
     self.libmpc = libmpc_py.libmpc

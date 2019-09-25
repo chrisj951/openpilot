@@ -14,7 +14,7 @@ import os
 class CurvatureLearner:
     def __init__(self, debug=False):
         self.offset = 0.
-        self.learning_rate = 6000
+        self.learning_rate = 12000
         self.frame = 0
         self.debug = debug
         try:
