@@ -96,8 +96,8 @@ class CarControllerParams():
     self.STEER_DRIVER_MULTIPLIER = 1   # weight driver torque heavily
     self.STEER_DRIVER_FACTOR = 1       # from dbc
 
-class CarController(object):
-  def __init__(self, dbc_name, car_fingerprint):
+class CarController():
+  def __init__(self, dbc_name):
     self.apply_steer_last = 0
     self.braking = False
     self.brake_steady = 0.

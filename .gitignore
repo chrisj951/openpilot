@@ -4,6 +4,7 @@ venv/
 .ipynb_checkpoints
 .idea
 .sconsign.dblite
+.vscode
 model2.png
 kegman.json
 a.out
@@ -31,7 +32,7 @@ selfdrive/logcatd/logcatd
 selfdrive/mapd/default_speeds_by_region.json
 selfdrive/proclogd/proclogd
 selfdrive/ui/ui
-selfdrive/test/tests/plant/out
+selfdrive/test/longitudinal_maneuvers/out
 selfdrive/visiond/visiond
 selfdrive/sensord/gpsd
 selfdrive/loggerd/loggerd

@@ -1,7 +1,7 @@
 import random
 import numpy as np
 
-import boardd_old
+import selfdrive.boardd.tests.boardd_old as boardd_old
 import selfdrive.boardd.boardd as boardd
 
 from common.realtime import sec_since_boot
@@ -31,6 +31,7 @@ class TestBoarddApiMethods(unittest.TestCase):
 
       ev_old = log.Event.from_bytes(m_old)
       ev = log.Event.from_bytes(m)
+
       self.assertEqual(ev_old.which(), ev.which())
       self.assertEqual(len(ev.sendcan), len(ev_old.sendcan))
       for i in range(len(ev.sendcan)):

@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-from __future__ import print_function
+#!/usr/bin/env python3
+
 import os
 import copy
 import json
@@ -7,7 +7,7 @@ import numpy as np
 import selfdrive.messaging as messaging
 from selfdrive.locationd.calibration_helpers import Calibration
 from selfdrive.swaglog import cloudlog
-from common.params import Params
+from common.params import Params, put_nonblocking
 from common.transformations.model import model_height
 from common.transformations.camera import view_frame_from_device_frame, get_view_frame_from_road_frame, \
                                           eon_intrinsics, get_calib_from_vp, H, W
@@ -31,7 +31,7 @@ def is_calibration_valid(vp):
          vp[1] > VP_VALIDITY_CORNERS[0,1] and vp[1] < VP_VALIDITY_CORNERS[1,1]
 
 
-class Calibrator(object):
+class Calibrator():
   def __init__(self, param_put=False):
     self.param_put = param_put
     self.vp = copy.copy(VP_INIT)
@@ -39,8 +39,9 @@ class Calibrator(object):
     self.cal_status = Calibration.UNCALIBRATED
     self.write_counter = 0
     self.just_calibrated = False
-    self.params = Params()
-    calibration_params = self.params.get("CalibrationParams")
+
+    # Read calibration
+    calibration_params = Params().get("CalibrationParams")
     if calibration_params:
       try:
         calibration_params = json.loads(calibration_params)
@@ -49,7 +50,6 @@ class Calibrator(object):
         self.update_status()
       except Exception:
         cloudlog.exception("CalibrationParams file found but error encountered")
-
 
   def update_status(self):
     start_status = self.cal_status
@@ -76,7 +76,7 @@ class Calibrator(object):
       if self.param_put and (self.write_counter % WRITE_CYCLES == 0 or self.just_calibrated):
         cal_params = {"vanishing_point": list(self.vp),
                       "valid_points": len(self.vps)}
-        self.params.put("CalibrationParams", json.dumps(cal_params))
+        put_nonblocking("CalibrationParams", json.dumps(cal_params).encode('utf8'))
       return new_vp
     else:
       return None

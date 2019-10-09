@@ -66,14 +66,14 @@ class TestPackerMethods(unittest.TestCase):
     left_lane_depart = (random.randint(0, 2) % 2 == 0)
     right_lane_depart = (random.randint(0, 2) % 2 == 0)
 
-    for _ in xrange(recursions):
+    for _ in range(recursions):
       create_ui_command(self.cp_old, steer, chime, left_line, right_line, left_lane_depart, right_lane_depart)
     n2 = sec_since_boot()
     elapsed_old = n2 - n1
 
     # print('Old API, elapsed time: {} secs'.format(elapsed_old))
     n1 = sec_since_boot()
-    for _ in xrange(recursions):
+    for _ in range(recursions):
       create_ui_command(self.cp, steer, chime, left_line, right_line, left_lane_depart, right_lane_depart)
     n2 = sec_since_boot()
     elapsed_new = n2 - n1
