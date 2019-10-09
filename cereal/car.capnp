@@ -84,6 +84,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     preLaneChangeLeft @59;
     preLaneChangeRight @60;
     laneChange @61;
+    internetConnectivityNeeded @62;
   }
 }
 
@@ -141,6 +142,9 @@ struct CarState {
   seatbeltUnlatched @25 :Bool;
   canValid @26 :Bool;
 
+  # clutch (manual transmission only)
+  clutchPressed @28 :Bool;
+
   # which packets this state came from
   canMonoTimes @12: List(UInt64);
 
@@ -169,6 +173,8 @@ struct CarState {
     sport @5;
     low @6;
     brake @7;
+    eco @8;
+    manumatic @9;
   }
 
 
@@ -187,6 +193,9 @@ struct CarState {
       altButton1 @6;
       altButton2 @7;
       altButton3 @8;
+      setCruise @9;
+      resumeCruise @10;
+      gapAdjustCruise @11;
     }
   }
 }
@@ -359,6 +368,7 @@ struct CarParams {
   isPandaBlack @39: Bool;
   epsSteerRateFactor @44: Float32;
   dashcamOnly @43: Bool;
+  transmissionType @44 :TransmissionType;
 
   struct LateralPIDTuning {
     kpBP @0 :List(Float32);
@@ -411,9 +421,7 @@ struct CarParams {
     reactMPC @8 :Float32;
   }
 
-
   enum SafetyModel {
-    # does NOT match board setting
     noOutput @0;
     honda @1;
     toyota @2;
@@ -427,10 +435,22 @@ struct CarParams {
     tesla @10;
     subaru @11;
     gmPassive @12;
+    mazda @13;
+    nissan @14;
+    volkswagen @15;
+    toyotaIpas @16;
+    allOutput @17;
+    gmAscm @18;
   }
 
   enum SteerControlType {
     torque @0;
     angle @1;
+  }
+
+  enum TransmissionType {
+    unknown @0;
+    automatic @1;
+    manual @2;
   }
 }
