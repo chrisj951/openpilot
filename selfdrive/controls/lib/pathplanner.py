@@ -31,7 +31,7 @@ class PathPlanner(object):
 
     self.setup_mpc(CP.steerRateCost)
     self.solution_invalid_cnt = 0
-    #self.path_offset_i = 0.0
+    self.path_offset_i = 0.0
     self.frame = 0
     self.kegman = kegman_conf(CP)
     if self.kegman.conf['steerRatio'] == "-1":
@@ -46,7 +46,7 @@ class PathPlanner(object):
       self.setup_mpc(self.steerRateCost)
     self.steerRateCost_prev = self.steerRateCost
 
-    self.curvature_offset = CurvatureLearner(debug=False)
+    #self.curvature_offset = CurvatureLearner(debug=False)
 
   def setup_mpc(self, steer_rate_cost):
     self.libmpc = libmpc_py.libmpc
@@ -86,12 +86,12 @@ class PathPlanner(object):
         self.setup_mpc(self.steerRateCost)
         self.steerRateCost_prev = self.steerRateCost
       self.frame = 0
-    if active:
-      curvfac = self.curvature_offset.update(angle_steers - angle_offset, self.LP.d_poly, v_ego)
-    else:
-      curvfac = 0.
-    curvature_factor = VM.curvature_factor(v_ego) + curvfac
-
+    #if active:
+    #  curvfac = self.curvature_offset.update(angle_steers - angle_offset, self.LP.d_poly, v_ego)
+    #else:
+    #  curvfac = 0.
+    #curvature_factor = VM.curvature_factor(v_ego) + curvfac
+    curvature_factor = VM.curvature_factor(v_ego)
     # account for actuation delay
     self.cur_state = calc_states_after_delay(self.cur_state, v_ego, angle_steers - angle_offset, curvature_factor, self.steerRatio, CP.steerActuatorDelay)
 
@@ -147,11 +147,11 @@ class PathPlanner(object):
     plan_send.pathPlan.sensorValid = bool(sm['liveParameters'].sensorValid)
     plan_send.pathPlan.posenetValid = bool(sm['liveParameters'].posenetValid)
     #keras datalogging
-    if v_ego > 11.176:
-      with open('/data/kerasdata.csv', mode='a') as kerasdata:
-          self.keras_writer = csv.writer(kerasdata, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-          self.keras_writer.writerow([angle_steers, v_ego, self.LP.l_poly, self.LP.r_poly, self.LP.d_poly,
-          self.LP.l_prob, self.LP.r_prob])
+    #if v_ego > 11.176:
+    #  with open('/data/kerasdata.csv', mode='a') as kerasdata:
+    #      self.keras_writer = csv.writer(kerasdata, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    #      self.keras_writer.writerow([angle_steers, v_ego, self.LP.l_poly, self.LP.r_poly, self.LP.d_poly,
+    #      self.LP.l_prob, self.LP.r_prob])
 
     pm.send('pathPlan', plan_send)
 
