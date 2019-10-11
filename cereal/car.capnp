@@ -143,7 +143,7 @@ struct CarState {
   canValid @26 :Bool;
 
   # clutch (manual transmission only)
-  clutchPressed @30 :Bool;
+  clutchPressed @32 :Bool;
 
   # which packets this state came from
   canMonoTimes @12: List(UInt64);
@@ -368,7 +368,7 @@ struct CarParams {
   isPandaBlack @39: Bool;
   epsSteerRateFactor @44: Float32;
   dashcamOnly @43: Bool;
-  transmissionType @44 :TransmissionType;
+  transmissionType @45 :TransmissionType;
 
   struct LateralPIDTuning {
     kpBP @0 :List(Float32);

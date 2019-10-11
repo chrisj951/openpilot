@@ -444,22 +444,11 @@ def manager_prepare(spinner=None):
 
   # build all processes
   os.chdir(os.path.dirname(os.path.abspath(__file__)))
-  
-  params = Params()
-  process_cnt = len(managed_processes)
-  loader_proc = subprocess.Popen(["./spinner"], stdin=subprocess.PIPE,
-        cwd=os.path.join(BASEDIR, "selfdrive", "ui", "spinner"),
-        close_fds=True)
-  spinner_text = "chffrplus" if params.get("Passive")=="1" else "openpilot"
-  
-  for n,p in enumerate(managed_processes):
-    if os.getenv("PREPAREONLY") is None:
-      loader_text = "loading {0}: {1}/{2} {3}".format(spinner_text, n+1, process_cnt, p)
-      loader_proc.stdin.write(loader_text + "\n")
+
+  for i, p in enumerate(managed_processes):
+    if spinner is not None:
+      spinner.update("%d" % (100.0 * (i + 1) / len(managed_processes),))
     prepare_managed_process(p)
-    
-  loader_proc.stdin.close()
-  loader_proc.terminate()
 
 def uninstall():
   cloudlog.warning("uninstalling")
@@ -542,24 +531,6 @@ def main():
   if params.get("Passive") is None:
     raise Exception("Passive must be set to continue")
 
-  # put something on screen while we set things up
-  if os.getenv("PREPAREONLY") is not None:
-    spinner_proc = None
-  else:
-    spinner_text = "chffrplus" if params.get("Passive")=="1" else "openpilot"
-    init_text = "initializing {0}".format(spinner_text)
-    spinner_proc = subprocess.Popen(["./spinner"], stdin=subprocess.PIPE,
-      cwd=os.path.join(BASEDIR, "selfdrive", "ui", "spinner"),
-      close_fds=True)
-    spinner_proc.stdin.write(init_text + "\n")
-    spinner_proc.stdin.close()
-  try:
-    manager_update()
-    manager_init()
-    manager_prepare()
-  finally:
-    if spinner_proc:
-      spinner_proc.terminate()
   with Spinner() as spinner:
       spinner.update("0") # Show progress bar
       manager_update()

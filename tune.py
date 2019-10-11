@@ -47,11 +47,11 @@ param = ["cameraOffset", "deadzone", "steerRatio", "steerRateCost", "Kp", "Ki", 
 
 j = 0
 while True:
-  print ""
-  print print_letters(param[j][0:9])
-  print ""
-  print print_letters(kegman.conf[param[j]])
-  print ""
+  print ("")
+  print (print_letters(param[j][0:9]))
+  print ("")
+  print (print_letters(kegman.conf[param[j]]))
+  print ("")
   print ("1, 3, 5, 7, 9 to incr 0.2, 0.01, 0.005, 0.0002, 0.00001")
   print ("a, d, g, j, l (L) to decr 0.2, 0.01, 0.005, 0.0002, 0.00001")
   print ("press SPACE / m for next /prev parameter")

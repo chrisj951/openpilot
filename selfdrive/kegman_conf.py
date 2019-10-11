@@ -61,7 +61,7 @@ class kegman_conf():
       with open('/data/openpilot/selfdrive/gernby.json', 'r') as f:
         base_config = json.load(f)
     except IOError:
-        base_config = {  "tuneRev": "0.0.2","Kf": "-1","Ki": "-1","steerRatio":"-1","steerRateCost":"-1","Kp": "-1","dampTime": "-1","rateFFGain": "-1","reactMPC": "-1", \
+        base_config = {  "Kf": "-1","Ki": "-1","steerRatio":"-1","steerRateCost":"-1","Kp": "-1","dampTime": "-1","rateFFGain": "-1","reactMPC": "-1", \
         "type": "-1","dampMPC":"-1","polyReact":"-1","polyDamp":"-1","polyFactor":"-1","timeConst":"-1","actEffect":"-1", \
         "outerGain":"-1","innerGain":"-1","innerGain":"-1","outerGain":"-1","actEffect":"-1","timeConst":"-1","springFactor":"-1","deadzone":"0.25","simpledd":False}
 
@@ -83,6 +83,8 @@ class kegman_conf():
       self.element_updated = True
 
     if "Kf" not in self.config:
+      self.config.update({"Kp":"-1"})
+      self.config.update({"Ki":"-1"})
       self.config.update({"Kf":"-1"})
       self.element_updated = True
 
@@ -106,11 +108,6 @@ class kegman_conf():
     if "cameraOffset" not in self.config:
       self.config.update({"cameraOffset":"0.06"})
       self.element_updated = True
-
-    if "tuneRev" not in self.config or self.config['tuneRev'] != base_config['tuneRev']:
-      for key, value in base_config.iteritems():
-        self.config.update({key: value})
-        self.element_updated = True
 
     if ("type" not in self.config or self.config['type'] == "-1") and CP != None:
       self.config.update({"type":CP.lateralTuning.which()})
