@@ -143,7 +143,7 @@ struct CarState {
   canValid @26 :Bool;
 
   # clutch (manual transmission only)
-  clutchPressed @28 :Bool;
+  clutchPressed @30 :Bool;
 
   # which packets this state came from
   canMonoTimes @12: List(UInt64);
