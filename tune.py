@@ -41,18 +41,18 @@ button_delay = 0.2
 kegman = kegman_conf()
 kegman.conf['tuneGernby'] = "1"
 #kegman.write_config(kegman.conf)
-param = ["Kp", "Ki", "Kf", "steerRatio", "steerRateCost", "deadzone", \
-         "1barBP0", "1barBP1", "1barMax", "2barBP0", "2barBP1", \
-         "2barMax", "3barBP0", "3barBP1", "3barMax", \
-         "1barHwy", "2barHwy", "3barHwy"]
+param = ["Kp", "Ki", "Kf", "steerRatio", "steerRateCost", "deadzone"]#, \
+         #"1barBP0", "1barBP1", "1barMax", "2barBP0", "2barBP1", \
+         #"2barMax", "3barBP0", "3barBP1", "3barMax", \
+         #"1barHwy", "2barHwy", "3barHwy"]
 
 j = 0
 while True:
-  print ""
-  print print_letters(param[j][0:9])
-  print ""
-  print print_letters(kegman.conf[param[j]])
-  print ""
+  print ("")
+  print (print_letters(param[j][0:9]))
+  print ("")
+  print (print_letters(kegman.conf[param[j]]))
+  print ("")
   print ("1,3,5,7,r to incr 0.1,0.05,0.01,0.001,0.00001")
   print ("a,d,g,j,v to decr 0.1,0.05,0.01,0.001,0.00001")
   print ("0 / L to make the value 0 / 1")
