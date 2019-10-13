@@ -62,43 +62,43 @@ while True:
   char  = getch()
   write_json = False
   if (char == "v"):
-    kegman.conf[param[j]] = str(float(kegman.conf[param[j]]) - 0.00001)
+    kegman.conf[param[j]] = str(round(float(kegman.conf[param[j]]) - 0.00001, 5))
     write_json = True
 
   if (char == "r"):
-    kegman.conf[param[j]] = str(float(kegman.conf[param[j]]) + 0.00001)
+    kegman.conf[param[j]] = str(round(float(kegman.conf[param[j]]) + 0.00001, 5))
     write_json = True
     
   if (char == "7"):
-    kegman.conf[param[j]] = str(float(kegman.conf[param[j]]) + 0.001)
+    kegman.conf[param[j]] = str(round(float(kegman.conf[param[j]]) + 0.001, 3))
     write_json = True
 
   if (char == "5"):
-    kegman.conf[param[j]] = str(float(kegman.conf[param[j]]) + 0.01)
+    kegman.conf[param[j]] = str(round(float(kegman.conf[param[j]]) + 0.01, 2))
     write_json = True
 
   elif (char == "3"):
-    kegman.conf[param[j]] = str(float(kegman.conf[param[j]]) + 0.05)
+    kegman.conf[param[j]] = str(round(float(kegman.conf[param[j]]) + 0.05, 2))
     write_json = True
 
   elif (char == "1"):
-    kegman.conf[param[j]] = str(float(kegman.conf[param[j]]) + 0.1)
+    kegman.conf[param[j]] = str(round(float(kegman.conf[param[j]]) + 0.1, 1))
     write_json = True
 
   elif (char == "j"):
-    kegman.conf[param[j]] = str(float(kegman.conf[param[j]]) - 0.001)
+    kegman.conf[param[j]] = str(round(float(kegman.conf[param[j]]) - 0.001, 3))
     write_json = True
 
   elif (char == "g"):
-    kegman.conf[param[j]] = str(float(kegman.conf[param[j]]) - 0.01)
+    kegman.conf[param[j]] = str(round(float(kegman.conf[param[j]]) - 0.01, 2))
     write_json = True
 
   elif (char == "d"):
-    kegman.conf[param[j]] = str(float(kegman.conf[param[j]]) - 0.05)
+    kegman.conf[param[j]] = str(round(float(kegman.conf[param[j]]) - 0.05, 2))
     write_json = True
 
   elif (char == "a"):
-    kegman.conf[param[j]] = str(float(kegman.conf[param[j]]) - 0.1)
+    kegman.conf[param[j]] = str(round(float(kegman.conf[param[j]]) - 0.1, 1))
     write_json = True
 
   elif (char == "0"):
@@ -122,7 +122,7 @@ while True:
       j = len(param) - 1
 
   elif (char == "z"):
-    process.kill()
+    sys.exit()
     break
 
 
