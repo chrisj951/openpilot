@@ -7,6 +7,7 @@ from selfdrive.controls.lib.drive_helpers import MPC_COST_LAT
 from selfdrive.controls.lib.lane_planner import LanePlanner
 import selfdrive.messaging as messaging
 from selfdrive.kegman_conf import kegman_conf
+from selfdrive.controls.lib.curvature_learner import CurvatureLearner
 
 LOG_MPC = os.environ.get('LOG_MPC', True)
 
@@ -25,6 +26,7 @@ class PathPlanner():
 
     self.setup_mpc(CP.steerRateCost)
     self.solution_invalid_cnt = 0
+    self.curvature_offset = CurvatureLearner(debug=False)
     self.path_offset_i = 0.0
     self.mpc_frame = 0
     
@@ -87,7 +89,12 @@ class PathPlanner():
     # Run MPC
     self.angle_steers_des_prev = self.angle_steers_des_mpc
     VM.update_params(sm['liveParameters'].stiffnessFactor, sm['liveParameters'].steerRatio)
-    curvature_factor = VM.curvature_factor(v_ego)
+    if active:
+      curvfac = self.curvature_offset.update(angle_steers - angle_offset, self.LP.d_poly, v_ego)
+    else:
+      curvfac = 0.
+
+    curvature_factor = VM.curvature_factor(v_ego) + curvfac
 
     # TODO: Check for active, override, and saturation
     # if active:
