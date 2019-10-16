@@ -1,5 +1,5 @@
 from numpy import clip
-import pickle
+import json
 import csv
 import os
 
@@ -19,15 +19,17 @@ class CurvatureLearner:
         self.frame = 0
         self.debug = debug
         try:
-            self.learned_offsets = pickle.load(open("/data/curvaturev4.p", "rb"))
+            with open("/data/curvaturev4.json", "r") as f:
+                self.learned_offsets = json.load(f)
         except (OSError, IOError):
             self.learned_offsets = {
                 "center": 0.,
                 "inner": 0.,
                 "outer": 0.
             }
-            pickle.dump(self.learned_offsets, open("/data/curvaturev4.p", "wb"))
-            os.chmod("/data/curvaturev4.p", 0o777)
+            with open("/data/curvaturev4.json", "w") as f:
+                json.dump(self.learned_offsets, f)
+            os.chmod("/data/curvaturev4.json", 0o777)
 
     def update(self, angle_steers=0., d_poly=None, v_ego=0.):
         if angle_steers > 0.1:
@@ -55,7 +57,8 @@ class CurvatureLearner:
         self.frame += 1
 
         if self.frame == 12000:  # every 2 mins
-            pickle.dump(self.learned_offsets, open("/data/curvaturev4.p", "wb"))
+            with open("/data/curvaturev4.json", "w") as f:
+                json.dump(self.learned_offsets, f)
             self.frame = 0
         if self.debug:
             with open('/data/curvdebug.csv', 'a') as csv_file:
