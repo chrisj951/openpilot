@@ -214,11 +214,11 @@ class PowerMonitoring:
 
     now = sec_since_boot()
     disable_charging = False
-    disable_charging |= (now - offroad_timestamp) > MAX_TIME_OFFROAD_S
-    disable_charging |= (self.car_voltage_mV < (VBATT_PAUSE_CHARGING * 1e3))
-    disable_charging |= (self.car_battery_capacity_uWh <= 0)
-    disable_charging &= (not health.health.ignitionLine and not health.health.ignitionCan)
-    disable_charging &= (self.params.get("DisablePowerDown") != b"1")
+    #disable_charging |= (now - offroad_timestamp) > MAX_TIME_OFFROAD_S
+    #disable_charging |= (self.car_voltage_mV < (VBATT_PAUSE_CHARGING * 1e3))
+    #disable_charging |= (self.car_battery_capacity_uWh <= 0)
+    #disable_charging &= (not health.health.ignitionLine and not health.health.ignitionCan)
+    #disable_charging &= (self.params.get("DisablePowerDown") != b"1")
     return disable_charging
 
   # See if we need to shutdown
