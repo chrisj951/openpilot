@@ -44,11 +44,13 @@ class CarInterface(CarInterfaceBase):
 
     elif candidate == CAR.PRIUS_TSS2:
       stop_and_go = True
-      ret.wheelbase = 2.70002  # from toyota online sepc.
-      ret.steerRatio = 13.4   # True steerRatio from older prius
+      ret.safetyParam = 66
+      ret.wheelbase = 2.70
+      ret.steerRatio = 13.4   # Factory steerRatio
       tire_stiffness_factor = 0.6371   # hand-tune
       ret.mass = 3115. * CV.LB_TO_KG + STD_CARGO_KG
-      set_lat_tune(ret.lateralTuning, LatTunes.PID_N)
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.35], [0.15]]
+      ret.lateralTuning.pid.kf = 0.00007818594
 
     elif candidate in [CAR.RAV4, CAR.RAV4H]:
       stop_and_go = True if (candidate in CAR.RAV4H) else False
